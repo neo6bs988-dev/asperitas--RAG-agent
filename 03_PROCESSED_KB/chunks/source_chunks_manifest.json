@@ -1,0 +1,33 @@
+{
+  "chunk_count": 2158,
+  "generated_utc": "2026-06-11T16:38:27.167768+00:00",
+  "skipped": [
+    {
+      "reason": "no_extractable_text",
+      "relative_path": "00_ADMIN/source_manifests/asperitas_agent_source_collection_manifest.zip",
+      "source_id": "ASP-P1-B0B013EEA441"
+    },
+    {
+      "reason": "no_extractable_text",
+      "relative_path": "00_ADMIN/source_manifests/asperitas_regulatory_sources_session_01_manifest_pack.zip",
+      "source_id": "ASP-P1-89D5EFFDA6C1"
+    },
+    {
+      "reason": "no_extractable_text",
+      "relative_path": "00_ADMIN/source_registries/asperitas_agent_source_registry_400plus.xlsx",
+      "source_id": "ASP-P1-53DDD50B5BA9"
+    },
+    {
+      "reason": "no_extractable_text",
+      "relative_path": "00_ADMIN/source_registries/asperitas_codex_source_registry_382_targets.xlsx",
+      "source_id": "ASP-P1-AA8571E8C2CA"
+    },
+    {
+      "reason": "no_extractable_text",
+      "relative_path": "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/합성생물학 보고서.zip",
+      "source_id": "ASP-P1-1E9D3CD5732F"
+    }
+  ],
+  "skipped_count": 5,
+  "source_count": 63
+}

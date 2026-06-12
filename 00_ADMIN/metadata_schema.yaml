@@ -1,0 +1,129 @@
+schema_name: asperitas_source_object
+schema_version: "1.0"
+purpose: >
+  Minimum source metadata for source-grounded Asperitas retrieval, compliance
+  gating, and auditability. The generated registry must preserve provenance,
+  source priority, disclosure level, license status, verification status, and
+  risk flags for every registered source file.
+
+required_fields:
+  source_id:
+    type: string
+    rule: "Stable ID derived from source priority and SHA-256 digest."
+  title:
+    type: string
+  file_name:
+    type: string
+  relative_path:
+    type: string
+    rule: "Repository-relative provenance path."
+  absolute_path:
+    type: string
+    rule: "Local absolute path for audit and regeneration only."
+  sha256:
+    type: string
+    rule: "Hex SHA-256 digest of the original source file."
+  file_size_bytes:
+    type: integer
+  modified_utc:
+    type: datetime
+  source_priority:
+    type: enum
+    values: [P0, P1, P2, P3, P4, P5, P6]
+  source_type:
+    type: enum
+    values: [internal, official, paper, regulatory, market, benchmark, prompt, code, dataset, conversation, unknown]
+  disclosure_level:
+    type: enum
+    values: [public, external-safe, internal, confidential, restricted, unknown]
+  origin:
+    type: enum
+    values: [uploaded, web, manual, email, drive, generated, unknown]
+  author_or_owner:
+    type: string_or_null
+  date_created:
+    type: date_or_null
+  date_accessed:
+    type: date
+  jurisdiction:
+    type: enum
+    values: [KR, US, CN, EU, GLOBAL, unknown]
+  license_status:
+    type: enum
+    values: [approved, needs_review, restricted, unknown]
+  confidentiality_notes:
+    type: string
+  pii_status:
+    type: enum
+    values: [none, contains_pii, redacted, unknown]
+  verification_status:
+    type: enum
+    values: [verified, partially_verified, unverified, needs_external_verification, stale, conflicting, unknown]
+  ingestion_status:
+    type: enum
+    values: [not_ingested, registered, chunked, embedded, indexed, kg_linked, eval_ready]
+  legal_review_status:
+    type: enum
+    values: [not_reviewed, approved, restricted, rejected, unknown]
+  wet_lab_validation_status:
+    type: enum
+    values: [not_applicable, not_validated, validated, failed, unknown]
+  provenance:
+    type: string
+    rule: "Must match the original repository-relative file path unless source is web-only."
+  summary:
+    type: string
+  evidence_label:
+    type: enum
+    values:
+      - Document-Supported Fact
+      - Official Source
+      - Peer-Reviewed Evidence
+      - Regulatory Source
+      - Industry Signal
+      - Inference
+      - Speculation
+      - Needs External Verification
+  risk_flags:
+    type: list
+    values: [CITES, Nagoya, LMO, biosafety, biosecurity, IP, privacy, legal, financial, external_comm]
+  allowed_use_cases:
+    type: list
+    values: [strategy, science, compliance, market, fundraising, operations, agent_development, rag, historical_context]
+  prohibited_use_cases:
+    type: list
+
+classification_defaults:
+  P0:
+    source_type: prompt
+    disclosure_level: restricted
+    license_status: restricted
+  P1:
+    source_type: internal
+    disclosure_level: confidential
+    license_status: restricted
+  P2:
+    source_type: official
+    disclosure_level: external-safe
+    license_status: needs_review
+  P3:
+    source_type: paper
+    disclosure_level: external-safe
+    license_status: needs_review
+  P4:
+    source_type: regulatory
+    disclosure_level: external-safe
+    license_status: needs_review
+  P5:
+    source_type: market
+    disclosure_level: internal
+    license_status: restricted
+  P6:
+    source_type: benchmark
+    disclosure_level: external-safe
+    license_status: needs_review
+
+external_use_rule: >
+  Public, investor, partner, researcher, and other external-facing outputs may
+  retrieve only public or external-safe chunks unless a human approval workflow
+  explicitly authorizes use of internal, confidential, or restricted sources.
