@@ -15,7 +15,14 @@ if str(SRC_ROOT) not in sys.path:
 
 from asperitas_agent.chunking import read_chunks  # noqa: E402
 from asperitas_agent.registry import read_registry  # noqa: E402
+from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
+
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 
 DIFFICULTIES = {"easy", "medium", "hard"}
@@ -199,6 +206,33 @@ def run_baseline_retrieval(
     return by_question
 
 
+def run_mvp003_retrieval(
+    questions: list[EvalQuestion],
+    registry_path: Path,
+    chunks_path: Path,
+    limit: int,
+) -> dict[str, list[dict[str, Any]]]:
+    if not registry_path.exists():
+        raise EvalError(f"Required file not found: {registry_path}")
+    if not chunks_path.exists():
+        raise EvalError(f"Required file not found: {chunks_path}")
+    records = read_registry(registry_path)
+    chunks = read_chunks(chunks_path)
+    if not chunks:
+        raise EvalError(f"No chunks loaded from: {chunks_path}")
+
+    by_question: dict[str, list[dict[str, Any]]] = {}
+    for question in questions:
+        retrieved = search_chunks_mvp003(question.user_question, chunks, records, limit=limit, include_explanations=True)
+        rows: list[dict[str, Any]] = []
+        for rank, result in enumerate(retrieved, start=1):
+            row = result.to_json()
+            row["rank"] = rank
+            rows.append(row)
+        by_question[question.question_id] = rows
+    return by_question
+
+
 def contains_section(result: dict[str, Any], expected_section: str) -> bool | None:
     needle = expected_section.strip()
     if not needle:
@@ -285,6 +319,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--registry", type=Path, default=REPO_ROOT / "data" / "source_registry.csv")
     parser.add_argument("--chunks", type=Path, default=REPO_ROOT / "data" / "chunks.jsonl")
     parser.add_argument("--results-jsonl", type=Path, default=None, help="Optional external retrieval results to score.")
+    parser.add_argument("--retriever", choices=("baseline", "mvp003"), default="baseline")
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
     return parser
@@ -300,6 +335,9 @@ def main(argv: list[str] | None = None) -> int:
         if args.results_jsonl:
             mode = "external-results"
             results = load_simulated_results(args.results_jsonl)
+        elif args.retriever == "mvp003":
+            mode = "mvp003-deterministic-metadata"
+            results = run_mvp003_retrieval(questions, args.registry, args.chunks, args.limit)
         else:
             mode = "current-tfidf-baseline"
             results = run_baseline_retrieval(questions, args.registry, args.chunks, args.limit)
