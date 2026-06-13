@@ -80,3 +80,51 @@ def test_mvp003_returns_unique_sources_for_top_k():
 
     assert len(results) == 1
     assert results[0].chunk.source_id == source.source_id
+
+
+def test_mvp003_result_preserves_section_metadata_without_requiring_section_scoring():
+    source = make_source("ASP-P1-SECTION", "Synthetic Biology Review", "review.pdf", "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/review.pdf")
+    methods = Chunk(
+        **{
+            **make_chunk(source, "Protocol details are summarized here.").to_json(),
+            "chunk_id": "ASP-P1-SECTION::chunk-0001",
+            "section": "Methods",
+            "section_heading": "Methods",
+            "section_path": ["Methods"],
+            "section_level": 1,
+            "heading_context": "Methods",
+        }
+    )
+    background = Chunk(
+        **{
+            **make_chunk(source, "Protocol details are summarized here.").to_json(),
+            "chunk_id": "ASP-P1-SECTION::chunk-0002",
+            "char_start": 100,
+            "section": "Background",
+            "section_heading": "Background",
+            "section_path": ["Background"],
+            "section_level": 1,
+            "heading_context": "Background",
+        }
+    )
+
+    results = search_chunks_mvp003("protocol details", [background, methods], [source], limit=1)
+    payload = results[0].to_json()
+
+    assert "section" in payload
+    assert "heading_context" in payload
+    assert "section_match" not in results[0].score_components
+
+
+def test_retrieval_code_does_not_reference_benchmark_answer_files():
+    files = [
+        "src/asperitas_agent/retrieval_mvp003.py",
+        "src/asperitas_agent/retrieval_tfidf.py",
+        "src/asperitas_agent/retrieval_normalization.py",
+        "src/asperitas_agent/chunking.py",
+    ]
+    forbidden = ("expected_sources", "retrieval_questions", "answer_key", "ground_truth", "ground-truth")
+
+    for file_name in files:
+        text = __import__("pathlib").Path(file_name).read_text(encoding="utf-8").casefold()
+        assert not any(pattern in text for pattern in forbidden)

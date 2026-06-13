@@ -130,6 +130,21 @@ def test_score_results_counts_top3_top5_priority_and_section():
     assert summary["overall_pass_rate"] == 1.0
 
 
+def test_section_match_uses_normalized_section_metadata():
+    module = load_eval_module()
+
+    result = {
+        "title": "AGENTS",
+        "section": "1. Source-Priority Policy",
+        "section_heading": "1. Source-Priority Policy",
+        "section_path": ["Agent Rules", "1. Source-Priority Policy"],
+        "heading_context": "Agent Rules > 1. Source-Priority Policy",
+        "text": "Body without the exact label.",
+    }
+
+    assert module.contains_section(result, "source priority policy")
+
+
 def test_missing_jsonl_file_returns_eval_error(tmp_path):
     module = load_eval_module()
 

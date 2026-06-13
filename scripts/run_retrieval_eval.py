@@ -13,7 +13,7 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from asperitas_agent.chunking import read_chunks  # noqa: E402
+from asperitas_agent.chunking import normalize_section_text, read_chunks  # noqa: E402
 from asperitas_agent.registry import read_registry  # noqa: E402
 from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
@@ -198,6 +198,10 @@ def run_baseline_retrieval(
                     "source_priority": result.chunk.source_priority,
                     "evidence_label": result.chunk.evidence_label,
                     "title": result.chunk.title,
+                    "section": result.chunk.section,
+                    "section_heading": result.chunk.section_heading,
+                    "section_path": result.chunk.section_path,
+                    "heading_context": result.chunk.heading_context,
                     "text": result.chunk.text,
                     "score": round(result.score, 6),
                 }
@@ -237,8 +241,17 @@ def contains_section(result: dict[str, Any], expected_section: str) -> bool | No
     needle = expected_section.strip()
     if not needle:
         return None
-    haystack = f"{result.get('title', '')} {result.get('text', '')}".casefold()
-    return needle.casefold() in haystack
+    haystack_parts = [
+        str(result.get("title", "")),
+        str(result.get("section", "")),
+        str(result.get("section_heading", "")),
+        " ".join(str(item) for item in result.get("section_path", []) if item),
+        str(result.get("heading_context", "")),
+        str(result.get("text", "")),
+    ]
+    haystack = normalize_section_text(" ".join(haystack_parts))
+    normalized_needle = normalize_section_text(needle)
+    return bool(normalized_needle and normalized_needle in haystack)
 
 
 def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dict[str, Any]:

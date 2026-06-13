@@ -106,6 +106,13 @@ class Chunk:
     verification_status: str
     risk_tags: list[str]
     checksum: str
+    section: str = ""
+    section_heading: str = ""
+    section_path: list[str] = field(default_factory=list)
+    section_level: int | None = None
+    parent_section: str = ""
+    subsection: str = ""
+    heading_context: str = ""
 
     def to_json(self) -> dict[str, Any]:
         return asdict(self)
