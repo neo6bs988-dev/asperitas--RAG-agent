@@ -141,6 +141,97 @@ class RetrievalResult:
 
 
 @dataclass
+class RetrieverMetadata:
+    retriever_name: str
+    retriever_version: str
+    top_k: int
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EvidenceItem:
+    rank: int
+    chunk_id: str
+    score: float
+    source_id: str = ""
+    source_title: str = ""
+    source_path: str = ""
+    source_priority: str = ""
+    evidence_label: str = ""
+    section: str = ""
+    section_heading: str = ""
+    section_path: list[str] = field(default_factory=list)
+    section_level: int | None = None
+    parent_section: str = ""
+    subsection: str = ""
+    text_excerpt: str = ""
+    citation_key: str = ""
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class SourceCoverageSummary:
+    unique_source_count: int
+    source_priorities_present: list[str]
+    evidence_labels_present: list[str]
+    section_paths_present: list[str]
+    missing_section_metadata_count: int
+    missing_source_priority_count: int
+    missing_evidence_label_count: int
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EvidenceRiskFlags:
+    no_evidence_found: bool
+    low_source_diversity: bool
+    missing_source_priority: bool
+    missing_evidence_label: bool
+    missing_section_metadata: bool
+    weak_section_coverage: bool
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class AbstentionDecision:
+    should_abstain: bool
+    reasons: list[str] = field(default_factory=list)
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class EvidencePack:
+    query: str
+    retriever: RetrieverMetadata
+    evidence_items: list[EvidenceItem]
+    source_coverage_summary: SourceCoverageSummary
+    risk_flags: EvidenceRiskFlags
+    abstention: AbstentionDecision
+    context_block: str
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "query": self.query,
+            "retriever": self.retriever.to_json(),
+            "evidence_items": [item.to_json() for item in self.evidence_items],
+            "source_coverage_summary": self.source_coverage_summary.to_json(),
+            "risk_flags": self.risk_flags.to_json(),
+            "abstention": self.abstention.to_json(),
+            "context_block": self.context_block,
+        }
+
+
+@dataclass
 class ComplianceResult:
     compliance_flag: bool
     human_approval_required: bool
