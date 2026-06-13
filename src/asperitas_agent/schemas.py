@@ -232,6 +232,47 @@ class EvidencePack:
 
 
 @dataclass
+class GuardrailEvidenceSummary:
+    evidence_count: int
+    unique_source_count: int
+    source_priorities_present: list[str]
+    evidence_labels_present: list[str]
+    section_metadata_coverage: float
+    missing_section_metadata_count: int
+    missing_source_priority_count: int
+    missing_evidence_label_count: int
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class GuardrailDecision:
+    decision: str
+    should_abstain: bool
+    confidence_level: str
+    reasons: list[str]
+    warnings: list[str]
+    failed_rules: list[str]
+    passed_rules: list[str]
+    evidence_summary: GuardrailEvidenceSummary
+    recommended_next_action: str
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "decision": self.decision,
+            "should_abstain": self.should_abstain,
+            "confidence_level": self.confidence_level,
+            "reasons": self.reasons,
+            "warnings": self.warnings,
+            "failed_rules": self.failed_rules,
+            "passed_rules": self.passed_rules,
+            "evidence_summary": self.evidence_summary.to_json(),
+            "recommended_next_action": self.recommended_next_action,
+        }
+
+
+@dataclass
 class ComplianceResult:
     compliance_flag: bool
     human_approval_required: bool
