@@ -273,6 +273,79 @@ class GuardrailDecision:
 
 
 @dataclass
+class CitationCoverage:
+    evidence_item_count: int
+    cited_evidence_count: int
+    uncited_evidence_count: int
+    all_claims_cited: bool
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class GuardrailDecisionSummary:
+    decision: str
+    should_abstain: bool
+    confidence_level: str
+    recommended_next_action: str
+    warnings: list[str]
+    reasons: list[str]
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class GroundedEvidenceUsed:
+    citation_key: str
+    source_path: str
+    source_title: str
+    source_priority: str
+    evidence_label: str
+    section: str
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class GroundedAnswerMetadata:
+    generator_name: str
+    generator_version: str
+    deterministic: bool = True
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class GroundedAnswer:
+    query: str
+    answer_status: str
+    answer_text: str
+    citations_used: list[str]
+    citation_coverage: CitationCoverage
+    guardrail_decision_summary: GuardrailDecisionSummary
+    evidence_used: list[GroundedEvidenceUsed]
+    limitations: list[str]
+    metadata: GroundedAnswerMetadata
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "query": self.query,
+            "answer_status": self.answer_status,
+            "answer_text": self.answer_text,
+            "citations_used": self.citations_used,
+            "citation_coverage": self.citation_coverage.to_json(),
+            "guardrail_decision_summary": self.guardrail_decision_summary.to_json(),
+            "evidence_used": [item.to_json() for item in self.evidence_used],
+            "limitations": self.limitations,
+            "metadata": self.metadata.to_json(),
+        }
+
+
+@dataclass
 class ComplianceResult:
     compliance_flag: bool
     human_approval_required: bool
