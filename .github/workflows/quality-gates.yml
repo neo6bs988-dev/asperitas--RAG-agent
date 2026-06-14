@@ -1,0 +1,43 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  quality-gates:
+    name: tests-artifacts-retrieval-eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,parsers]"
+
+      - name: Run unit tests
+        run: python -m pytest
+
+      - name: Verify artifacts
+        run: python scripts/verify_artifacts.py
+
+      - name: Audit chunk section metadata
+        run: python scripts/audit_chunk_sections.py --json
+
+      - name: Run baseline retrieval eval
+        run: python scripts/run_retrieval_eval.py --retriever baseline --limit 5
+
+      - name: Run MVP-003 metadata-aware retrieval eval
+        run: python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
