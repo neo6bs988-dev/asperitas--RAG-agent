@@ -346,6 +346,32 @@ class GroundedAnswer:
 
 
 @dataclass
+class AgentResponse:
+    query: str
+    top_k: int
+    status: str
+    answer: str
+    citations_used: list[str]
+    evidence_count: int
+    evidence: list[dict[str, Any]]
+    guardrail: dict[str, Any]
+    metadata: dict[str, Any]
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "query": self.query,
+            "top_k": self.top_k,
+            "status": self.status,
+            "answer": self.answer,
+            "citations_used": self.citations_used,
+            "evidence_count": self.evidence_count,
+            "evidence": self.evidence,
+            "guardrail": self.guardrail,
+            "metadata": self.metadata,
+        }
+
+
+@dataclass
 class ComplianceResult:
     compliance_flag: bool
     human_approval_required: bool
