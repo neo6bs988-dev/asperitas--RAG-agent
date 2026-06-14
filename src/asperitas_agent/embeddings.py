@@ -1,10 +1,44 @@
 from __future__ import annotations
 
+import hashlib
+from dataclasses import dataclass
+from typing import Protocol
+
 from .schemas import Chunk, EmbeddingRecord, SourceRecord
 
 
 DEFAULT_EMBEDDING_MODEL = "offline-placeholder"
 DEFAULT_EMBEDDING_VERSION = "mvp005-phase1-schema"
+DEFAULT_OFFLINE_EMBEDDING_MODEL = "offline-deterministic-hash"
+DEFAULT_OFFLINE_EMBEDDING_VERSION = "mvp005-phase2-offline"
+
+
+class EmbeddingProvider(Protocol):
+    embedding_model: str
+    embedding_dim: int
+    embedding_version: str
+
+    def embed_text(self, text: str) -> list[float]:
+        ...
+
+
+@dataclass(frozen=True)
+class DeterministicOfflineEmbeddingProvider:
+    embedding_dim: int
+    embedding_model: str = DEFAULT_OFFLINE_EMBEDDING_MODEL
+    embedding_version: str = DEFAULT_OFFLINE_EMBEDDING_VERSION
+
+    def __post_init__(self) -> None:
+        if self.embedding_dim <= 0:
+            raise ValueError("embedding_dim must be positive")
+        if not self.embedding_model.strip():
+            raise ValueError("embedding_model must be non-empty")
+        if not self.embedding_version.strip():
+            raise ValueError("embedding_version must be non-empty")
+
+    def embed_text(self, text: str) -> list[float]:
+        seed = "\x00".join([self.embedding_model, self.embedding_version, str(self.embedding_dim), text])
+        return [_stable_unit_float(seed, index) for index in range(self.embedding_dim)]
 
 
 def build_source_file_lookup(records: list[SourceRecord]) -> dict[str, str]:
@@ -60,4 +94,10 @@ def build_embedding_records(
         )
         for chunk in chunks
     ]
+
+
+def _stable_unit_float(seed: str, index: int) -> float:
+    digest = hashlib.sha256(f"{seed}\x00{index}".encode("utf-8")).digest()
+    integer = int.from_bytes(digest[:8], byteorder="big", signed=False)
+    return (integer / ((1 << 64) - 1)) * 2.0 - 1.0
 
