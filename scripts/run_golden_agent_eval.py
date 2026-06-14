@@ -15,6 +15,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from asperitas_agent.agent_runner import ask_agent  # noqa: E402
+from asperitas_agent.failure_taxonomy import classify_failure  # noqa: E402
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -206,7 +207,7 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
         "determinism": _json_dumps(first) == _json_dumps(second),
     }
     failures = [name for name, ok in checks.items() if not ok]
-    return {
+    report = {
         "id": case["id"],
         "category": case["category"],
         "ok": not failures,
@@ -220,6 +221,9 @@ def evaluate_case(case: dict[str, Any]) -> dict[str, Any]:
         "checks": checks,
         "failures": failures,
     }
+    if failures:
+        report["failure_category"] = classify_failure(report)
+    return report
 
 
 def evaluate_golden_queries(golden_file: Path = DEFAULT_GOLDEN_FILE) -> dict[str, Any]:

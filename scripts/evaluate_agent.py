@@ -17,6 +17,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from asperitas_agent.agent_runner import ask_agent  # noqa: E402
+from asperitas_agent.failure_taxonomy import classify_failure  # noqa: E402
 
 
 ALLOWED_STATUSES = {"answered", "caution", "abstained"}
@@ -233,17 +234,25 @@ def run_cases() -> tuple[list[dict[str, Any]], dict[str, bool]]:
         status_ok = status_ok and not status_errors
         citations_ok = citations_ok and not citation_errors
         guardrails_ok = guardrails_ok and not guardrail_errors
-        case_reports.append(
-            {
-                "case_id": case.case_id,
-                "status": payload.get("status"),
-                "expected_status": case.expected_status,
-                "evidence_count": payload.get("evidence_count"),
-                "citations_used": payload.get("citations_used", []),
-                "ok": not errors,
-                "errors": errors,
-            }
-        )
+        report_checks = {
+            "schema": not schema_errors,
+            "status": not status_errors,
+            "citations": not citation_errors,
+            "guardrails": not guardrail_errors,
+        }
+        report = {
+            "case_id": case.case_id,
+            "status": payload.get("status"),
+            "expected_status": case.expected_status,
+            "evidence_count": payload.get("evidence_count"),
+            "citations_used": payload.get("citations_used", []),
+            "ok": not errors,
+            "errors": errors,
+            "checks": report_checks,
+        }
+        if errors:
+            report["failure_category"] = classify_failure(report)
+        case_reports.append(report)
     return case_reports, {"schema": schema_ok, "status": status_ok, "citations": citations_ok, "guardrails": guardrails_ok}
 
 
