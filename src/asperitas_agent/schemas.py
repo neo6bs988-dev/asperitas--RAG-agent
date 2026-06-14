@@ -119,6 +119,26 @@ class Chunk:
 
 
 @dataclass
+class EmbeddingRecord:
+    chunk_id: str
+    source_id: str
+    source_file: str
+    source_priority: str
+    evidence_label: str
+    section: str
+    section_heading: str
+    section_path: list[str]
+    heading_context: str
+    embedding_model: str
+    embedding_dim: int
+    embedding_version: str
+    content_hash: str
+
+    def to_json(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
 class RetrievalResult:
     query: str
     chunk: Chunk
