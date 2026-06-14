@@ -4,6 +4,7 @@ from asperitas_agent.embeddings import (
     DEFAULT_EMBEDDING_MODEL,
     DEFAULT_EMBEDDING_VERSION,
     DeterministicOfflineEmbeddingProvider,
+    InMemoryVectorStore,
     build_embedding_record,
     build_embedding_records,
 )
@@ -195,4 +196,149 @@ def test_offline_provider_metadata_is_compatible_with_embedding_record_schema():
     assert record.heading_context == chunk.heading_context
     assert record.embedding_model == provider.embedding_model
     assert record.embedding_version == provider.embedding_version
+
+
+def make_vector_record(
+    suffix: str,
+    vector: list[float],
+    source: SourceRecord | None = None,
+    chunk: Chunk | None = None,
+):
+    source = source or make_source()
+    chunk = chunk or make_chunk(source)
+    chunk = Chunk(**{**chunk.to_json(), "chunk_id": f"{chunk.chunk_id}-{suffix}"})
+    provider = DeterministicOfflineEmbeddingProvider(embedding_dim=len(vector))
+    return build_embedding_record(
+        chunk,
+        source_file=source.path,
+        embedding_model=provider.embedding_model,
+        embedding_dim=provider.embedding_dim,
+        embedding_version=provider.embedding_version,
+    )
+
+
+def test_in_memory_vector_store_adds_records():
+    store = InMemoryVectorStore(embedding_dim=3)
+    record = make_vector_record("one", [1.0, 0.0, 0.0])
+
+    store.add(record, [1.0, 0.0, 0.0])
+
+    assert len(store) == 1
+
+
+def test_in_memory_vector_store_empty_search_returns_no_results():
+    store = InMemoryVectorStore(embedding_dim=3)
+
+    assert store.search([1.0, 0.0, 0.0]) == []
+
+
+def test_in_memory_vector_store_search_returns_ranked_results():
+    store = InMemoryVectorStore(embedding_dim=2)
+    best = make_vector_record("best", [1.0, 0.0])
+    middle = make_vector_record("middle", [0.5, 0.5])
+    worst = make_vector_record("worst", [0.0, 1.0])
+
+    store.add(worst, [0.0, 1.0])
+    store.add(middle, [0.5, 0.5])
+    store.add(best, [1.0, 0.0])
+
+    results = store.search([1.0, 0.0], top_k=3)
+
+    assert [result.record.chunk_id for result in results] == [best.chunk_id, middle.chunk_id, worst.chunk_id]
+    assert results[0].score > results[1].score > results[2].score
+
+
+def test_in_memory_vector_store_search_results_preserve_metadata():
+    source = make_source()
+    chunk = make_chunk(source)
+    store = InMemoryVectorStore(embedding_dim=3)
+    record = make_vector_record("metadata", [1.0, 0.0, 0.0], source=source, chunk=chunk)
+
+    store.add(record, [1.0, 0.0, 0.0])
+    result = store.search([1.0, 0.0, 0.0], top_k=1)[0]
+    payload = result.to_json()
+
+    assert payload["source_id"] == chunk.source_id
+    assert payload["source_file"] == source.path
+    assert payload["source_priority"] == chunk.source_priority
+    assert payload["evidence_label"] == chunk.evidence_label
+    assert payload["section"] == chunk.section
+    assert payload["section_heading"] == chunk.section_heading
+    assert payload["section_path"] == chunk.section_path
+    assert payload["heading_context"] == chunk.heading_context
+    assert payload["embedding_model"] == record.embedding_model
+    assert payload["embedding_dim"] == record.embedding_dim
+    assert payload["embedding_version"] == record.embedding_version
+    assert payload["content_hash"] == record.content_hash
+    assert payload["score"] == 1.0
+
+
+def test_in_memory_vector_store_rejects_dimension_mismatch():
+    store = InMemoryVectorStore(embedding_dim=3)
+    record = make_vector_record("mismatch", [1.0, 0.0, 0.0])
+    wrong_record = build_embedding_record(
+        make_chunk(make_source()),
+        source_file=make_source().path,
+        embedding_model="offline-deterministic-hash",
+        embedding_dim=2,
+        embedding_version="mvp005-phase2-offline",
+    )
+
+    with pytest.raises(ValueError, match="vector dimension does not match"):
+        store.add(record, [1.0, 0.0])
+
+    with pytest.raises(ValueError, match="record embedding_dim does not match"):
+        store.add(wrong_record, [1.0, 0.0, 0.0])
+
+    with pytest.raises(ValueError, match="query_vector dimension does not match"):
+        store.search([1.0, 0.0])
+
+    with pytest.raises(ValueError, match="embedding_dim must be positive"):
+        InMemoryVectorStore(embedding_dim=0)
+
+
+def test_in_memory_vector_store_top_k_behavior_is_stable():
+    store = InMemoryVectorStore(embedding_dim=2)
+    first = make_vector_record("first", [1.0, 0.0])
+    second = make_vector_record("second", [1.0, 0.0])
+    third = make_vector_record("third", [1.0, 0.0])
+
+    store.add(first, [1.0, 0.0])
+    store.add(second, [1.0, 0.0])
+    store.add(third, [1.0, 0.0])
+
+    assert store.search([1.0, 0.0], top_k=0) == []
+    assert [result.record.chunk_id for result in store.search([1.0, 0.0], top_k=2)] == [first.chunk_id, second.chunk_id]
+    assert [result.record.chunk_id for result in store.search([1.0, 0.0], top_k=99)] == [first.chunk_id, second.chunk_id, third.chunk_id]
+
+
+def test_embedding_record_provider_and_vector_store_are_compatible():
+    source = make_source()
+    chunk = make_chunk(source)
+    provider = DeterministicOfflineEmbeddingProvider(embedding_dim=5)
+    vector = provider.embed_text(chunk.text)
+    record = build_embedding_record(
+        chunk,
+        source_file=source.path,
+        embedding_model=provider.embedding_model,
+        embedding_dim=provider.embedding_dim,
+        embedding_version=provider.embedding_version,
+    )
+    store = InMemoryVectorStore(embedding_dim=provider.embedding_dim)
+
+    store.add(record, vector)
+    result = store.search(vector, top_k=1)[0]
+
+    assert result.record.chunk_id == record.chunk_id
+    assert result.record.source_id == record.source_id
+    assert result.record.source_file == record.source_file
+    assert result.record.source_priority == record.source_priority
+    assert result.record.evidence_label == record.evidence_label
+    assert result.record.section == record.section
+    assert result.record.section_heading == record.section_heading
+    assert result.record.section_path == record.section_path
+    assert result.record.heading_context == record.heading_context
+    assert result.record.embedding_model == provider.embedding_model
+    assert result.record.embedding_dim == provider.embedding_dim
+    assert result.record.embedding_version == provider.embedding_version
 
