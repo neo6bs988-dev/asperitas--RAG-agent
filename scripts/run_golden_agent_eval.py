@@ -17,6 +17,12 @@ if str(SRC_ROOT) not in sys.path:
 from asperitas_agent.agent_runner import ask_agent  # noqa: E402
 
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+
 DEFAULT_GOLDEN_FILE = REPO_ROOT / "eval" / "golden_agent_queries.jsonl"
 ALLOWED_STATUSES = {"answered", "caution", "abstained"}
 PRIORITY_RANKS = {f"P{index}": index for index in range(7)}
