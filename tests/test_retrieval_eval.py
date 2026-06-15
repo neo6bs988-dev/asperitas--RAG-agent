@@ -210,6 +210,14 @@ def test_parser_accepts_vector_retriever_mode():
     assert args.retriever == "vector"
 
 
+def test_parser_accepts_hybrid_retriever_mode():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args(["--retriever", "hybrid"])
+
+    assert args.retriever == "hybrid"
+
+
 def test_run_retriever_selects_vector_mode(monkeypatch):
     module = load_eval_module()
     sentinel = {"Q1": []}
@@ -223,6 +231,86 @@ def test_run_retriever_selects_vector_mode(monkeypatch):
 
     assert mode == module.MVP005_VECTOR_EVAL_MODE
     assert results is sentinel
+
+
+def test_run_retriever_selects_hybrid_mode(monkeypatch):
+    module = load_eval_module()
+    sentinel = {"Q1": []}
+
+    def fake_hybrid_retrieval(questions, registry_path, chunks_path, limit):
+        return sentinel
+
+    monkeypatch.setattr(module, "run_hybrid_retrieval", fake_hybrid_retrieval)
+
+    mode, results = module.run_retriever("hybrid", [], Path("registry.csv"), Path("chunks.jsonl"), 5)
+
+    assert mode == module.MVP006_HYBRID_EVAL_MODE
+    assert results is sentinel
+
+
+def test_run_retriever_keeps_existing_mode_paths(monkeypatch):
+    module = load_eval_module()
+    calls: list[str] = []
+
+    def fake_baseline(questions, registry_path, chunks_path, limit):
+        calls.append("baseline")
+        return {"baseline": []}
+
+    def fake_mvp003(questions, registry_path, chunks_path, limit):
+        calls.append("mvp003")
+        return {"mvp003": []}
+
+    def fake_vector(questions, registry_path, chunks_path, limit):
+        calls.append("vector")
+        return {"vector": []}
+
+    def forbidden_hybrid(questions, registry_path, chunks_path, limit):
+        raise AssertionError("hybrid path should not run for existing modes")
+
+    monkeypatch.setattr(module, "run_baseline_retrieval", fake_baseline)
+    monkeypatch.setattr(module, "run_mvp003_retrieval", fake_mvp003)
+    monkeypatch.setattr(module, "run_vector_retrieval", fake_vector)
+    monkeypatch.setattr(module, "run_hybrid_retrieval", forbidden_hybrid)
+
+    baseline_mode, baseline_results = module.run_retriever("baseline", [], Path("registry.csv"), Path("chunks.jsonl"), 5)
+    mvp003_mode, mvp003_results = module.run_retriever("mvp003", [], Path("registry.csv"), Path("chunks.jsonl"), 5)
+    vector_mode, vector_results = module.run_retriever("vector", [], Path("registry.csv"), Path("chunks.jsonl"), 5)
+
+    assert calls == ["baseline", "mvp003", "vector"]
+    assert baseline_mode == "current-tfidf-baseline"
+    assert baseline_results == {"baseline": []}
+    assert mvp003_mode == "mvp003-deterministic-metadata"
+    assert mvp003_results == {"mvp003": []}
+    assert vector_mode == module.MVP005_VECTOR_EVAL_MODE
+    assert vector_results == {"vector": []}
+
+
+def test_hybrid_top_results_keep_mvp003_top_k_candidates():
+    module = load_eval_module()
+    ranked = [
+        {
+            "chunk_id": "vector-only",
+            "score": 0.95,
+            "vector_rank": 1,
+            "score_components": {"mvp003_score": 0.0, "vector_score": 1.0, "metadata_score": 1.0},
+        },
+        {
+            "chunk_id": "mvp003-first",
+            "score": 0.8,
+            "mvp003_rank": 1,
+            "score_components": {"mvp003_score": 1.0, "vector_score": 0.2, "metadata_score": 1.0},
+        },
+        {
+            "chunk_id": "mvp003-second",
+            "score": 0.2,
+            "mvp003_rank": 2,
+            "score_components": {"mvp003_score": 0.2, "vector_score": 0.0, "metadata_score": 1.0},
+        },
+    ]
+
+    selected = module.select_hybrid_top_results(ranked, limit=2)
+
+    assert {row["chunk_id"] for row in selected} == {"mvp003-first", "mvp003-second"}
 
 
 def test_vector_retrieval_preserves_embedding_record_metadata(tmp_path):
@@ -264,3 +352,50 @@ def test_vector_retrieval_preserves_embedding_record_metadata(tmp_path):
     assert row["embedding_version"] == "mvp005-phase5-lexical-semantic"
     assert row["content_hash"] == chunk.checksum
     assert isinstance(row["score"], float)
+
+
+def test_hybrid_retrieval_preserves_metadata_and_score_components(tmp_path):
+    module = load_eval_module()
+    source = make_source()
+    chunk = make_chunk(source)
+    registry_path = tmp_path / "source_registry.csv"
+    chunks_path = tmp_path / "chunks.jsonl"
+    write_registry([source], path=registry_path)
+    write_chunks([chunk], path=chunks_path)
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What does the source priority policy say?",
+        expected_source_file=source.path,
+        expected_source_priority=source.source_priority,
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label=chunk.evidence_label,
+        rationale="The fixture chunk contains the expected policy section.",
+        difficulty="easy",
+        category="source_governance",
+    )
+
+    results = module.run_hybrid_retrieval([question], registry_path, chunks_path, limit=5)
+    row = results["Q1"][0]
+
+    assert row["rank"] == 1
+    assert row["source_id"] == source.source_id
+    assert row["source_file"] == source.path
+    assert row["source_priority"] == source.source_priority
+    assert row["evidence_label"] == chunk.evidence_label
+    assert row["section"] == chunk.section
+    assert row["section_heading"] == chunk.section_heading
+    assert row["section_path"] == chunk.section_path
+    assert row["heading_context"] == chunk.heading_context
+    assert row["title"] == chunk.title
+    assert row["text"] == chunk.text
+    assert row["embedding_model"] == "offline-lexical-semantic-hash"
+    assert row["embedding_dim"] == module.MVP005_VECTOR_EVAL_EMBEDDING_DIM
+    assert row["embedding_version"] == "mvp005-phase5-lexical-semantic"
+    assert row["content_hash"] == chunk.checksum
+    assert row["mvp003_rank"] == 1
+    assert row["vector_rank"] == 1
+    assert isinstance(row["score"], float)
+    assert row["score_components"]["mvp003_score"] == 1.0
+    assert row["score_components"]["vector_score"] > 0.0
+    assert row["score_components"]["section_score"] == 1.0
+    assert row["score_components"]["metadata_score"] == 1.0

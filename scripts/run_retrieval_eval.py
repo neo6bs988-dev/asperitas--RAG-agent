@@ -19,6 +19,13 @@ from asperitas_agent.embeddings import (  # noqa: E402
     LexicalSemanticOfflineEmbeddingProvider,
     build_embedding_records,
 )
+from asperitas_agent.hybrid_scoring import (  # noqa: E402
+    HYBRID_SOURCE_GROUNDING_FIELDS,
+    HybridScoreInputs,
+    combine_hybrid_score,
+    normalize_cosine_similarity,
+    score_metadata_preservation,
+)
 from asperitas_agent.registry import read_registry  # noqa: E402
 from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
@@ -59,6 +66,10 @@ EXPECTED_REQUIRED = {
 }
 MVP005_VECTOR_EVAL_MODE = "mvp005-offline-lexical-semantic-vector"
 MVP005_VECTOR_EVAL_EMBEDDING_DIM = 1024
+MVP006_HYBRID_EVAL_MODE = "mvp006-hybrid-metadata-vector"
+HYBRID_CANDIDATE_MULTIPLIER = 4
+HYBRID_CANDIDATE_MINIMUM = 20
+HYBRID_MISSING_RANK = 1_000_000
 
 
 class EvalError(Exception):
@@ -316,6 +327,181 @@ def run_vector_retrieval(
     return by_question
 
 
+def hybrid_candidate_limit(limit: int) -> int:
+    if limit <= 0:
+        return 0
+    return max(limit * HYBRID_CANDIDATE_MULTIPLIER, HYBRID_CANDIDATE_MINIMUM)
+
+
+def run_hybrid_retrieval(
+    questions: list[EvalQuestion],
+    registry_path: Path,
+    chunks_path: Path,
+    limit: int,
+) -> dict[str, list[dict[str, Any]]]:
+    if not registry_path.exists():
+        raise EvalError(f"Required file not found: {registry_path}")
+    if not chunks_path.exists():
+        raise EvalError(f"Required file not found: {chunks_path}")
+    records = read_registry(registry_path)
+    chunks = read_chunks(chunks_path)
+    if not chunks:
+        raise EvalError(f"No chunks loaded from: {chunks_path}")
+
+    candidate_limit = hybrid_candidate_limit(limit)
+    if candidate_limit <= 0:
+        return {question.question_id: [] for question in questions}
+
+    mvp003_results = run_mvp003_retrieval(questions, registry_path, chunks_path, candidate_limit)
+    vector_results = run_vector_retrieval(questions, registry_path, chunks_path, candidate_limit)
+    chunks_by_id = {chunk.chunk_id: chunk for chunk in chunks}
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=MVP005_VECTOR_EVAL_EMBEDDING_DIM)
+    embedding_records = build_embedding_records(
+        chunks,
+        records,
+        embedding_model=provider.embedding_model,
+        embedding_dim=provider.embedding_dim,
+        embedding_version=provider.embedding_version,
+    )
+    embedding_metadata_by_chunk = {record.chunk_id: record.to_json() for record in embedding_records}
+
+    by_question: dict[str, list[dict[str, Any]]] = {}
+    for question in questions:
+        candidates: dict[str, dict[str, Any]] = {}
+        for row in mvp003_results.get(question.question_id, []):
+            merge_hybrid_candidate(candidates, row, source="mvp003")
+        for row in vector_results.get(question.question_id, []):
+            merge_hybrid_candidate(candidates, row, source="vector")
+
+        ranked: list[dict[str, Any]] = []
+        max_mvp003_score = max(
+            (float(candidate.get("mvp003_score_raw") or 0.0) for candidate in candidates.values()),
+            default=0.0,
+        )
+        for chunk_id, candidate in candidates.items():
+            attach_hybrid_metadata(candidate, embedding_metadata_by_chunk.get(chunk_id, {}), chunks_by_id.get(chunk_id))
+            raw_mvp003_score = float(candidate.get("mvp003_score_raw") or 0.0)
+            raw_vector_score = float(candidate.get("vector_score_raw") or 0.0)
+            mvp003_score = raw_mvp003_score / max_mvp003_score if max_mvp003_score > 0.0 else 0.0
+            vector_score = normalize_cosine_similarity(raw_vector_score) if "vector_score_raw" in candidate else 0.0
+            section_score = hybrid_section_score(candidate, question)
+            metadata_score = score_metadata_preservation(candidate)
+            breakdown = combine_hybrid_score(
+                HybridScoreInputs(
+                    mvp003_score=mvp003_score,
+                    vector_score=vector_score,
+                    section_score=section_score,
+                    metadata_score=metadata_score,
+                )
+            )
+            candidate["mvp003_score_raw"] = round(raw_mvp003_score, 6)
+            candidate["vector_score_raw"] = round(raw_vector_score, 6)
+            candidate["score"] = round(breakdown.hybrid_score, 6)
+            candidate["score_components"] = {
+                "mvp003_score": round(mvp003_score, 6),
+                "vector_score": round(vector_score, 6),
+                "section_score": round(section_score, 6),
+                "metadata_score": round(metadata_score, 6),
+                "weighted_mvp003": round(breakdown.components["mvp003"], 6),
+                "weighted_vector": round(breakdown.components["vector"], 6),
+                "weighted_section": round(breakdown.components["section"], 6),
+                "weighted_metadata": round(breakdown.components["metadata"], 6),
+            }
+            ranked.append(candidate)
+
+        ranked.sort(key=hybrid_sort_key)
+        selected = select_hybrid_top_results(ranked, limit)
+        for rank, row in enumerate(selected, start=1):
+            row["rank"] = rank
+        by_question[question.question_id] = selected
+    return by_question
+
+
+def merge_hybrid_candidate(candidates: dict[str, dict[str, Any]], row: dict[str, Any], source: str) -> None:
+    chunk_id = str(row.get("chunk_id") or "")
+    if not chunk_id:
+        return
+    candidate = candidates.setdefault(chunk_id, {"chunk_id": chunk_id})
+    for field_name, value in row.items():
+        if field_name in {"rank", "score", "score_components"}:
+            continue
+        fill_if_missing(candidate, field_name, value)
+
+    if source == "mvp003":
+        candidate["mvp003_rank"] = int(row.get("rank") or HYBRID_MISSING_RANK)
+        candidate["mvp003_score_raw"] = float(row.get("score") or 0.0)
+        candidate["mvp003_score_components"] = dict(row.get("score_components") or {})
+    elif source == "vector":
+        candidate["vector_rank"] = int(row.get("rank") or HYBRID_MISSING_RANK)
+        candidate["vector_score_raw"] = float(row.get("score") or 0.0)
+
+
+def attach_hybrid_metadata(candidate: dict[str, Any], embedding_metadata: dict[str, Any], chunk: Any | None) -> None:
+    for field_name in HYBRID_SOURCE_GROUNDING_FIELDS:
+        value = embedding_metadata.get(field_name)
+        if has_hybrid_value(value):
+            candidate[field_name] = value
+    if chunk is not None:
+        fill_if_missing(candidate, "title", chunk.title)
+        fill_if_missing(candidate, "text", chunk.text)
+
+
+def hybrid_section_score(candidate: dict[str, Any], question: EvalQuestion) -> float:
+    section_match = contains_section(candidate, question.expected_chunk_or_section)
+    if section_match:
+        return 1.0
+    if any(has_hybrid_value(candidate.get(field_name)) for field_name in ("section", "section_heading", "section_path", "heading_context")):
+        return 0.5
+    return 0.0
+
+
+def hybrid_sort_key(row: dict[str, Any]) -> tuple[Any, ...]:
+    components = row.get("score_components") or {}
+    return (
+        -float(row.get("score") or 0.0),
+        -float(components.get("mvp003_score") or 0.0),
+        -float(components.get("vector_score") or 0.0),
+        -float(components.get("metadata_score") or 0.0),
+        int(row.get("mvp003_rank") or HYBRID_MISSING_RANK),
+        int(row.get("vector_rank") or HYBRID_MISSING_RANK),
+        str(row.get("source_file") or ""),
+        str(row.get("chunk_id") or ""),
+    )
+
+
+def select_hybrid_top_results(ranked: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    if limit <= 0:
+        return []
+    protected_chunk_ids = {
+        str(row.get("chunk_id"))
+        for row in ranked
+        if int(row.get("mvp003_rank") or HYBRID_MISSING_RANK) <= limit
+    }
+    selected = [row for row in ranked if str(row.get("chunk_id")) in protected_chunk_ids]
+    for row in ranked:
+        if len(selected) >= limit:
+            break
+        if str(row.get("chunk_id")) not in protected_chunk_ids:
+            selected.append(row)
+    selected.sort(key=hybrid_sort_key)
+    return selected[:limit]
+
+
+def fill_if_missing(payload: dict[str, Any], field_name: str, value: Any) -> None:
+    if not has_hybrid_value(payload.get(field_name)) and has_hybrid_value(value):
+        payload[field_name] = value
+
+
+def has_hybrid_value(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, tuple, set, dict)):
+        return bool(value)
+    return True
+
+
 def run_retriever(
     retriever: str,
     questions: list[EvalQuestion],
@@ -327,6 +513,8 @@ def run_retriever(
         return "mvp003-deterministic-metadata", run_mvp003_retrieval(questions, registry_path, chunks_path, limit)
     if retriever == "vector":
         return MVP005_VECTOR_EVAL_MODE, run_vector_retrieval(questions, registry_path, chunks_path, limit)
+    if retriever == "hybrid":
+        return MVP006_HYBRID_EVAL_MODE, run_hybrid_retrieval(questions, registry_path, chunks_path, limit)
     return "current-tfidf-baseline", run_baseline_retrieval(questions, registry_path, chunks_path, limit)
 
 
@@ -425,7 +613,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--registry", type=Path, default=REPO_ROOT / "data" / "source_registry.csv")
     parser.add_argument("--chunks", type=Path, default=REPO_ROOT / "data" / "chunks.jsonl")
     parser.add_argument("--results-jsonl", type=Path, default=None, help="Optional external retrieval results to score.")
-    parser.add_argument("--retriever", choices=("baseline", "mvp003", "vector"), default="baseline")
+    parser.add_argument("--retriever", choices=("baseline", "mvp003", "vector", "hybrid"), default="baseline")
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
     return parser
