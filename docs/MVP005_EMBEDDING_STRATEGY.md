@@ -74,3 +74,15 @@ Prototype Qdrant only after one of these is true:
 
 Until then, the vector backend decision remains deferred.
 
+## Phase 5 Update
+
+Issue #22 added `LexicalSemanticOfflineEmbeddingProvider`, a pure-Python local provider behind `EmbeddingProvider`.
+
+Measured result:
+
+- previous vector overall: 31.2%
+- Phase 5 vector overall: 53.1%
+- baseline overall remains 34.4%
+- mvp003 overall remains 90.6%
+
+Decision: keep the Phase 5 provider for vector eval, keep `mvp003` as the reference retriever, and defer external vector DB installation until hybrid retrieval or backend-prototype work has a separate measured gate.

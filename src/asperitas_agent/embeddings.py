@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import math
+import re
+import unicodedata
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -12,6 +14,34 @@ DEFAULT_EMBEDDING_MODEL = "offline-placeholder"
 DEFAULT_EMBEDDING_VERSION = "mvp005-phase1-schema"
 DEFAULT_OFFLINE_EMBEDDING_MODEL = "offline-deterministic-hash"
 DEFAULT_OFFLINE_EMBEDDING_VERSION = "mvp005-phase2-offline"
+DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_MODEL = "offline-lexical-semantic-hash"
+DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_VERSION = "mvp005-phase5-lexical-semantic"
+LEXICAL_SEMANTIC_STOPWORDS = {
+    "a",
+    "about",
+    "an",
+    "and",
+    "are",
+    "as",
+    "by",
+    "for",
+    "from",
+    "how",
+    "in",
+    "is",
+    "of",
+    "or",
+    "should",
+    "the",
+    "to",
+    "what",
+    "when",
+    "where",
+    "which",
+    "why",
+    "with",
+}
+TOKEN_RE = re.compile(r"\w+", re.UNICODE)
 
 
 class EmbeddingProvider(Protocol):
@@ -50,6 +80,39 @@ class DeterministicOfflineEmbeddingProvider:
     def embed_text(self, text: str) -> list[float]:
         seed = "\x00".join([self.embedding_model, self.embedding_version, str(self.embedding_dim), text])
         return [_stable_unit_float(seed, index) for index in range(self.embedding_dim)]
+
+
+@dataclass(frozen=True)
+class LexicalSemanticOfflineEmbeddingProvider:
+    embedding_dim: int
+    embedding_model: str = DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_MODEL
+    embedding_version: str = DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_VERSION
+
+    def __post_init__(self) -> None:
+        if self.embedding_dim <= 0:
+            raise ValueError("embedding_dim must be positive")
+        if not self.embedding_model.strip():
+            raise ValueError("embedding_model must be non-empty")
+        if not self.embedding_version.strip():
+            raise ValueError("embedding_version must be non-empty")
+
+    def embed_text(self, text: str) -> list[float]:
+        features = _lexical_semantic_features(text)
+        if not features:
+            fallback = DeterministicOfflineEmbeddingProvider(
+                embedding_dim=self.embedding_dim,
+                embedding_model=f"{self.embedding_model}-fallback",
+                embedding_version=self.embedding_version,
+            )
+            return _normalize_vector(fallback.embed_text(text))
+
+        vector = [0.0] * self.embedding_dim
+        seed = "\x00".join([self.embedding_model, self.embedding_version, str(self.embedding_dim)])
+        for feature, weight in features:
+            digest = hashlib.sha256(f"{seed}\x00{feature}".encode("utf-8")).digest()
+            index = int.from_bytes(digest[:8], byteorder="big", signed=False) % self.embedding_dim
+            vector[index] += weight
+        return _normalize_vector(vector)
 
 
 @dataclass(frozen=True)
@@ -174,6 +237,52 @@ def _stable_unit_float(seed: str, index: int) -> float:
     digest = hashlib.sha256(f"{seed}\x00{index}".encode("utf-8")).digest()
     integer = int.from_bytes(digest[:8], byteorder="big", signed=False)
     return (integer / ((1 << 64) - 1)) * 2.0 - 1.0
+
+
+def _normalize_token(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", value or "").casefold()
+    normalized = normalized.strip("_")
+    return normalized
+
+
+def _stem_token(token: str) -> str:
+    if not token.isascii():
+        return token
+    for suffix in ("ization", "ations", "ation", "ingly", "edly", "ing", "ies", "ied", "ed", "es", "s"):
+        if token.endswith(suffix) and len(token) > len(suffix) + 3:
+            if suffix in {"ies", "ied"}:
+                return token[: -len(suffix)] + "y"
+            return token[: -len(suffix)]
+    return token
+
+
+def _lexical_semantic_tokens(text: str) -> list[str]:
+    tokens = [_normalize_token(token) for token in TOKEN_RE.findall(text)]
+    return [token for token in tokens if len(token) >= 2 and token not in LEXICAL_SEMANTIC_STOPWORDS]
+
+
+def _lexical_semantic_features(text: str) -> list[tuple[str, float]]:
+    tokens = _lexical_semantic_tokens(text)
+    if not tokens:
+        return []
+    features: list[tuple[str, float]] = []
+    for token in tokens:
+        features.append((f"tok:{token}", 1.0))
+        stem = _stem_token(token)
+        if stem != token:
+            features.append((f"stem:{stem}", 0.75))
+    for index in range(len(tokens) - 1):
+        features.append((f"bigram:{tokens[index]} {tokens[index + 1]}", 1.5))
+    for index in range(len(tokens) - 2):
+        features.append((f"trigram:{tokens[index]} {tokens[index + 1]} {tokens[index + 2]}", 1.25))
+    return features
+
+
+def _normalize_vector(vector: list[float]) -> list[float]:
+    norm = math.sqrt(sum(value * value for value in vector))
+    if norm == 0.0:
+        return vector
+    return [value / norm for value in vector]
 
 
 def _cosine_similarity(left: tuple[float, ...], right: tuple[float, ...]) -> float:

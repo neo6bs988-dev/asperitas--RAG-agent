@@ -3,8 +3,11 @@ import pytest
 from asperitas_agent.embeddings import (
     DEFAULT_EMBEDDING_MODEL,
     DEFAULT_EMBEDDING_VERSION,
+    DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_MODEL,
+    DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_VERSION,
     DeterministicOfflineEmbeddingProvider,
     InMemoryVectorStore,
+    LexicalSemanticOfflineEmbeddingProvider,
     build_embedding_record,
     build_embedding_records,
 )
@@ -196,6 +199,106 @@ def test_offline_provider_metadata_is_compatible_with_embedding_record_schema():
     assert record.heading_context == chunk.heading_context
     assert record.embedding_model == provider.embedding_model
     assert record.embedding_version == provider.embedding_version
+
+
+def test_lexical_semantic_provider_returns_same_vector_for_same_text():
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=32)
+
+    assert provider.embed_text("source priority policy") == provider.embed_text("source priority policy")
+
+
+def test_lexical_semantic_provider_vector_length_matches_embedding_dim():
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=17)
+
+    vector = provider.embed_text("source-grounded biological intelligence")
+
+    assert len(vector) == 17
+    assert all(-1.0 <= value <= 1.0 for value in vector)
+
+
+def test_lexical_semantic_provider_rejects_invalid_embedding_dim():
+    with pytest.raises(ValueError, match="embedding_dim must be positive"):
+        LexicalSemanticOfflineEmbeddingProvider(embedding_dim=0)
+
+    with pytest.raises(ValueError, match="embedding_dim must be positive"):
+        LexicalSemanticOfflineEmbeddingProvider(embedding_dim=-1)
+
+
+def test_lexical_semantic_provider_fallback_is_deterministic_for_featureless_text():
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=9)
+
+    first = provider.embed_text("!!!")
+    second = provider.embed_text("!!!")
+
+    assert first == second
+    assert len(first) == 9
+    assert any(value != 0.0 for value in first)
+
+
+def test_lexical_semantic_provider_requires_no_external_api_dependency():
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=8)
+
+    assert provider.embedding_model == DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_MODEL
+    assert provider.embedding_version == DEFAULT_LEXICAL_SEMANTIC_EMBEDDING_VERSION
+    assert provider.embed_text("offline local lexical semantic provider")
+
+
+def test_lexical_semantic_provider_metadata_is_compatible_with_embedding_record_schema():
+    source = make_source()
+    chunk = make_chunk(source)
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=16)
+
+    record = build_embedding_record(
+        chunk,
+        source_file=source.path,
+        embedding_model=provider.embedding_model,
+        embedding_dim=provider.embedding_dim,
+        embedding_version=provider.embedding_version,
+    )
+    vector = provider.embed_text(chunk.text)
+
+    assert len(vector) == record.embedding_dim
+    assert record.source_id == chunk.source_id
+    assert record.source_file == source.path
+    assert record.source_priority == chunk.source_priority
+    assert record.evidence_label == chunk.evidence_label
+    assert record.section == chunk.section
+    assert record.section_heading == chunk.section_heading
+    assert record.section_path == chunk.section_path
+    assert record.heading_context == chunk.heading_context
+    assert record.embedding_model == provider.embedding_model
+    assert record.embedding_version == provider.embedding_version
+
+
+def test_lexical_semantic_provider_ranks_shared_features_above_unrelated_text():
+    source = make_source()
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=64)
+    store = InMemoryVectorStore(embedding_dim=provider.embedding_dim)
+    matching_chunk = make_chunk(source)
+    unrelated_chunk = Chunk(
+        **{
+            **matching_chunk.to_json(),
+            "chunk_id": f"{matching_chunk.chunk_id}-unrelated",
+            "text": "Protein folding assays describe enzyme structure and catalytic mechanisms.",
+            "section": "Protein Methods",
+            "section_heading": "Protein Methods",
+            "section_path": ["Biological Intelligence", "Protein Methods"],
+            "heading_context": "Biological Intelligence > Protein Methods",
+        }
+    )
+    for chunk in (unrelated_chunk, matching_chunk):
+        record = build_embedding_record(
+            chunk,
+            source_file=source.path,
+            embedding_model=provider.embedding_model,
+            embedding_dim=provider.embedding_dim,
+            embedding_version=provider.embedding_version,
+        )
+        store.add(record, provider.embed_text(f"{chunk.title} {chunk.heading_context} {chunk.text}"))
+
+    result = store.search(provider.embed_text("source priority policy"), top_k=1)[0]
+
+    assert result.record.chunk_id == matching_chunk.chunk_id
 
 
 def make_vector_record(

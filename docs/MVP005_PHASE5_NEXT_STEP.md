@@ -34,3 +34,20 @@ Add and evaluate a local semantic embedding provider behind `EmbeddingProvider`.
 ## Acceptance Direction
 
 The next provider should improve vector retrieval over the current 31.2% overall vector score or clearly show why MVP-006 hybrid retrieval is needed before backend installation.
+
+## Completion Update
+
+Issue #22 implemented a pure-Python lexical-semantic offline provider behind `EmbeddingProvider`.
+
+Result:
+
+- baseline overall: 34.4%
+- mvp003 overall: 90.6%
+- vector overall after Phase 5: 53.1%
+
+Decision:
+
+- keep the Phase 5 lexical-semantic provider for vector eval;
+- do not replace `mvp003`;
+- do not install an external vector backend yet;
+- move next to MVP-006 hybrid retrieval design.

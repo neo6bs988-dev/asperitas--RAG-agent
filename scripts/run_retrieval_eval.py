@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -16,8 +15,8 @@ if str(SRC_ROOT) not in sys.path:
 
 from asperitas_agent.chunking import normalize_section_text, read_chunks  # noqa: E402
 from asperitas_agent.embeddings import (  # noqa: E402
-    DeterministicOfflineEmbeddingProvider,
     InMemoryVectorStore,
+    LexicalSemanticOfflineEmbeddingProvider,
     build_embedding_records,
 )
 from asperitas_agent.registry import read_registry  # noqa: E402
@@ -58,33 +57,8 @@ EXPECTED_REQUIRED = {
     "expected_source_priority",
     "expected_evidence_label",
 }
-MVP005_VECTOR_EVAL_MODE = "mvp005-offline-deterministic-vector"
-MVP005_VECTOR_EVAL_EMBEDDING_DIM = 32
-MVP005_VECTOR_EVAL_MAX_TERMS = 96
-VECTOR_EVAL_TOKEN_RE = re.compile(r"\w+", re.UNICODE)
-VECTOR_EVAL_STOPWORDS = {
-    "a",
-    "an",
-    "and",
-    "are",
-    "as",
-    "for",
-    "from",
-    "how",
-    "in",
-    "is",
-    "of",
-    "or",
-    "should",
-    "the",
-    "to",
-    "what",
-    "when",
-    "where",
-    "which",
-    "why",
-    "with",
-}
+MVP005_VECTOR_EVAL_MODE = "mvp005-offline-lexical-semantic-vector"
+MVP005_VECTOR_EVAL_EMBEDDING_DIM = 1024
 
 
 class EvalError(Exception):
@@ -270,27 +244,21 @@ def run_mvp003_retrieval(
     return by_question
 
 
-def vector_eval_terms(text: str) -> list[str]:
-    terms = VECTOR_EVAL_TOKEN_RE.findall(normalize_section_text(text))
-    filtered = [term for term in terms if term and term not in VECTOR_EVAL_STOPWORDS]
-    return filtered[:MVP005_VECTOR_EVAL_MAX_TERMS]
-
-
-def vector_eval_embedding(provider: DeterministicOfflineEmbeddingProvider, text: str) -> list[float]:
-    terms = vector_eval_terms(text)
-    if not terms:
-        return provider.embed_text(text)
-    vector = [0.0] * provider.embedding_dim
-    for term in terms:
-        term_vector = provider.embed_text(term)
-        for index, value in enumerate(term_vector):
-            vector[index] += value
-    return [value / len(terms) for value in vector]
-
-
-def vector_eval_chunk_text(chunk: Any) -> str:
+def vector_eval_chunk_text(chunk: Any, record: Any | None = None) -> str:
+    registry_parts: list[str] = []
+    if record is not None:
+        registry_parts = [
+            str(record.source_id),
+            str(record.title),
+            str(record.original_filename),
+            str(record.path),
+            str(record.source_priority),
+            str(record.source_type),
+            str(record.use_case),
+        ]
     return "\n".join(
-        [
+        registry_parts
+        + [
             str(chunk.title),
             str(chunk.section),
             str(chunk.section_heading),
@@ -316,7 +284,8 @@ def run_vector_retrieval(
     if not chunks:
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
-    provider = DeterministicOfflineEmbeddingProvider(embedding_dim=MVP005_VECTOR_EVAL_EMBEDDING_DIM)
+    records_by_id = {record.source_id: record for record in records}
+    provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=MVP005_VECTOR_EVAL_EMBEDDING_DIM)
     embedding_records = build_embedding_records(
         chunks,
         records,
@@ -328,11 +297,12 @@ def run_vector_retrieval(
     store = InMemoryVectorStore(embedding_dim=provider.embedding_dim)
     for record in embedding_records:
         chunk = chunks_by_id[record.chunk_id]
-        store.add(record, vector_eval_embedding(provider, vector_eval_chunk_text(chunk)))
+        source_record = records_by_id.get(chunk.source_id)
+        store.add(record, provider.embed_text(vector_eval_chunk_text(chunk, source_record)))
 
     by_question: dict[str, list[dict[str, Any]]] = {}
     for question in questions:
-        query_vector = vector_eval_embedding(provider, question.user_question)
+        query_vector = provider.embed_text(question.user_question)
         retrieved = store.search(query_vector, top_k=limit)
         rows: list[dict[str, Any]] = []
         for rank, result in enumerate(retrieved, start=1):

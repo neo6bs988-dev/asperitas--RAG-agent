@@ -259,8 +259,8 @@ def test_vector_retrieval_preserves_embedding_record_metadata(tmp_path):
     assert row["heading_context"] == chunk.heading_context
     assert row["title"] == chunk.title
     assert row["text"] == chunk.text
-    assert row["embedding_model"] == "offline-deterministic-hash"
+    assert row["embedding_model"] == "offline-lexical-semantic-hash"
     assert row["embedding_dim"] == module.MVP005_VECTOR_EVAL_EMBEDDING_DIM
-    assert row["embedding_version"] == "mvp005-phase2-offline"
+    assert row["embedding_version"] == "mvp005-phase5-lexical-semantic"
     assert row["content_hash"] == chunk.checksum
     assert isinstance(row["score"], float)
