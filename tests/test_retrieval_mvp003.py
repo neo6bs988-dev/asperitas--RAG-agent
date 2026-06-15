@@ -1,4 +1,4 @@
-from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003
+from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003
 from asperitas_agent.schemas import Chunk, SourceRecord
 
 
@@ -80,6 +80,20 @@ def test_mvp003_returns_unique_sources_for_top_k():
 
     assert len(results) == 1
     assert results[0].chunk.source_id == source.source_id
+
+
+def test_mvp003_chunk_scoring_can_return_multiple_chunks_per_source():
+    source = make_source("ASP-P1-ONE", "Protein Design", "protein design.pdf", "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/protein design.pdf")
+    chunks = [
+        make_chunk(source, "protein design first chunk"),
+        Chunk(**{**make_chunk(source, "protein design second chunk").to_json(), "chunk_id": "ASP-P1-ONE::chunk-0002", "char_start": 100}),
+    ]
+
+    scored = score_chunks_mvp003("protein design", chunks, [source])
+    retrieved = search_chunks_mvp003("protein design", chunks, [source], limit=5)
+
+    assert {result.chunk.chunk_id for result in scored} == {"ASP-P1-ONE::chunk-0001", "ASP-P1-ONE::chunk-0002"}
+    assert len(retrieved) == 1
 
 
 def test_mvp003_result_preserves_section_metadata_without_requiring_section_scoring():

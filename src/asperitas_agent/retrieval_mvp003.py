@@ -213,6 +213,24 @@ def score_candidate(query: str, chunk: Chunk, record: SourceRecord, base_score: 
     )
 
 
+def score_chunks_mvp003(query: str, chunks: list[Chunk], records: list[SourceRecord]) -> list[Mvp003Result]:
+    if not query.strip() or not chunks:
+        return []
+    lookup = build_source_lookup(records)
+    base_scores = _body_tfidf_scores(query, chunks)
+    scored: list[Mvp003Result] = []
+
+    for chunk in chunks:
+        record = lookup.get(chunk.source_id)
+        if record is None:
+            continue
+        result = score_candidate(query, chunk, record, base_scores.get(chunk.chunk_id, 0.0))
+        if result.score > 0:
+            scored.append(result)
+
+    return sorted(scored, key=_mvp003_sort_key, reverse=True)
+
+
 def search_chunks_mvp003(
     query: str,
     chunks: list[Chunk],
@@ -237,16 +255,16 @@ def search_chunks_mvp003(
         if current is None or (result.score, -chunk.char_start, chunk.chunk_id) > (current.score, -current.chunk.char_start, current.chunk.chunk_id):
             best_by_source[chunk.source_id] = result
 
-    ranked = sorted(
-        best_by_source.values(),
-        key=lambda item: (
-            item.score,
-            item.score_components.get("exact_filename_phrase", 0.0),
-            item.score_components.get("alias_phrase", 0.0),
-            item.score_components.get("filename_match", 0.0),
-            item.chunk.source_priority,
-            item.source_file,
-        ),
-        reverse=True,
-    )
+    ranked = sorted(best_by_source.values(), key=_mvp003_sort_key, reverse=True)
     return ranked[:limit]
+
+
+def _mvp003_sort_key(item: Mvp003Result) -> tuple[float, float, float, float, str, str]:
+    return (
+        item.score,
+        item.score_components.get("exact_filename_phrase", 0.0),
+        item.score_components.get("alias_phrase", 0.0),
+        item.score_components.get("filename_match", 0.0),
+        item.chunk.source_priority,
+        item.source_file,
+    )
