@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,11 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from asperitas_agent.chunking import normalize_section_text, read_chunks  # noqa: E402
+from asperitas_agent.embeddings import (  # noqa: E402
+    DeterministicOfflineEmbeddingProvider,
+    InMemoryVectorStore,
+    build_embedding_records,
+)
 from asperitas_agent.registry import read_registry  # noqa: E402
 from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
@@ -51,6 +57,33 @@ EXPECTED_REQUIRED = {
     "expected_source_file",
     "expected_source_priority",
     "expected_evidence_label",
+}
+MVP005_VECTOR_EVAL_MODE = "mvp005-offline-deterministic-vector"
+MVP005_VECTOR_EVAL_EMBEDDING_DIM = 32
+MVP005_VECTOR_EVAL_MAX_TERMS = 96
+VECTOR_EVAL_TOKEN_RE = re.compile(r"\w+", re.UNICODE)
+VECTOR_EVAL_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "for",
+    "from",
+    "how",
+    "in",
+    "is",
+    "of",
+    "or",
+    "should",
+    "the",
+    "to",
+    "what",
+    "when",
+    "where",
+    "which",
+    "why",
+    "with",
 }
 
 
@@ -237,6 +270,96 @@ def run_mvp003_retrieval(
     return by_question
 
 
+def vector_eval_terms(text: str) -> list[str]:
+    terms = VECTOR_EVAL_TOKEN_RE.findall(normalize_section_text(text))
+    filtered = [term for term in terms if term and term not in VECTOR_EVAL_STOPWORDS]
+    return filtered[:MVP005_VECTOR_EVAL_MAX_TERMS]
+
+
+def vector_eval_embedding(provider: DeterministicOfflineEmbeddingProvider, text: str) -> list[float]:
+    terms = vector_eval_terms(text)
+    if not terms:
+        return provider.embed_text(text)
+    vector = [0.0] * provider.embedding_dim
+    for term in terms:
+        term_vector = provider.embed_text(term)
+        for index, value in enumerate(term_vector):
+            vector[index] += value
+    return [value / len(terms) for value in vector]
+
+
+def vector_eval_chunk_text(chunk: Any) -> str:
+    return "\n".join(
+        [
+            str(chunk.title),
+            str(chunk.section),
+            str(chunk.section_heading),
+            " > ".join(str(item) for item in chunk.section_path if item),
+            str(chunk.heading_context),
+            str(chunk.text),
+        ]
+    )
+
+
+def run_vector_retrieval(
+    questions: list[EvalQuestion],
+    registry_path: Path,
+    chunks_path: Path,
+    limit: int,
+) -> dict[str, list[dict[str, Any]]]:
+    if not registry_path.exists():
+        raise EvalError(f"Required file not found: {registry_path}")
+    if not chunks_path.exists():
+        raise EvalError(f"Required file not found: {chunks_path}")
+    records = read_registry(registry_path)
+    chunks = read_chunks(chunks_path)
+    if not chunks:
+        raise EvalError(f"No chunks loaded from: {chunks_path}")
+
+    provider = DeterministicOfflineEmbeddingProvider(embedding_dim=MVP005_VECTOR_EVAL_EMBEDDING_DIM)
+    embedding_records = build_embedding_records(
+        chunks,
+        records,
+        embedding_model=provider.embedding_model,
+        embedding_dim=provider.embedding_dim,
+        embedding_version=provider.embedding_version,
+    )
+    chunks_by_id = {chunk.chunk_id: chunk for chunk in chunks}
+    store = InMemoryVectorStore(embedding_dim=provider.embedding_dim)
+    for record in embedding_records:
+        chunk = chunks_by_id[record.chunk_id]
+        store.add(record, vector_eval_embedding(provider, vector_eval_chunk_text(chunk)))
+
+    by_question: dict[str, list[dict[str, Any]]] = {}
+    for question in questions:
+        query_vector = vector_eval_embedding(provider, question.user_question)
+        retrieved = store.search(query_vector, top_k=limit)
+        rows: list[dict[str, Any]] = []
+        for rank, result in enumerate(retrieved, start=1):
+            row = result.to_json()
+            chunk = chunks_by_id.get(result.record.chunk_id)
+            row["rank"] = rank
+            row["title"] = chunk.title if chunk else ""
+            row["text"] = chunk.text if chunk else ""
+            rows.append(row)
+        by_question[question.question_id] = rows
+    return by_question
+
+
+def run_retriever(
+    retriever: str,
+    questions: list[EvalQuestion],
+    registry_path: Path,
+    chunks_path: Path,
+    limit: int,
+) -> tuple[str, dict[str, list[dict[str, Any]]]]:
+    if retriever == "mvp003":
+        return "mvp003-deterministic-metadata", run_mvp003_retrieval(questions, registry_path, chunks_path, limit)
+    if retriever == "vector":
+        return MVP005_VECTOR_EVAL_MODE, run_vector_retrieval(questions, registry_path, chunks_path, limit)
+    return "current-tfidf-baseline", run_baseline_retrieval(questions, registry_path, chunks_path, limit)
+
+
 def contains_section(result: dict[str, Any], expected_section: str) -> bool | None:
     needle = expected_section.strip()
     if not needle:
@@ -332,7 +455,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--registry", type=Path, default=REPO_ROOT / "data" / "source_registry.csv")
     parser.add_argument("--chunks", type=Path, default=REPO_ROOT / "data" / "chunks.jsonl")
     parser.add_argument("--results-jsonl", type=Path, default=None, help="Optional external retrieval results to score.")
-    parser.add_argument("--retriever", choices=("baseline", "mvp003"), default="baseline")
+    parser.add_argument("--retriever", choices=("baseline", "mvp003", "vector"), default="baseline")
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
     return parser
@@ -348,12 +471,8 @@ def main(argv: list[str] | None = None) -> int:
         if args.results_jsonl:
             mode = "external-results"
             results = load_simulated_results(args.results_jsonl)
-        elif args.retriever == "mvp003":
-            mode = "mvp003-deterministic-metadata"
-            results = run_mvp003_retrieval(questions, args.registry, args.chunks, args.limit)
         else:
-            mode = "current-tfidf-baseline"
-            results = run_baseline_retrieval(questions, args.registry, args.chunks, args.limit)
+            mode, results = run_retriever(args.retriever, questions, args.registry, args.chunks, args.limit)
         summary = score_results(questions, results)
     except EvalError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
