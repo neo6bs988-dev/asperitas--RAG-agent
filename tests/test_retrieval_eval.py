@@ -103,13 +103,16 @@ def make_chunk(source: SourceRecord) -> Chunk:
 def test_load_questions_validates_required_schema(tmp_path):
     module = load_eval_module()
     path = tmp_path / "questions.jsonl"
-    write_jsonl(path, [valid_question()])
+    row = valid_question()
+    row["expected_path_context"] = "P1_RND_PROJECTS"
+    write_jsonl(path, [row])
 
     questions = module.load_questions(path)
 
     assert len(questions) == 1
     assert questions[0].question_id == "Q1"
     assert questions[0].expected_source_file == "AGENTS.md"
+    assert questions[0].expected_path_context == "P1_RND_PROJECTS"
 
 
 def test_load_questions_rejects_invalid_category(tmp_path):
@@ -177,7 +180,78 @@ def test_score_results_counts_top3_top5_priority_and_section():
     assert summary["source_file_match_at_5"] == 1.0
     assert summary["source_priority_match"] == 1.0
     assert summary["section_match"] == 1.0
+    assert summary["path_context_match"] is None
     assert summary["overall_pass_rate"] == 1.0
+
+
+def test_score_results_counts_path_context_separately_from_section():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="Where is the R&D projects copy stored?",
+        expected_source_file="01_RAW_SOURCES/P1_RND_PROJECTS/2026 PTMC project.pptx",
+        expected_source_priority="P1",
+        expected_chunk_or_section="",
+        expected_path_context="P1_RND_PROJECTS",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="The folder path is the expected provenance signal.",
+        difficulty="medium",
+        category="operations",
+    )
+    results = {
+        "Q1": [
+            {
+                "source_file": "01_RAW_SOURCES/P1_RND_PROJECTS/2026 PTMC project.pptx",
+                "source_priority": "P1",
+                "evidence_label": "Document-Supported Fact",
+                "section": "",
+                "heading_context": "",
+                "title": "2026 PTMC project",
+                "text": "Project body text without the folder token.",
+            }
+        ]
+    }
+
+    summary = module.score_results([question], results)
+
+    assert summary["source_file_match_at_5"] == 1.0
+    assert summary["section_match"] is None
+    assert summary["path_context_match"] == 1.0
+    assert summary["overall_pass_rate"] == 1.0
+
+
+def test_path_context_does_not_satisfy_section_expectation():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="Where is the R&D projects copy stored?",
+        expected_source_file="01_RAW_SOURCES/P1_RND_PROJECTS/2026 PTMC project.pptx",
+        expected_source_priority="P1",
+        expected_chunk_or_section="P1_RND_PROJECTS",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="Path context must not masquerade as section metadata.",
+        difficulty="medium",
+        category="operations",
+    )
+    results = {
+        "Q1": [
+            {
+                "source_file": "01_RAW_SOURCES/P1_RND_PROJECTS/2026 PTMC project.pptx",
+                "source_priority": "P1",
+                "evidence_label": "Document-Supported Fact",
+                "section": "",
+                "heading_context": "",
+                "title": "2026 PTMC project",
+                "text": "Project body text without the folder token.",
+            }
+        ]
+    }
+
+    summary = module.score_results([question], results)
+
+    assert summary["section_match"] == 0.0
+    assert summary["path_context_match"] is None
+    assert summary["overall_pass_rate"] == 0.0
 
 
 def test_section_match_uses_normalized_section_metadata():

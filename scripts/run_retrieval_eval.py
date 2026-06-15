@@ -88,6 +88,7 @@ class EvalQuestion:
     rationale: str
     difficulty: str
     category: str
+    expected_path_context: str = ""
 
 
 def normalize_path(value: str) -> str:
@@ -141,6 +142,7 @@ def load_questions(path: Path) -> list[EvalQuestion]:
                 rationale=str(row["rationale"]),
                 difficulty=str(row["difficulty"]),
                 category=str(row["category"]),
+                expected_path_context=str(row.get("expected_path_context") or ""),
             )
         )
     return questions
@@ -595,17 +597,33 @@ def contains_section(result: dict[str, Any], expected_section: str) -> bool | No
     return bool(normalized_needle and normalized_needle in haystack)
 
 
+def contains_path_context(result: dict[str, Any], expected_path_context: str) -> bool | None:
+    needle = expected_path_context.strip()
+    if not needle:
+        return None
+    normalized_source_file = normalize_path(str(result.get("source_file", "")))
+    normalized_needle = normalize_path(needle)
+    return bool(normalized_needle and normalized_needle in normalized_source_file)
+
+
 def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dict[str, Any]:
     expected_file = normalize_path(question.expected_source_file)
     top3 = results[:3]
     top5 = results[:5]
     matched = next((result for result in top5 if normalize_path(str(result.get("source_file", ""))) == expected_file), None)
     section_match = contains_section(matched, question.expected_chunk_or_section) if matched else (None if not question.expected_chunk_or_section else False)
+    path_context_match = contains_path_context(matched, question.expected_path_context) if matched else (None if not question.expected_path_context else False)
     source_file_match_top3 = any(normalize_path(str(result.get("source_file", ""))) == expected_file for result in top3)
     source_file_match_top5 = matched is not None
     source_priority_match = bool(matched and str(matched.get("source_priority")) == question.expected_source_priority)
     evidence_label_match = bool(matched and str(matched.get("evidence_label", question.expected_evidence_label)) == question.expected_evidence_label)
-    overall_pass = bool(source_file_match_top5 and source_priority_match and evidence_label_match and section_match is not False)
+    overall_pass = bool(
+        source_file_match_top5
+        and source_priority_match
+        and evidence_label_match
+        and section_match is not False
+        and path_context_match is not False
+    )
     return {
         "question_id": question.question_id,
         "source_file_match_top3": source_file_match_top3,
@@ -613,6 +631,7 @@ def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dic
         "source_priority_match": source_priority_match,
         "evidence_label_match": evidence_label_match,
         "section_match": section_match,
+        "path_context_match": path_context_match,
         "overall_pass": overall_pass,
         "top_result_source_file": str(results[0].get("source_file", "")) if results else "",
     }
@@ -631,6 +650,10 @@ def score_results(questions: list[EvalQuestion], results_by_question: dict[str, 
     section_rate = None
     if section_rows:
         section_rate = sum(1 for row in section_rows if row["section_match"]) / len(section_rows)
+    path_context_rows = [row for row in per_question if row["path_context_match"] is not None]
+    path_context_rate = None
+    if path_context_rows:
+        path_context_rate = sum(1 for row in path_context_rows if row["path_context_match"]) / len(path_context_rows)
     return {
         "total_questions": total,
         "source_file_match_at_3": rate("source_file_match_top3"),
@@ -638,6 +661,7 @@ def score_results(questions: list[EvalQuestion], results_by_question: dict[str, 
         "source_priority_match": rate("source_priority_match"),
         "evidence_label_match": rate("evidence_label_match"),
         "section_match": section_rate,
+        "path_context_match": path_context_rate,
         "overall_pass_rate": rate("overall_pass"),
         "per_question": per_question,
     }
@@ -658,6 +682,8 @@ def print_summary(summary: dict[str, Any], mode: str) -> None:
     print(f"Source priority match: {format_percent(summary['source_priority_match'])}")
     print(f"Evidence label match: {format_percent(summary['evidence_label_match'])}")
     print(f"Section match: {format_percent(summary['section_match'])}")
+    if summary["path_context_match"] is not None:
+        print(f"Path context match: {format_percent(summary['path_context_match'])}")
     print(f"Overall pass rate: {format_percent(summary['overall_pass_rate'])}")
     failed = [row for row in summary["per_question"] if not row["overall_pass"]]
     if failed:
