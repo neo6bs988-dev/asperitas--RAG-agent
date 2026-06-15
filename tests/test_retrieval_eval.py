@@ -285,32 +285,46 @@ def test_run_retriever_keeps_existing_mode_paths(monkeypatch):
     assert vector_results == {"vector": []}
 
 
-def test_hybrid_top_results_keep_mvp003_top_k_candidates():
+def test_hybrid_top_results_keep_mvp003_top_k_sources_with_section_substitution():
     module = load_eval_module()
     ranked = [
         {
             "chunk_id": "vector-only",
+            "source_id": "VECTOR",
             "score": 0.95,
             "vector_rank": 1,
             "score_components": {"mvp003_score": 0.0, "vector_score": 1.0, "metadata_score": 1.0},
         },
         {
             "chunk_id": "mvp003-first",
+            "source_id": "A",
             "score": 0.8,
             "mvp003_rank": 1,
-            "score_components": {"mvp003_score": 1.0, "vector_score": 0.2, "metadata_score": 1.0},
+            "mvp003_score_raw": 100.0,
+            "score_components": {"mvp003_score": 1.0, "vector_score": 0.2, "section_score": 0.5, "metadata_score": 1.0},
+        },
+        {
+            "chunk_id": "section-first",
+            "source_id": "A",
+            "score": 0.78,
+            "section_candidate_rank": 30,
+            "mvp003_score_raw": 95.0,
+            "score_components": {"mvp003_score": 0.95, "vector_score": 0.0, "section_score": 1.0, "metadata_score": 1.0},
         },
         {
             "chunk_id": "mvp003-second",
+            "source_id": "B",
             "score": 0.2,
             "mvp003_rank": 2,
-            "score_components": {"mvp003_score": 0.2, "vector_score": 0.0, "metadata_score": 1.0},
+            "mvp003_score_raw": 20.0,
+            "score_components": {"mvp003_score": 0.2, "vector_score": 0.0, "section_score": 0.5, "metadata_score": 1.0},
         },
     ]
 
     selected = module.select_hybrid_top_results(ranked, limit=2)
 
-    assert {row["chunk_id"] for row in selected} == {"mvp003-first", "mvp003-second"}
+    assert {row["source_id"] for row in selected} == {"A", "B"}
+    assert {row["chunk_id"] for row in selected} == {"section-first", "mvp003-second"}
 
 
 def test_vector_retrieval_preserves_embedding_record_metadata(tmp_path):
@@ -399,3 +413,60 @@ def test_hybrid_retrieval_preserves_metadata_and_score_components(tmp_path):
     assert row["score_components"]["vector_score"] > 0.0
     assert row["score_components"]["section_score"] == 1.0
     assert row["score_components"]["metadata_score"] == 1.0
+
+
+def test_hybrid_retrieval_can_substitute_same_source_section_candidate(tmp_path):
+    module = load_eval_module()
+    source = make_source()
+    base_chunk = make_chunk(source)
+    wrong_section = Chunk(
+        **{
+            **base_chunk.to_json(),
+            "chunk_id": f"{source.source_id}::VECTOR::chunk-wrong",
+            "char_start": 0,
+            "char_end": len(base_chunk.text),
+            "section": "General Governance",
+            "section_heading": "General Governance",
+            "section_path": ["General Governance"],
+            "heading_context": "General Governance",
+            "checksum": "c" * 64,
+        }
+    )
+    right_section = Chunk(
+        **{
+            **base_chunk.to_json(),
+            "chunk_id": f"{source.source_id}::VECTOR::chunk-right",
+            "char_start": 100,
+            "char_end": 100 + len(base_chunk.text),
+            "section": "Source Priority Policy",
+            "section_heading": "Source Priority Policy",
+            "section_path": ["Governance", "Source Priority Policy"],
+            "heading_context": "Governance > Source Priority Policy",
+            "checksum": "d" * 64,
+        }
+    )
+    registry_path = tmp_path / "source_registry.csv"
+    chunks_path = tmp_path / "chunks.jsonl"
+    write_registry([source], path=registry_path)
+    write_chunks([wrong_section, right_section], path=chunks_path)
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What does the source priority policy say?",
+        expected_source_file=source.path,
+        expected_source_priority=source.source_priority,
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label=base_chunk.evidence_label,
+        rationale="The fixture chunk contains the expected policy section.",
+        difficulty="easy",
+        category="source_governance",
+    )
+
+    mvp003_results = module.run_mvp003_retrieval([question], registry_path, chunks_path, limit=1)
+    hybrid_results = module.run_hybrid_retrieval([question], registry_path, chunks_path, limit=1)
+
+    assert mvp003_results["Q1"][0]["chunk_id"] == wrong_section.chunk_id
+    assert hybrid_results["Q1"][0]["chunk_id"] == right_section.chunk_id
+    assert hybrid_results["Q1"][0]["source_id"] == source.source_id
+    assert hybrid_results["Q1"][0]["source_priority"] == source.source_priority
+    assert hybrid_results["Q1"][0]["evidence_label"] == base_chunk.evidence_label
+    assert hybrid_results["Q1"][0]["score_components"]["section_score"] == 1.0

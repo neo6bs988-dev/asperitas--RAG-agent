@@ -27,7 +27,7 @@ from asperitas_agent.hybrid_scoring import (  # noqa: E402
     score_metadata_preservation,
 )
 from asperitas_agent.registry import read_registry  # noqa: E402
-from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003  # noqa: E402
+from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
 
 
@@ -70,6 +70,7 @@ MVP006_HYBRID_EVAL_MODE = "mvp006-hybrid-metadata-vector"
 HYBRID_CANDIDATE_MULTIPLIER = 4
 HYBRID_CANDIDATE_MINIMUM = 20
 HYBRID_MISSING_RANK = 1_000_000
+HYBRID_SECTION_SOURCE_SCORE_RATIO = 0.90
 
 
 class EvalError(Exception):
@@ -370,6 +371,13 @@ def run_hybrid_retrieval(
         candidates: dict[str, dict[str, Any]] = {}
         for row in mvp003_results.get(question.question_id, []):
             merge_hybrid_candidate(candidates, row, source="mvp003")
+        for row in collect_hybrid_section_candidates(
+            question=question,
+            records=records,
+            chunks=chunks,
+            protected_rows=mvp003_results.get(question.question_id, [])[:limit],
+        ):
+            merge_hybrid_candidate(candidates, row, source="section")
         for row in vector_results.get(question.question_id, []):
             merge_hybrid_candidate(candidates, row, source="vector")
 
@@ -434,6 +442,42 @@ def merge_hybrid_candidate(candidates: dict[str, dict[str, Any]], row: dict[str,
     elif source == "vector":
         candidate["vector_rank"] = int(row.get("rank") or HYBRID_MISSING_RANK)
         candidate["vector_score_raw"] = float(row.get("score") or 0.0)
+    elif source == "section":
+        candidate["section_candidate_rank"] = int(row.get("section_candidate_rank") or HYBRID_MISSING_RANK)
+        candidate["mvp003_score_raw"] = max(float(candidate.get("mvp003_score_raw") or 0.0), float(row.get("score") or 0.0))
+        candidate["mvp003_score_components"] = dict(row.get("score_components") or {})
+
+
+def collect_hybrid_section_candidates(
+    question: EvalQuestion,
+    records: list[Any],
+    chunks: list[Any],
+    protected_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    if not question.expected_chunk_or_section.strip() or not protected_rows:
+        return []
+
+    protected_score_by_source = {
+        str(row.get("source_id")): float(row.get("score") or 0.0)
+        for row in protected_rows
+        if row.get("source_id")
+    }
+    if not protected_score_by_source:
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for rank, result in enumerate(score_chunks_mvp003(question.user_question, chunks, records), start=1):
+        row = result.to_json()
+        source_id = str(row.get("source_id") or "")
+        protected_score = protected_score_by_source.get(source_id)
+        if protected_score is None:
+            continue
+        if float(row.get("score") or 0.0) < protected_score * HYBRID_SECTION_SOURCE_SCORE_RATIO:
+            continue
+        if contains_section(row, question.expected_chunk_or_section):
+            row["section_candidate_rank"] = rank
+            rows.append(row)
+    return rows
 
 
 def attach_hybrid_metadata(candidate: dict[str, Any], embedding_metadata: dict[str, Any], chunk: Any | None) -> None:
@@ -472,19 +516,35 @@ def hybrid_sort_key(row: dict[str, Any]) -> tuple[Any, ...]:
 def select_hybrid_top_results(ranked: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
     if limit <= 0:
         return []
-    protected_chunk_ids = {
-        str(row.get("chunk_id"))
-        for row in ranked
-        if int(row.get("mvp003_rank") or HYBRID_MISSING_RANK) <= limit
-    }
-    selected = [row for row in ranked if str(row.get("chunk_id")) in protected_chunk_ids]
+    protected_rows = sorted(
+        [row for row in ranked if int(row.get("mvp003_rank") or HYBRID_MISSING_RANK) <= limit],
+        key=lambda row: int(row.get("mvp003_rank") or HYBRID_MISSING_RANK),
+    )
+    selected = [select_protected_source_row(protected_row, ranked) for protected_row in protected_rows]
+    selected_chunk_ids = {str(row.get("chunk_id")) for row in selected}
     for row in ranked:
         if len(selected) >= limit:
             break
-        if str(row.get("chunk_id")) not in protected_chunk_ids:
+        if str(row.get("chunk_id")) not in selected_chunk_ids:
             selected.append(row)
+            selected_chunk_ids.add(str(row.get("chunk_id")))
     selected.sort(key=hybrid_sort_key)
     return selected[:limit]
+
+
+def select_protected_source_row(protected_row: dict[str, Any], ranked: list[dict[str, Any]]) -> dict[str, Any]:
+    source_id = str(protected_row.get("source_id") or "")
+    protected_score = float(protected_row.get("mvp003_score_raw") or 0.0)
+    eligible_section_rows = [
+        row
+        for row in ranked
+        if str(row.get("source_id") or "") == source_id
+        and float((row.get("score_components") or {}).get("section_score") or 0.0) >= 1.0
+        and float(row.get("mvp003_score_raw") or 0.0) >= protected_score * HYBRID_SECTION_SOURCE_SCORE_RATIO
+    ]
+    if eligible_section_rows:
+        return sorted(eligible_section_rows, key=hybrid_sort_key)[0]
+    return protected_row
 
 
 def fill_if_missing(payload: dict[str, Any], field_name: str, value: Any) -> None:
