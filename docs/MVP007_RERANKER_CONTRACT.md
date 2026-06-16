@@ -94,16 +94,32 @@ Phase 1 does not add a CLI eval flag and does not run reranking inside `scripts/
 
 ## Eval Plan For Issue #13
 
-Issue #13 should add explicit eval plumbing, for example:
+Issue #13 adds explicit eval plumbing through:
 
 ```bash
-python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
-python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
 python scripts/run_retrieval_eval.py --retriever mvp003 --reranker deterministic-test --limit 5
 python scripts/run_retrieval_eval.py --retriever hybrid --reranker deterministic-test --limit 5
 ```
 
-Acceptance criteria for a real reranker eval mode:
+Default behavior remains unchanged:
+
+```bash
+python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
+python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
+```
+
+`--reranker deterministic-test` is an explicit offline eval mode. It reports:
+
+- base retriever mode;
+- reranker name;
+- top-1 ordering changes;
+- top-3 ordering changes;
+- top-5 ordering changes;
+- source file match @3 delta;
+- source file match @5 delta;
+- overall pass-rate delta.
+
+Acceptance criteria for reranker eval mode:
 
 - default eval output is unchanged when no reranker is enabled;
 - reranked mode is explicit in command output;
@@ -114,6 +130,21 @@ Acceptance criteria for a real reranker eval mode:
 - path-context match does not regress;
 - required source-grounding metadata survives reranking;
 - `mvp003` remains the protected reference baseline.
+
+## Regression Rules
+
+Treat an explicit reranker run as regressed if:
+
+- source file match @5 decreases versus the same base retriever without reranking;
+- source priority match decreases;
+- evidence label match decreases;
+- section match decreases without a documented acceptance decision;
+- path-context match decreases;
+- any returned row drops or mutates required source-grounding metadata;
+- original retrieval `rank`, `score`, or `score_components` are overwritten instead of preserved;
+- default no-reranker eval output changes.
+
+The deterministic test reranker may be useful for plumbing validation even when it does not improve metrics. Do not claim retrieval improvement without measured deltas from the eval output.
 
 ## Rollback Path
 
@@ -126,5 +157,4 @@ If reranking regresses source-grounding metrics or drops metadata:
 
 ## Next Task
 
-MVP-007 Phase 2 / Issue #13: add explicit reranker eval plumbing and compare no-rerank versus reranked outputs for `mvp003` and `hybrid`.
-
+MVP-007 Phase 3: decide whether to keep the deterministic test reranker as plumbing-only, tune deterministic reranking rules, or defer production reranking until a stronger reranker strategy is defined.

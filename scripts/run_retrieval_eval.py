@@ -27,6 +27,7 @@ from asperitas_agent.hybrid_scoring import (  # noqa: E402
     score_metadata_preservation,
 )
 from asperitas_agent.registry import read_registry  # noqa: E402
+from asperitas_agent.reranking import DeterministicTestReranker, Reranker, rerank_candidates  # noqa: E402
 from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
 
@@ -67,6 +68,8 @@ EXPECTED_REQUIRED = {
 MVP005_VECTOR_EVAL_MODE = "mvp005-offline-lexical-semantic-vector"
 MVP005_VECTOR_EVAL_EMBEDDING_DIM = 1024
 MVP006_HYBRID_EVAL_MODE = "mvp006-hybrid-metadata-vector"
+RERANKER_NONE = "none"
+RERANKER_DETERMINISTIC_TEST = "deterministic-test"
 HYBRID_CANDIDATE_MULTIPLIER = 4
 HYBRID_CANDIDATE_MINIMUM = 20
 HYBRID_MISSING_RANK = 1_000_000
@@ -580,6 +583,90 @@ def run_retriever(
     return "current-tfidf-baseline", run_baseline_retrieval(questions, registry_path, chunks_path, limit)
 
 
+def build_reranker(reranker_name: str) -> Reranker | None:
+    if reranker_name == RERANKER_NONE:
+        return None
+    if reranker_name == RERANKER_DETERMINISTIC_TEST:
+        return DeterministicTestReranker()
+    raise EvalError(f"Unsupported reranker: {reranker_name}")
+
+
+def apply_reranker_to_results(
+    questions: list[EvalQuestion],
+    results_by_question: dict[str, list[dict[str, Any]]],
+    reranker: Reranker | None,
+    limit: int,
+) -> dict[str, list[dict[str, Any]]]:
+    if reranker is None:
+        return {question.question_id: [dict(row) for row in results_by_question.get(question.question_id, [])] for question in questions}
+    reranked: dict[str, list[dict[str, Any]]] = {}
+    for question in questions:
+        rows = results_by_question.get(question.question_id, [])
+        try:
+            reranked[question.question_id] = rerank_candidates(
+                query=question.user_question,
+                candidates=rows,
+                reranker=reranker,
+                top_k=limit,
+            )
+        except ValueError as exc:
+            raise EvalError(f"{question.question_id} reranker metadata preservation failed: {exc}") from exc
+    return reranked
+
+
+def compare_reranker_outputs(
+    questions: list[EvalQuestion],
+    base_results: dict[str, list[dict[str, Any]]],
+    reranked_results: dict[str, list[dict[str, Any]]],
+    base_summary: dict[str, Any],
+    reranked_summary: dict[str, Any],
+    base_mode: str,
+    reranker_name: str,
+) -> dict[str, Any]:
+    total = len(questions)
+    top1_changed = 0
+    top3_changed = 0
+    top5_changed = 0
+    changed_question_ids: list[str] = []
+    for question in questions:
+        base_rows = base_results.get(question.question_id, [])
+        reranked_rows = reranked_results.get(question.question_id, [])
+        if top_k_signature(base_rows, 1) != top_k_signature(reranked_rows, 1):
+            top1_changed += 1
+        if top_k_signature(base_rows, 3) != top_k_signature(reranked_rows, 3):
+            top3_changed += 1
+            changed_question_ids.append(question.question_id)
+        if top_k_signature(base_rows, 5) != top_k_signature(reranked_rows, 5):
+            top5_changed += 1
+
+    return {
+        "base_mode": base_mode,
+        "reranker": reranker_name,
+        "total_questions": total,
+        "top1_changed_count": top1_changed,
+        "top3_changed_count": top3_changed,
+        "top5_changed_count": top5_changed,
+        "top3_changed_question_ids": changed_question_ids,
+        "source_file_match_at_3_before": base_summary["source_file_match_at_3"],
+        "source_file_match_at_3_after": reranked_summary["source_file_match_at_3"],
+        "source_file_match_at_3_delta": reranked_summary["source_file_match_at_3"] - base_summary["source_file_match_at_3"],
+        "source_file_match_at_5_before": base_summary["source_file_match_at_5"],
+        "source_file_match_at_5_after": reranked_summary["source_file_match_at_5"],
+        "source_file_match_at_5_delta": reranked_summary["source_file_match_at_5"] - base_summary["source_file_match_at_5"],
+        "overall_pass_rate_before": base_summary["overall_pass_rate"],
+        "overall_pass_rate_after": reranked_summary["overall_pass_rate"],
+        "overall_pass_rate_delta": reranked_summary["overall_pass_rate"] - base_summary["overall_pass_rate"],
+    }
+
+
+def top_k_signature(results: list[dict[str, Any]], top_k: int) -> tuple[str, ...]:
+    return tuple(result_identity(row) for row in results[:top_k])
+
+
+def result_identity(row: dict[str, Any]) -> str:
+    return str(row.get("chunk_id") or row.get("source_file") or row.get("source_id") or "")
+
+
 def contains_section(result: dict[str, Any], expected_section: str) -> bool | None:
     needle = expected_section.strip()
     if not needle:
@@ -673,6 +760,10 @@ def format_percent(value: float | None) -> str:
     return f"{value * 100:.1f}%"
 
 
+def format_percentage_point_delta(value: float) -> str:
+    return f"{value * 100:+.1f} percentage points"
+
+
 def print_summary(summary: dict[str, Any], mode: str) -> None:
     print("MVP-002.5 Retrieval Evaluation")
     print(f"Mode: {mode}")
@@ -685,6 +776,16 @@ def print_summary(summary: dict[str, Any], mode: str) -> None:
     if summary["path_context_match"] is not None:
         print(f"Path context match: {format_percent(summary['path_context_match'])}")
     print(f"Overall pass rate: {format_percent(summary['overall_pass_rate'])}")
+    comparison = summary.get("reranker_comparison")
+    if comparison:
+        print(f"Reranker: {comparison['reranker']}")
+        print(f"Base mode: {comparison['base_mode']}")
+        print(f"Top-1 ordering changed: {comparison['top1_changed_count']}/{comparison['total_questions']}")
+        print(f"Top-3 ordering changed: {comparison['top3_changed_count']}/{comparison['total_questions']}")
+        print(f"Top-5 ordering changed: {comparison['top5_changed_count']}/{comparison['total_questions']}")
+        print(f"Source file match @3 delta: {format_percentage_point_delta(comparison['source_file_match_at_3_delta'])}")
+        print(f"Source file match @5 delta: {format_percentage_point_delta(comparison['source_file_match_at_5_delta'])}")
+        print(f"Overall pass rate delta: {format_percentage_point_delta(comparison['overall_pass_rate_delta'])}")
     failed = [row for row in summary["per_question"] if not row["overall_pass"]]
     if failed:
         print("Failed question_ids:")
@@ -700,6 +801,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--chunks", type=Path, default=REPO_ROOT / "data" / "chunks.jsonl")
     parser.add_argument("--results-jsonl", type=Path, default=None, help="Optional external retrieval results to score.")
     parser.add_argument("--retriever", choices=("baseline", "mvp003", "vector", "hybrid"), default="baseline")
+    parser.add_argument("--reranker", choices=(RERANKER_NONE, RERANKER_DETERMINISTIC_TEST), default=RERANKER_NONE)
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
     return parser
@@ -717,7 +819,25 @@ def main(argv: list[str] | None = None) -> int:
             results = load_simulated_results(args.results_jsonl)
         else:
             mode, results = run_retriever(args.retriever, questions, args.registry, args.chunks, args.limit)
-        summary = score_results(questions, results)
+        base_summary = score_results(questions, results)
+        reranker = build_reranker(args.reranker)
+        if reranker is None:
+            summary = base_summary
+        else:
+            base_mode = mode
+            base_results = results
+            results = apply_reranker_to_results(questions, base_results, reranker, args.limit)
+            mode = f"{mode}+reranker:{args.reranker}"
+            summary = score_results(questions, results)
+            summary["reranker_comparison"] = compare_reranker_outputs(
+                questions=questions,
+                base_results=base_results,
+                reranked_results=results,
+                base_summary=base_summary,
+                reranked_summary=summary,
+                base_mode=base_mode,
+                reranker_name=args.reranker,
+            )
     except EvalError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2
