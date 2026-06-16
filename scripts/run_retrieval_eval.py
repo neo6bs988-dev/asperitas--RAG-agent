@@ -365,7 +365,12 @@ def run_hybrid_retrieval(
     if candidate_limit <= 0:
         return {question.question_id: [] for question in questions}
 
-    mvp003_results = run_mvp003_retrieval(questions, registry_path, chunks_path, candidate_limit)
+    mvp003_scored_results: dict[str, list[Any]] = {}
+    mvp003_results: dict[str, list[dict[str, Any]]] = {}
+    for question in questions:
+        scored_results = score_chunks_mvp003(question.user_question, chunks, records)
+        mvp003_scored_results[question.question_id] = scored_results
+        mvp003_results[question.question_id] = mvp003_rows_from_scored_results(scored_results, candidate_limit)
     vector_results = run_vector_retrieval(questions, registry_path, chunks_path, candidate_limit)
     chunks_by_id = {chunk.chunk_id: chunk for chunk in chunks}
     provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=MVP005_VECTOR_EVAL_EMBEDDING_DIM)
@@ -388,6 +393,7 @@ def run_hybrid_retrieval(
             records=records,
             chunks=chunks,
             protected_rows=mvp003_results.get(question.question_id, [])[:limit],
+            scored_results=mvp003_scored_results.get(question.question_id, []),
         ):
             merge_hybrid_candidate(candidates, row, source="section")
         for row in vector_results.get(question.question_id, []):
@@ -437,6 +443,38 @@ def run_hybrid_retrieval(
     return by_question
 
 
+def mvp003_rows_from_scored_results(scored_results: list[Any], limit: int) -> list[dict[str, Any]]:
+    best_by_source: dict[str, Any] = {}
+    for result in scored_results:
+        chunk = result.chunk
+        current = best_by_source.get(chunk.source_id)
+        if current is None or (result.score, -chunk.char_start, chunk.chunk_id) > (
+            current.score,
+            -current.chunk.char_start,
+            current.chunk.chunk_id,
+        ):
+            best_by_source[chunk.source_id] = result
+
+    ranked = sorted(best_by_source.values(), key=mvp003_result_sort_key, reverse=True)
+    rows: list[dict[str, Any]] = []
+    for rank, result in enumerate(ranked[:limit], start=1):
+        row = result.to_json()
+        row["rank"] = rank
+        rows.append(row)
+    return rows
+
+
+def mvp003_result_sort_key(item: Any) -> tuple[float, float, float, float, str, str]:
+    return (
+        item.score,
+        item.score_components.get("exact_filename_phrase", 0.0),
+        item.score_components.get("alias_phrase", 0.0),
+        item.score_components.get("filename_match", 0.0),
+        item.chunk.source_priority,
+        item.source_file,
+    )
+
+
 def merge_hybrid_candidate(candidates: dict[str, dict[str, Any]], row: dict[str, Any], source: str) -> None:
     chunk_id = str(row.get("chunk_id") or "")
     if not chunk_id:
@@ -465,6 +503,7 @@ def collect_hybrid_section_candidates(
     records: list[Any],
     chunks: list[Any],
     protected_rows: list[dict[str, Any]],
+    scored_results: list[Any] | None = None,
 ) -> list[dict[str, Any]]:
     if not question.expected_chunk_or_section.strip() or not protected_rows:
         return []
@@ -478,7 +517,8 @@ def collect_hybrid_section_candidates(
         return []
 
     rows: list[dict[str, Any]] = []
-    for rank, result in enumerate(score_chunks_mvp003(question.user_question, chunks, records), start=1):
+    ranked_results = scored_results if scored_results is not None else score_chunks_mvp003(question.user_question, chunks, records)
+    for rank, result in enumerate(ranked_results, start=1):
         row = result.to_json()
         source_id = str(row.get("source_id") or "")
         protected_score = protected_score_by_source.get(source_id)

@@ -4,6 +4,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -572,6 +573,46 @@ def test_hybrid_retrieval_can_substitute_same_source_section_candidate(tmp_path)
     assert hybrid_results["Q1"][0]["score_components"]["section_score"] == 1.0
 
 
+def test_mvp003_rows_from_scored_results_preserves_source_dedup_sorting():
+    module = load_eval_module()
+    rows = module.mvp003_rows_from_scored_results(
+        [
+            fake_mvp003_result(eval_candidate("source-a-low", rank=1, section="General", text="source priority"), score=4.0),
+            fake_mvp003_result(eval_candidate("source-b", rank=2, section="General", text="source priority"), source_id="SOURCE-B", score=7.0),
+            fake_mvp003_result(eval_candidate("source-a-high", rank=3, section="General", text="source priority"), score=9.0),
+        ],
+        limit=2,
+    )
+
+    assert [row["chunk_id"] for row in rows] == ["source-a-high", "source-b"]
+    assert [row["rank"] for row in rows] == [1, 2]
+
+
+def test_collect_hybrid_section_candidates_can_reuse_precomputed_scores(monkeypatch):
+    module = load_eval_module()
+    question = eval_question()
+    row = eval_candidate("section-match", rank=2, section="Source Priority Policy", text="source priority policy")
+    row["score"] = 9.5
+    protected_row = eval_candidate("protected", rank=1, section="General", text="source priority")
+    protected_row["score"] = 10.0
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("section candidate collection should reuse precomputed scores")
+
+    monkeypatch.setattr(module, "score_chunks_mvp003", fail_if_called)
+
+    rows = module.collect_hybrid_section_candidates(
+        question=question,
+        records=[],
+        chunks=[],
+        protected_rows=[protected_row],
+        scored_results=[fake_mvp003_result(row, score=9.5)],
+    )
+
+    assert [candidate["chunk_id"] for candidate in rows] == ["section-match"]
+    assert rows[0]["section_candidate_rank"] == 1
+
+
 def test_disabled_reranker_eval_preserves_default_order():
     module = load_eval_module()
     question = eval_question()
@@ -754,3 +795,20 @@ def eval_candidate(chunk_id: str, rank: int, section: str, text: str) -> dict:
         "title": "AGENTS",
         "text": text,
     }
+
+
+def fake_mvp003_result(row: dict, source_id: str = "ASP-P0-EVAL", score: float = 1.0):
+    payload = {**row, "source_id": source_id, "score": score}
+    chunk = SimpleNamespace(
+        chunk_id=payload["chunk_id"],
+        source_id=payload["source_id"],
+        source_priority=payload["source_priority"],
+        char_start=payload.get("char_start", 0),
+    )
+    return SimpleNamespace(
+        chunk=chunk,
+        score=score,
+        source_file=payload["source_file"],
+        score_components=payload.get("score_components", {}),
+        to_json=lambda: dict(payload),
+    )
