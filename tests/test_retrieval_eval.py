@@ -574,17 +574,7 @@ def test_hybrid_retrieval_can_substitute_same_source_section_candidate(tmp_path)
 
 def test_disabled_reranker_eval_preserves_default_order():
     module = load_eval_module()
-    question = module.EvalQuestion(
-        question_id="Q1",
-        user_question="What is the source priority policy?",
-        expected_source_file="AGENTS.md",
-        expected_source_priority="P0",
-        expected_chunk_or_section="Source Priority Policy",
-        expected_evidence_label="Document-Supported Fact",
-        rationale="AGENTS.md defines the source policy.",
-        difficulty="easy",
-        category="source_governance",
-    )
+    question = eval_question()
     results = {
         "Q1": [
             eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
@@ -600,17 +590,7 @@ def test_disabled_reranker_eval_preserves_default_order():
 
 def test_deterministic_test_reranker_eval_reorders_rows_and_preserves_original_rank():
     module = load_eval_module()
-    question = module.EvalQuestion(
-        question_id="Q1",
-        user_question="What is the source priority policy?",
-        expected_source_file="AGENTS.md",
-        expected_source_priority="P0",
-        expected_chunk_or_section="Source Priority Policy",
-        expected_evidence_label="Document-Supported Fact",
-        rationale="AGENTS.md defines the source policy.",
-        difficulty="easy",
-        category="source_governance",
-    )
+    question = eval_question()
     results = {
         "Q1": [
             eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
@@ -636,17 +616,7 @@ def test_deterministic_test_reranker_eval_reorders_rows_and_preserves_original_r
 
 def test_deterministic_test_reranker_eval_preserves_metadata_fields():
     module = load_eval_module()
-    question = module.EvalQuestion(
-        question_id="Q1",
-        user_question="What is the source priority policy?",
-        expected_source_file="AGENTS.md",
-        expected_source_priority="P0",
-        expected_chunk_or_section="Source Priority Policy",
-        expected_evidence_label="Document-Supported Fact",
-        rationale="AGENTS.md defines the source policy.",
-        difficulty="easy",
-        category="source_governance",
-    )
+    question = eval_question()
     results = {
         "Q1": [
             eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
@@ -677,23 +647,16 @@ def test_deterministic_test_reranker_eval_preserves_metadata_fields():
             "embedding_dim",
             "embedding_version",
             "content_hash",
+            "rank",
+            "score",
+            "score_components",
         ):
             assert row[field_name] == original[field_name]
 
 
 def test_reranker_comparison_reports_top_k_ordering_changes():
     module = load_eval_module()
-    question = module.EvalQuestion(
-        question_id="Q1",
-        user_question="What is the source priority policy?",
-        expected_source_file="AGENTS.md",
-        expected_source_priority="P0",
-        expected_chunk_or_section="Source Priority Policy",
-        expected_evidence_label="Document-Supported Fact",
-        rationale="AGENTS.md defines the source policy.",
-        difficulty="easy",
-        category="source_governance",
-    )
+    question = eval_question()
     base_results = {
         "Q1": [
             eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
@@ -722,8 +685,52 @@ def test_reranker_comparison_reports_top_k_ordering_changes():
     assert comparison["top1_changed_count"] == 1
     assert comparison["top3_changed_count"] == 1
     assert comparison["top5_changed_count"] == 1
+    assert comparison["top3_changed_question_ids"] == ["Q1"]
+    assert comparison["top5_changed_question_ids"] == ["Q1"]
     assert comparison["source_file_match_at_3_delta"] == 0.0
     assert comparison["source_file_match_at_5_delta"] == 0.0
+    assert comparison["source_priority_match_delta"] == 0.0
+    assert comparison["evidence_label_match_delta"] == 0.0
+    assert comparison["section_match_delta"] == 1.0
+    assert comparison["path_context_match_delta"] is None
+
+
+def test_emit_line_flushes_output_stream():
+    module = load_eval_module()
+    stream = FlushTrackingStream()
+
+    module.emit_line("reranker summary", stream=stream)
+
+    assert stream.contents == "reranker summary\n"
+    assert stream.flush_count == 1
+
+
+class FlushTrackingStream:
+    def __init__(self) -> None:
+        self.contents = ""
+        self.flush_count = 0
+
+    def write(self, value: str) -> int:
+        self.contents += value
+        return len(value)
+
+    def flush(self) -> None:
+        self.flush_count += 1
+
+
+def eval_question():
+    module = load_eval_module()
+    return module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+    )
 
 
 def eval_candidate(chunk_id: str, rank: int, section: str, text: str) -> dict:

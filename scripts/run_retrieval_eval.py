@@ -32,10 +32,17 @@ from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
 
 
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-if hasattr(sys.stderr, "reconfigure"):
-    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+def configure_output_streams() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace", line_buffering=True, write_through=True)
+
+
+def emit_line(message: str = "", *, stream: Any | None = None) -> None:
+    print(message, file=stream or sys.stdout, flush=True)
+
+
+configure_output_streams()
 
 
 DIFFICULTIES = {"easy", "medium", "hard"}
@@ -599,13 +606,13 @@ def apply_reranker_to_results(
 ) -> dict[str, list[dict[str, Any]]]:
     if reranker is None:
         return {question.question_id: [dict(row) for row in results_by_question.get(question.question_id, [])] for question in questions}
+
     reranked: dict[str, list[dict[str, Any]]] = {}
     for question in questions:
-        rows = results_by_question.get(question.question_id, [])
         try:
             reranked[question.question_id] = rerank_candidates(
                 query=question.user_question,
-                candidates=rows,
+                candidates=results_by_question.get(question.question_id, []),
                 reranker=reranker,
                 top_k=limit,
             )
@@ -627,7 +634,8 @@ def compare_reranker_outputs(
     top1_changed = 0
     top3_changed = 0
     top5_changed = 0
-    changed_question_ids: list[str] = []
+    top3_changed_question_ids: list[str] = []
+    top5_changed_question_ids: list[str] = []
     for question in questions:
         base_rows = base_results.get(question.question_id, [])
         reranked_rows = reranked_results.get(question.question_id, [])
@@ -635,9 +643,10 @@ def compare_reranker_outputs(
             top1_changed += 1
         if top_k_signature(base_rows, 3) != top_k_signature(reranked_rows, 3):
             top3_changed += 1
-            changed_question_ids.append(question.question_id)
+            top3_changed_question_ids.append(question.question_id)
         if top_k_signature(base_rows, 5) != top_k_signature(reranked_rows, 5):
             top5_changed += 1
+            top5_changed_question_ids.append(question.question_id)
 
     return {
         "base_mode": base_mode,
@@ -646,17 +655,36 @@ def compare_reranker_outputs(
         "top1_changed_count": top1_changed,
         "top3_changed_count": top3_changed,
         "top5_changed_count": top5_changed,
-        "top3_changed_question_ids": changed_question_ids,
+        "top3_changed_question_ids": top3_changed_question_ids,
+        "top5_changed_question_ids": top5_changed_question_ids,
         "source_file_match_at_3_before": base_summary["source_file_match_at_3"],
         "source_file_match_at_3_after": reranked_summary["source_file_match_at_3"],
         "source_file_match_at_3_delta": reranked_summary["source_file_match_at_3"] - base_summary["source_file_match_at_3"],
         "source_file_match_at_5_before": base_summary["source_file_match_at_5"],
         "source_file_match_at_5_after": reranked_summary["source_file_match_at_5"],
         "source_file_match_at_5_delta": reranked_summary["source_file_match_at_5"] - base_summary["source_file_match_at_5"],
+        "source_priority_match_before": base_summary["source_priority_match"],
+        "source_priority_match_after": reranked_summary["source_priority_match"],
+        "source_priority_match_delta": reranked_summary["source_priority_match"] - base_summary["source_priority_match"],
+        "evidence_label_match_before": base_summary["evidence_label_match"],
+        "evidence_label_match_after": reranked_summary["evidence_label_match"],
+        "evidence_label_match_delta": reranked_summary["evidence_label_match"] - base_summary["evidence_label_match"],
+        "section_match_before": base_summary["section_match"],
+        "section_match_after": reranked_summary["section_match"],
+        "section_match_delta": nullable_delta(base_summary["section_match"], reranked_summary["section_match"]),
+        "path_context_match_before": base_summary["path_context_match"],
+        "path_context_match_after": reranked_summary["path_context_match"],
+        "path_context_match_delta": nullable_delta(base_summary["path_context_match"], reranked_summary["path_context_match"]),
         "overall_pass_rate_before": base_summary["overall_pass_rate"],
         "overall_pass_rate_after": reranked_summary["overall_pass_rate"],
         "overall_pass_rate_delta": reranked_summary["overall_pass_rate"] - base_summary["overall_pass_rate"],
     }
+
+
+def nullable_delta(before: float | None, after: float | None) -> float | None:
+    if before is None or after is None:
+        return None
+    return after - before
 
 
 def top_k_signature(results: list[dict[str, Any]], top_k: int) -> tuple[str, ...]:
@@ -760,37 +788,43 @@ def format_percent(value: float | None) -> str:
     return f"{value * 100:.1f}%"
 
 
-def format_percentage_point_delta(value: float) -> str:
+def format_percentage_point_delta(value: float | None) -> str:
+    if value is None:
+        return "n/a"
     return f"{value * 100:+.1f} percentage points"
 
 
 def print_summary(summary: dict[str, Any], mode: str) -> None:
-    print("MVP-002.5 Retrieval Evaluation")
-    print(f"Mode: {mode}")
-    print(f"Questions: {summary['total_questions']}")
-    print(f"Source file match @3: {format_percent(summary['source_file_match_at_3'])}")
-    print(f"Source file match @5: {format_percent(summary['source_file_match_at_5'])}")
-    print(f"Source priority match: {format_percent(summary['source_priority_match'])}")
-    print(f"Evidence label match: {format_percent(summary['evidence_label_match'])}")
-    print(f"Section match: {format_percent(summary['section_match'])}")
+    emit_line("MVP-002.5 Retrieval Evaluation")
+    emit_line(f"Mode: {mode}")
+    emit_line(f"Questions: {summary['total_questions']}")
+    emit_line(f"Source file match @3: {format_percent(summary['source_file_match_at_3'])}")
+    emit_line(f"Source file match @5: {format_percent(summary['source_file_match_at_5'])}")
+    emit_line(f"Source priority match: {format_percent(summary['source_priority_match'])}")
+    emit_line(f"Evidence label match: {format_percent(summary['evidence_label_match'])}")
+    emit_line(f"Section match: {format_percent(summary['section_match'])}")
     if summary["path_context_match"] is not None:
-        print(f"Path context match: {format_percent(summary['path_context_match'])}")
-    print(f"Overall pass rate: {format_percent(summary['overall_pass_rate'])}")
+        emit_line(f"Path context match: {format_percent(summary['path_context_match'])}")
+    emit_line(f"Overall pass rate: {format_percent(summary['overall_pass_rate'])}")
     comparison = summary.get("reranker_comparison")
     if comparison:
-        print(f"Reranker: {comparison['reranker']}")
-        print(f"Base mode: {comparison['base_mode']}")
-        print(f"Top-1 ordering changed: {comparison['top1_changed_count']}/{comparison['total_questions']}")
-        print(f"Top-3 ordering changed: {comparison['top3_changed_count']}/{comparison['total_questions']}")
-        print(f"Top-5 ordering changed: {comparison['top5_changed_count']}/{comparison['total_questions']}")
-        print(f"Source file match @3 delta: {format_percentage_point_delta(comparison['source_file_match_at_3_delta'])}")
-        print(f"Source file match @5 delta: {format_percentage_point_delta(comparison['source_file_match_at_5_delta'])}")
-        print(f"Overall pass rate delta: {format_percentage_point_delta(comparison['overall_pass_rate_delta'])}")
+        emit_line(f"Reranker: {comparison['reranker']}")
+        emit_line(f"Base mode: {comparison['base_mode']}")
+        emit_line(f"Top-1 ordering changed: {comparison['top1_changed_count']}/{comparison['total_questions']}")
+        emit_line(f"Top-3 ordering changed: {comparison['top3_changed_count']}/{comparison['total_questions']}")
+        emit_line(f"Top-5 ordering changed: {comparison['top5_changed_count']}/{comparison['total_questions']}")
+        emit_line(f"Source file match @3 delta: {format_percentage_point_delta(comparison['source_file_match_at_3_delta'])}")
+        emit_line(f"Source file match @5 delta: {format_percentage_point_delta(comparison['source_file_match_at_5_delta'])}")
+        emit_line(f"Source priority match delta: {format_percentage_point_delta(comparison['source_priority_match_delta'])}")
+        emit_line(f"Evidence label match delta: {format_percentage_point_delta(comparison['evidence_label_match_delta'])}")
+        emit_line(f"Section match delta: {format_percentage_point_delta(comparison['section_match_delta'])}")
+        emit_line(f"Path context match delta: {format_percentage_point_delta(comparison['path_context_match_delta'])}")
+        emit_line(f"Overall pass rate delta: {format_percentage_point_delta(comparison['overall_pass_rate_delta'])}")
     failed = [row for row in summary["per_question"] if not row["overall_pass"]]
     if failed:
-        print("Failed question_ids:")
+        emit_line("Failed question_ids:")
         for row in failed[:20]:
-            print(f"- {row['question_id']} top_result={row['top_result_source_file']}")
+            emit_line(f"- {row['question_id']} top_result={row['top_result_source_file']}")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -839,11 +873,11 @@ def main(argv: list[str] | None = None) -> int:
                 reranker_name=args.reranker,
             )
     except EvalError as exc:
-        print(f"ERROR: {exc}", file=sys.stderr)
+        emit_line(f"ERROR: {exc}", stream=sys.stderr)
         return 2
 
     if args.json:
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        emit_line(json.dumps(summary, ensure_ascii=False, indent=2))
     else:
         print_summary(summary, mode)
     return 0

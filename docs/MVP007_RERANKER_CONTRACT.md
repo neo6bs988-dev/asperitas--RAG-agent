@@ -92,7 +92,7 @@ Phase 1 adds:
 
 Phase 1 does not add a CLI eval flag and does not run reranking inside `scripts/run_retrieval_eval.py`. That prevents accidental metric changes before the eval contract is approved.
 
-## Eval Plan For Issue #13
+## Eval Plumbing For Issue #13
 
 Issue #13 adds explicit eval plumbing through:
 
@@ -117,6 +117,10 @@ python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
 - top-5 ordering changes;
 - source file match @3 delta;
 - source file match @5 delta;
+- source priority match delta;
+- evidence label match delta;
+- section match delta;
+- path-context match delta;
 - overall pass-rate delta.
 
 Acceptance criteria for reranker eval mode:
@@ -158,3 +162,4 @@ If reranking regresses source-grounding metrics or drops metadata:
 ## Next Task
 
 MVP-007 Phase 3: decide whether to keep the deterministic test reranker as plumbing-only, tune deterministic reranking rules, or defer production reranking until a stronger reranker strategy is defined.
+
