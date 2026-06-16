@@ -14,14 +14,28 @@ This document upgrades the Asperitas RAG workflow from static governance into ex
 
 ## Local Quality Pipeline
 
-Run this before committing source-code, retrieval, chunking, schema, or eval changes:
+Run this before every PR unless the task is explicitly docs/governance-only and the skipped checks are reported:
 
 ```bash
 python -m pytest
 python scripts/verify_artifacts.py
+```
+
+Run this before committing retrieval, chunking, metadata, embeddings, vector, hybrid, reranker, eval-fixture, or answer-generation changes:
+
+```bash
 python scripts/audit_chunk_sections.py --json
 python scripts/run_retrieval_eval.py --retriever baseline --limit 5
 python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
+python scripts/run_retrieval_eval.py --retriever vector --limit 5
+python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
+```
+
+Run this before committing reranker or reranker-eval changes:
+
+```bash
+python scripts/run_retrieval_eval.py --retriever mvp003 --reranker deterministic-test --limit 5
+python scripts/run_retrieval_eval.py --retriever hybrid --reranker deterministic-test --limit 5
 ```
 
 Docs-only changes do not need pytest or retrieval eval, but they must satisfy artifact verification by human review: correct path, required sections, no broken governance references, no false implementation claims.
@@ -34,9 +48,26 @@ The GitHub Actions workflow should run on:
 - pull request to `main`
 - manual dispatch
 
-The CI gate must install the project, run unit tests, run artifact verification, audit chunk sections, and run deterministic retrieval evals.
+The CI gate must install the project, run unit tests, run artifact verification, audit chunk sections, and run deterministic retrieval evals for `baseline` and `mvp003`.
+
+Current CI coverage:
+
+| Gate | CI status | Notes |
+|---|---|---|
+| `python -m pytest` | Required | Includes reranker, metadata-preservation, path-context, retrieval, answer, compliance, and static integrity tests. |
+| `python scripts/verify_artifacts.py` | Required | Verifies registry/chunk artifact consistency. |
+| `python scripts/audit_chunk_sections.py --json` | Required | Catches chunk section metadata drift. |
+| `baseline` retrieval eval | Required | Historical comparator. |
+| `mvp003` retrieval eval | Required | Protected deterministic reference retriever. |
+| `vector` retrieval eval | Local or release-only | Keep out of required CI until runtime and thresholds are stable. |
+| `hybrid` retrieval eval | Local or release-only | Accepted comparison mode, not default. Keep out of required CI until runtime and thresholds are stable. |
+| deterministic-test reranker eval | Local or release-only | Plumbing-only check; not quality-improvement evidence. |
+| answer faithfulness eval | Future release gate | Starts after MVP-008. |
+| compliance guardrail eval | Future release gate | Starts after MVP-009. |
 
 CI is not a substitute for human review. It only confirms that the executable gates still run.
+
+Branch protection should require the `Quality Gates` workflow before merge to `main`. This setting is configured in GitHub repository settings, not in source code, so it remains a repository-admin manual check.
 
 ## PR Review Pipeline
 
@@ -81,4 +112,4 @@ Escalate to human decision if:
 2. Add a threshold checker that fails CI on hard regressions.
 3. Add release notes under `09_LOGS/decision_logs/` for each MVP closure.
 4. Add branch protection so `main` requires the quality-gates workflow.
-5. Add separate workflows for heavy embeddings/vector DB checks when MVP-005 begins.
+5. Add a separate manual workflow for full vector, hybrid, reranker, answer-faithfulness, and compliance release gates when those commands are stable enough for repeatable automation.

@@ -13,19 +13,47 @@ Apply these gates before reporting a task as done. A gate is not a suggestion; i
 | Biological/compliance/public claim | Compliance/biosafety check + source-grounding check + GitHub review |
 | MVP release | All relevant gates + MVP release manager review |
 
+## Gate Execution Policy
+
+Use the lightest gate set that protects the changed surface.
+
+| Gate class | Runs where | Purpose |
+|---|---|---|
+| Always local before PR | Developer/Codex workstation | Catch broken tests and artifact drift before review. |
+| Required CI | GitHub Actions | Prevent unverified changes from silently entering `main`. |
+| Conditional local retrieval gates | Developer/Codex workstation | Measure retrieval, chunking, metadata, vector, hybrid, reranker, or answer-generation changes before PR. |
+| Optional expensive gates | Developer/Codex workstation or manual workflow dispatch | Run slow eval comparisons when risk justifies the cost. |
+| Release-only gates | Release branch or milestone closeout | Produce complete MVP evidence and release notes. |
+
 ## Canonical Commands
 
 Run from the repository root.
 
+Always local before PR:
+
 ```bash
 python -m pytest
 python scripts/verify_artifacts.py
+```
+
+Conditional retrieval/chunking/metadata/vector/hybrid gate:
+
+```bash
 python scripts/audit_chunk_sections.py --json
 python scripts/run_retrieval_eval.py --retriever baseline --limit 5
 python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
+python scripts/run_retrieval_eval.py --retriever vector --limit 5
+python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
 ```
 
-Use `docs/MVP004_BASELINE_METRICS.md` for the current retrieval baseline, regression rules, and report format.
+Conditional reranker eval gate:
+
+```bash
+python scripts/run_retrieval_eval.py --retriever mvp003 --reranker deterministic-test --limit 5
+python scripts/run_retrieval_eval.py --retriever hybrid --reranker deterministic-test --limit 5
+```
+
+Use the latest milestone report or decision log for current retrieval baselines, regression rules, and report format.
 
 ## Source Code Tests
 
@@ -67,6 +95,9 @@ Required when retrieval, chunking, scoring, metadata filters, embeddings, vector
 
 - Run `python scripts/run_retrieval_eval.py --retriever baseline --limit 5`.
 - Run `python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5`.
+- Run `python scripts/run_retrieval_eval.py --retriever vector --limit 5` when embeddings, vector retrieval, hybrid retrieval, reranking, or eval comparison policy is affected.
+- Run `python scripts/run_retrieval_eval.py --retriever hybrid --limit 5` when hybrid retrieval, reranking, eval comparison policy, section substitution, or answer-generation evidence selection is affected.
+- Run explicit reranker eval commands when reranking code, reranker eval plumbing, or reranker policy is affected.
 - Report dataset, settings, pass/fail count, metric deltas, and regressions.
 
 Pass condition: no unexplained regression in required retrieval metrics.
@@ -137,4 +168,26 @@ CI should run on:
 - pull requests to `main`;
 - manual workflow dispatch.
 
+Current required CI gates:
+
+- `python -m pytest`
+- `python scripts/verify_artifacts.py`
+- `python scripts/audit_chunk_sections.py --json`
+- `python scripts/run_retrieval_eval.py --retriever baseline --limit 5`
+- `python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5`
+
+CI intentionally does not run every vector, hybrid, reranker, answer-faithfulness, or compliance release gate on every PR. Those gates remain conditional local or release-only until they are fast, stable, and thresholded enough for required CI.
+
 CI passing does not automatically mean a PR is strategically correct. It means the minimum executable checks passed.
+
+## Merge Safety
+
+Repository branch protection should require the `Quality Gates` workflow before merging to `main`.
+
+Codex or a human reviewer must still confirm:
+
+- local conditional gates were run when the changed surface required them;
+- no source code changed for docs/governance-only work;
+- no retrieval mode was silently replaced or removed;
+- no secrets, credentials, endpoints, model binaries, generated indexes, or cloud resources were added;
+- risks and skipped checks are documented in the PR body.
