@@ -292,6 +292,32 @@ def test_parser_accepts_hybrid_retriever_mode():
     assert args.retriever == "hybrid"
 
 
+def test_parser_defaults_to_no_reranker():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args([])
+
+    assert args.reranker == module.RERANKER_NONE
+
+
+def test_parser_accepts_deterministic_test_reranker():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args(["--retriever", "mvp003", "--reranker", "deterministic-test"])
+
+    assert args.reranker == module.RERANKER_DETERMINISTIC_TEST
+
+
+def test_build_reranker_selects_explicit_modes():
+    module = load_eval_module()
+
+    assert module.build_reranker(module.RERANKER_NONE) is None
+    reranker = module.build_reranker(module.RERANKER_DETERMINISTIC_TEST)
+
+    assert reranker.reranker_name == "deterministic-test-reranker"
+    assert reranker.deterministic is True
+
+
 def test_run_retriever_selects_vector_mode(monkeypatch):
     module = load_eval_module()
     sentinel = {"Q1": []}
@@ -544,3 +570,180 @@ def test_hybrid_retrieval_can_substitute_same_source_section_candidate(tmp_path)
     assert hybrid_results["Q1"][0]["source_priority"] == source.source_priority
     assert hybrid_results["Q1"][0]["evidence_label"] == base_chunk.evidence_label
     assert hybrid_results["Q1"][0]["score_components"]["section_score"] == 1.0
+
+
+def test_disabled_reranker_eval_preserves_default_order():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+    )
+    results = {
+        "Q1": [
+            eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
+            eval_candidate("strong", rank=2, section="Source Priority Policy", text="source priority policy"),
+        ]
+    }
+
+    reranked = module.apply_reranker_to_results([question], results, reranker=None, limit=5)
+
+    assert [row["chunk_id"] for row in reranked["Q1"]] == ["weak", "strong"]
+    assert "reranker_metadata" not in reranked["Q1"][0]
+
+
+def test_deterministic_test_reranker_eval_reorders_rows_and_preserves_original_rank():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+    )
+    results = {
+        "Q1": [
+            eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
+            eval_candidate("strong", rank=2, section="Source Priority Policy", text="source priority policy evidence hierarchy"),
+        ]
+    }
+
+    reranked = module.apply_reranker_to_results(
+        [question],
+        results,
+        reranker=module.build_reranker(module.RERANKER_DETERMINISTIC_TEST),
+        limit=5,
+    )
+    row = reranked["Q1"][0]
+
+    assert [row["chunk_id"] for row in reranked["Q1"]] == ["strong", "weak"]
+    assert row["rank"] == 2
+    assert row["score"] == results["Q1"][1]["score"]
+    assert row["score_components"] == results["Q1"][1]["score_components"]
+    assert row["reranker_metadata"]["input_rank"] == 2
+    assert row["reranker_metadata"]["reranked_rank"] == 1
+
+
+def test_deterministic_test_reranker_eval_preserves_metadata_fields():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+    )
+    results = {
+        "Q1": [
+            eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
+            eval_candidate("strong", rank=2, section="Source Priority Policy", text="source priority policy"),
+        ]
+    }
+
+    reranked = module.apply_reranker_to_results(
+        [question],
+        results,
+        reranker=module.build_reranker(module.RERANKER_DETERMINISTIC_TEST),
+        limit=5,
+    )
+    original_by_chunk = {row["chunk_id"]: row for row in results["Q1"]}
+
+    for row in reranked["Q1"]:
+        original = original_by_chunk[row["chunk_id"]]
+        for field_name in (
+            "source_id",
+            "source_file",
+            "source_priority",
+            "evidence_label",
+            "section",
+            "section_heading",
+            "section_path",
+            "heading_context",
+            "embedding_model",
+            "embedding_dim",
+            "embedding_version",
+            "content_hash",
+        ):
+            assert row[field_name] == original[field_name]
+
+
+def test_reranker_comparison_reports_top_k_ordering_changes():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+    )
+    base_results = {
+        "Q1": [
+            eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
+            eval_candidate("strong", rank=2, section="Source Priority Policy", text="source priority policy"),
+        ]
+    }
+    reranked_results = {
+        "Q1": [
+            eval_candidate("strong", rank=2, section="Source Priority Policy", text="source priority policy"),
+            eval_candidate("weak", rank=1, section="General Governance", text="unrelated body"),
+        ]
+    }
+    base_summary = module.score_results([question], base_results)
+    reranked_summary = module.score_results([question], reranked_results)
+
+    comparison = module.compare_reranker_outputs(
+        questions=[question],
+        base_results=base_results,
+        reranked_results=reranked_results,
+        base_summary=base_summary,
+        reranked_summary=reranked_summary,
+        base_mode="mvp003-deterministic-metadata",
+        reranker_name=module.RERANKER_DETERMINISTIC_TEST,
+    )
+
+    assert comparison["top1_changed_count"] == 1
+    assert comparison["top3_changed_count"] == 1
+    assert comparison["top5_changed_count"] == 1
+    assert comparison["source_file_match_at_3_delta"] == 0.0
+    assert comparison["source_file_match_at_5_delta"] == 0.0
+
+
+def eval_candidate(chunk_id: str, rank: int, section: str, text: str) -> dict:
+    return {
+        "rank": rank,
+        "chunk_id": chunk_id,
+        "source_id": "ASP-P0-EVAL",
+        "source_file": "AGENTS.md",
+        "source_priority": "P0",
+        "evidence_label": "Document-Supported Fact",
+        "section": section,
+        "section_heading": section,
+        "section_path": ["Governance", section],
+        "heading_context": f"Governance > {section}",
+        "embedding_model": "offline-lexical-semantic-hash",
+        "embedding_dim": 1024,
+        "embedding_version": "mvp005-phase5-lexical-semantic",
+        "content_hash": "a" * 64,
+        "score": 0.42,
+        "score_components": {"mvp003_score": 0.4, "vector_score": 0.5},
+        "title": "AGENTS",
+        "text": text,
+    }
