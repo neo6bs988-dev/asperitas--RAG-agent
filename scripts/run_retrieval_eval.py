@@ -365,12 +365,6 @@ def run_hybrid_retrieval(
     if candidate_limit <= 0:
         return {question.question_id: [] for question in questions}
 
-    mvp003_scored_results: dict[str, list[Any]] = {}
-    mvp003_results: dict[str, list[dict[str, Any]]] = {}
-    for question in questions:
-        scored_results = score_chunks_mvp003(question.user_question, chunks, records)
-        mvp003_scored_results[question.question_id] = scored_results
-        mvp003_results[question.question_id] = mvp003_rows_from_scored_results(scored_results, candidate_limit)
     vector_results = run_vector_retrieval(questions, registry_path, chunks_path, candidate_limit)
     chunks_by_id = {chunk.chunk_id: chunk for chunk in chunks}
     provider = LexicalSemanticOfflineEmbeddingProvider(embedding_dim=MVP005_VECTOR_EVAL_EMBEDDING_DIM)
@@ -385,15 +379,17 @@ def run_hybrid_retrieval(
 
     by_question: dict[str, list[dict[str, Any]]] = {}
     for question in questions:
+        scored_results = score_chunks_mvp003(question.user_question, chunks, records)
+        mvp003_rows = mvp003_rows_from_scored_results(scored_results, candidate_limit)
         candidates: dict[str, dict[str, Any]] = {}
-        for row in mvp003_results.get(question.question_id, []):
+        for row in mvp003_rows:
             merge_hybrid_candidate(candidates, row, source="mvp003")
         for row in collect_hybrid_section_candidates(
             question=question,
             records=records,
             chunks=chunks,
-            protected_rows=mvp003_results.get(question.question_id, [])[:limit],
-            scored_results=mvp003_scored_results.get(question.question_id, []),
+            protected_rows=mvp003_rows[:limit],
+            scored_results=scored_results,
         ):
             merge_hybrid_candidate(candidates, row, source="section")
         for row in vector_results.get(question.question_id, []):
