@@ -734,6 +734,216 @@ def test_reranker_comparison_reports_top_k_ordering_changes():
     assert comparison["evidence_label_match_delta"] == 0.0
     assert comparison["section_match_delta"] == 1.0
     assert comparison["path_context_match_delta"] is None
+    assert comparison["top3_source_identity_preserved_count"] == 1
+    assert comparison["top5_source_coverage_preserved_count"] == 1
+    assert comparison["candidate_dropped_count"] == 0
+    assert comparison["candidate_duplicated_count"] == 0
+    assert comparison["candidate_introduced_count"] == 0
+    assert comparison["metadata_preservation_violation_count"] == 0
+    assert comparison["would_fail_closed_count"] == 0
+    assert comparison["would_fail_closed_reasons"] == {}
+
+
+def test_candidate_identity_prefers_stable_composite_fields():
+    module = load_eval_module()
+    row = eval_candidate("chunk-a", rank=1, section="General", text="body")
+
+    assert module.candidate_identity(row) == "ASP-P0-EVAL|AGENTS.md|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa|chunk-a"
+    assert module.candidate_identity({"source_file": "AGENTS.md"}) == "AGENTS.md"
+
+
+def test_candidate_preservation_delta_reports_dropped_duplicated_and_introduced_candidates():
+    module = load_eval_module()
+    base_rows = [
+        eval_candidate("chunk-a", rank=1, section="General", text="a"),
+        eval_candidate("chunk-b", rank=2, section="General", text="b"),
+    ]
+    reranked_rows = [
+        eval_candidate("chunk-a", rank=1, section="General", text="a"),
+        eval_candidate("chunk-a", rank=1, section="General", text="a"),
+        eval_candidate("chunk-c", rank=3, section="General", text="c"),
+    ]
+
+    delta = module.candidate_preservation_delta(base_rows, reranked_rows)
+
+    assert delta == {"dropped": 1, "duplicated": 1, "introduced": 1}
+
+
+def test_source_identity_preservation_counts_top3_and_top5_coverage():
+    module = load_eval_module()
+    question = eval_question()
+    base_results = {"Q1": [eval_candidate_for_source(f"base-{index}", source_id=f"SRC-{index}") for index in range(1, 6)]}
+    reranked_results = {
+        "Q1": [
+            eval_candidate_for_source("base-3", source_id="SRC-3"),
+            eval_candidate_for_source("base-2", source_id="SRC-2"),
+            eval_candidate_for_source("base-1", source_id="SRC-1"),
+            eval_candidate_for_source("base-5", source_id="SRC-5"),
+            eval_candidate_for_source("base-4", source_id="SRC-4"),
+        ]
+    }
+    base_summary = module.score_results([question], base_results)
+    reranked_summary = module.score_results([question], reranked_results)
+
+    comparison = module.compare_reranker_outputs(
+        questions=[question],
+        base_results=base_results,
+        reranked_results=reranked_results,
+        base_summary=base_summary,
+        reranked_summary=reranked_summary,
+        base_mode="mvp003-deterministic-metadata",
+        reranker_name=module.RERANKER_DETERMINISTIC_TEST,
+    )
+
+    assert comparison["top3_source_identity_preserved_count"] == 1
+    assert comparison["top5_source_coverage_preserved_count"] == 1
+    assert comparison["would_fail_closed_count"] == 0
+
+
+def test_grounding_metadata_mutation_is_reported_without_changing_eval_semantics():
+    module = load_eval_module()
+    question = eval_question()
+    base_row = eval_candidate("chunk-a", rank=1, section="Source Priority Policy", text="source priority policy")
+    mutated_row = {**base_row, "source_priority": "P5"}
+    base_results = {"Q1": [base_row]}
+    reranked_results = {"Q1": [mutated_row]}
+    base_summary = module.score_results([question], base_results)
+    reranked_summary = module.score_results([question], reranked_results)
+
+    comparison = module.compare_reranker_outputs(
+        questions=[question],
+        base_results=base_results,
+        reranked_results=reranked_results,
+        base_summary=base_summary,
+        reranked_summary=reranked_summary,
+        base_mode="mvp003-deterministic-metadata",
+        reranker_name=module.RERANKER_DETERMINISTIC_TEST,
+    )
+
+    assert comparison["metadata_preservation_violation_count"] == 1
+    assert comparison["would_fail_closed_count"] == 1
+    assert comparison["would_fail_closed_reasons"]["grounding_metadata_mutated"] == 1
+    assert comparison["would_fail_closed_reasons"]["priority_regression"] == 1
+
+    content_hash_mutation_count = module.grounding_metadata_violation_count(
+        [base_row],
+        [{**base_row, "content_hash": "b" * 64}],
+    )
+    assert content_hash_mutation_count == 1
+
+
+def test_would_fail_closed_reason_aggregation_reports_source_at3_regression():
+    module = load_eval_module()
+    question = eval_question()
+    base_results = {
+        "Q1": [
+            eval_candidate_for_source("expected", source_id="EXPECTED", source_file="AGENTS.md"),
+            eval_candidate_for_source("other-1", source_id="OTHER-1", source_file="README.md"),
+            eval_candidate_for_source("other-2", source_id="OTHER-2", source_file="README.md"),
+            eval_candidate_for_source("other-3", source_id="OTHER-3", source_file="README.md"),
+        ]
+    }
+    reranked_results = {
+        "Q1": [
+            eval_candidate_for_source("other-1", source_id="OTHER-1", source_file="README.md"),
+            eval_candidate_for_source("other-2", source_id="OTHER-2", source_file="README.md"),
+            eval_candidate_for_source("other-3", source_id="OTHER-3", source_file="README.md"),
+            eval_candidate_for_source("expected", source_id="EXPECTED", source_file="AGENTS.md"),
+        ]
+    }
+    base_summary = module.score_results([question], base_results)
+    reranked_summary = module.score_results([question], reranked_results)
+
+    comparison = module.compare_reranker_outputs(
+        questions=[question],
+        base_results=base_results,
+        reranked_results=reranked_results,
+        base_summary=base_summary,
+        reranked_summary=reranked_summary,
+        base_mode="mvp003-deterministic-metadata",
+        reranker_name=module.RERANKER_DETERMINISTIC_TEST,
+    )
+
+    assert comparison["source_file_match_at_3_delta"] == -1.0
+    assert comparison["source_file_match_at_5_delta"] == 0.0
+    assert comparison["would_fail_closed_count"] == 1
+    assert comparison["would_fail_closed_reasons"]["source_at3_regression"] == 1
+    assert comparison["would_fail_closed_reasons"]["top3_source_identity_lost"] == 1
+
+
+def test_json_summary_is_backward_compatible_and_additive_for_reranker(tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(
+        results_path,
+        [
+            {
+                "question_id": "Q1",
+                "results": [
+                    eval_candidate("weak", rank=1, section="General", text="unrelated"),
+                    eval_candidate("strong", rank=2, section="Source Priority Policy", text="source priority policy"),
+                ],
+            }
+        ],
+    )
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+            "--reranker",
+            module.RERANKER_DETERMINISTIC_TEST,
+            "--limit",
+            "5",
+            "--json",
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(capsys.readouterr().out)
+    comparison = payload["reranker_comparison"]
+    assert comparison["top1_changed_count"] == 1
+    assert comparison["source_file_match_at_3_delta"] == 0.0
+    assert comparison["top3_source_identity_preserved_count"] == 1
+    assert comparison["candidate_dropped_count"] == 0
+    assert comparison["would_fail_closed_reasons"] == {}
+
+
+def test_json_summary_without_reranker_keeps_existing_shape(tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(
+        results_path,
+        [{"question_id": "Q1", "results": [eval_candidate("weak", rank=1, section="Source Priority Policy", text="source priority policy")]}],
+    )
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+            "--json",
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert "reranker_comparison" not in payload
 
 
 def test_emit_line_flushes_output_stream():
@@ -795,6 +1005,19 @@ def eval_candidate(chunk_id: str, rank: int, section: str, text: str) -> dict:
         "title": "AGENTS",
         "text": text,
     }
+
+
+def eval_candidate_for_source(
+    chunk_id: str,
+    source_id: str,
+    source_file: str = "AGENTS.md",
+    rank: int = 1,
+) -> dict:
+    row = eval_candidate(chunk_id, rank=rank, section="Source Priority Policy", text="source priority policy")
+    row["source_id"] = source_id
+    row["source_file"] = source_file
+    row["content_hash"] = f"{chunk_id:0<64}"[:64]
+    return row
 
 
 def fake_mvp003_result(row: dict, source_id: str = "ASP-P0-EVAL", score: float = 1.0):

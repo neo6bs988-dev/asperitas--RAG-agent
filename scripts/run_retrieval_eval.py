@@ -27,7 +27,12 @@ from asperitas_agent.hybrid_scoring import (  # noqa: E402
     score_metadata_preservation,
 )
 from asperitas_agent.registry import read_registry  # noqa: E402
-from asperitas_agent.reranking import DeterministicTestReranker, Reranker, rerank_candidates  # noqa: E402
+from asperitas_agent.reranking import (  # noqa: E402
+    RERANK_SOURCE_GROUNDING_FIELDS,
+    DeterministicTestReranker,
+    Reranker,
+    rerank_candidates,
+)
 from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
 
@@ -670,8 +675,18 @@ def compare_reranker_outputs(
     top1_changed = 0
     top3_changed = 0
     top5_changed = 0
+    top3_source_identity_preserved = 0
+    top5_source_coverage_preserved = 0
+    candidate_dropped_count = 0
+    candidate_duplicated_count = 0
+    candidate_introduced_count = 0
+    metadata_preservation_violation_count = 0
+    would_fail_closed_question_ids: set[str] = set()
+    would_fail_closed_reasons: dict[str, int] = {}
     top3_changed_question_ids: list[str] = []
     top5_changed_question_ids: list[str] = []
+    base_scores_by_question = {str(row["question_id"]): row for row in base_summary["per_question"]}
+    reranked_scores_by_question = {str(row["question_id"]): row for row in reranked_summary["per_question"]}
     for question in questions:
         base_rows = base_results.get(question.question_id, [])
         reranked_rows = reranked_results.get(question.question_id, [])
@@ -684,6 +699,40 @@ def compare_reranker_outputs(
             top5_changed += 1
             top5_changed_question_ids.append(question.question_id)
 
+        question_reasons: set[str] = set()
+        if source_identity_set(base_rows[:3]).issubset(source_identity_set(reranked_rows[:3])):
+            top3_source_identity_preserved += 1
+        else:
+            question_reasons.add("top3_source_identity_lost")
+        if source_identity_set(base_rows[:5]).issubset(source_identity_set(reranked_rows[:5])):
+            top5_source_coverage_preserved += 1
+        else:
+            question_reasons.add("top5_source_coverage_lost")
+
+        candidate_delta = candidate_preservation_delta(base_rows, reranked_rows)
+        candidate_dropped_count += candidate_delta["dropped"]
+        candidate_duplicated_count += candidate_delta["duplicated"]
+        candidate_introduced_count += candidate_delta["introduced"]
+        if candidate_delta["dropped"]:
+            question_reasons.add("candidate_dropped")
+        if candidate_delta["duplicated"]:
+            question_reasons.add("candidate_duplicated")
+        if candidate_delta["introduced"]:
+            question_reasons.add("candidate_introduced")
+
+        metadata_violations = grounding_metadata_violation_count(base_rows, reranked_rows)
+        metadata_preservation_violation_count += metadata_violations
+        if metadata_violations:
+            question_reasons.add("grounding_metadata_mutated")
+
+        base_score = base_scores_by_question.get(question.question_id, {})
+        reranked_score = reranked_scores_by_question.get(question.question_id, {})
+        question_reasons.update(per_question_regression_reasons(base_score, reranked_score))
+        if question_reasons:
+            would_fail_closed_question_ids.add(question.question_id)
+            for reason in sorted(question_reasons):
+                would_fail_closed_reasons[reason] = would_fail_closed_reasons.get(reason, 0) + 1
+
     return {
         "base_mode": base_mode,
         "reranker": reranker_name,
@@ -691,6 +740,14 @@ def compare_reranker_outputs(
         "top1_changed_count": top1_changed,
         "top3_changed_count": top3_changed,
         "top5_changed_count": top5_changed,
+        "top3_source_identity_preserved_count": top3_source_identity_preserved,
+        "top5_source_coverage_preserved_count": top5_source_coverage_preserved,
+        "candidate_dropped_count": candidate_dropped_count,
+        "candidate_duplicated_count": candidate_duplicated_count,
+        "candidate_introduced_count": candidate_introduced_count,
+        "metadata_preservation_violation_count": metadata_preservation_violation_count,
+        "would_fail_closed_count": len(would_fail_closed_question_ids),
+        "would_fail_closed_reasons": dict(sorted(would_fail_closed_reasons.items())),
         "top3_changed_question_ids": top3_changed_question_ids,
         "top5_changed_question_ids": top5_changed_question_ids,
         "source_file_match_at_3_before": base_summary["source_file_match_at_3"],
@@ -729,6 +786,81 @@ def top_k_signature(results: list[dict[str, Any]], top_k: int) -> tuple[str, ...
 
 def result_identity(row: dict[str, Any]) -> str:
     return str(row.get("chunk_id") or row.get("source_file") or row.get("source_id") or "")
+
+
+def candidate_identity(row: dict[str, Any]) -> str:
+    parts = [
+        str(row.get("source_id") or ""),
+        str(row.get("source_file") or ""),
+        str(row.get("content_hash") or ""),
+        str(row.get("chunk_id") or ""),
+    ]
+    identity = "|".join(part for part in parts if part)
+    if identity:
+        return identity
+    return result_identity(row)
+
+
+def source_identity(row: dict[str, Any]) -> str:
+    return str(row.get("source_id") or row.get("source_file") or "")
+
+
+def source_identity_set(results: list[dict[str, Any]]) -> set[str]:
+    return {identity for identity in (source_identity(row) for row in results) if identity}
+
+
+def identity_counts(results: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in results:
+        identity = candidate_identity(row)
+        if identity:
+            counts[identity] = counts.get(identity, 0) + 1
+    return counts
+
+
+def candidate_preservation_delta(base_rows: list[dict[str, Any]], reranked_rows: list[dict[str, Any]]) -> dict[str, int]:
+    base_counts = identity_counts(base_rows)
+    reranked_counts = identity_counts(reranked_rows)
+    dropped = sum(max(base_count - reranked_counts.get(identity, 0), 0) for identity, base_count in base_counts.items())
+    duplicated = sum(max(count - 1, 0) for count in reranked_counts.values())
+    introduced = sum(count for identity, count in reranked_counts.items() if identity not in base_counts)
+    return {"dropped": dropped, "duplicated": duplicated, "introduced": introduced}
+
+
+def grounding_metadata_violation_count(base_rows: list[dict[str, Any]], reranked_rows: list[dict[str, Any]]) -> int:
+    base_by_identity = {metadata_preservation_identity(row): row for row in base_rows}
+    violations = 0
+    for reranked_row in reranked_rows:
+        base_row = base_by_identity.get(metadata_preservation_identity(reranked_row))
+        if base_row is None:
+            continue
+        if any(
+            field_name in base_row and reranked_row.get(field_name) != base_row.get(field_name)
+            for field_name in RERANK_SOURCE_GROUNDING_FIELDS
+        ):
+            violations += 1
+    return violations
+
+
+def metadata_preservation_identity(row: dict[str, Any]) -> str:
+    return str(row.get("chunk_id") or candidate_identity(row))
+
+
+def per_question_regression_reasons(base_score: dict[str, Any], reranked_score: dict[str, Any]) -> set[str]:
+    reasons: set[str] = set()
+    regression_fields = (
+        ("source_file_match_top3", "source_at3_regression"),
+        ("source_file_match_top5", "source_at5_regression"),
+        ("source_priority_match", "priority_regression"),
+        ("evidence_label_match", "evidence_label_regression"),
+        ("section_match", "section_regression"),
+        ("path_context_match", "path_context_regression"),
+        ("overall_pass", "overall_regression"),
+    )
+    for field_name, reason in regression_fields:
+        if base_score.get(field_name) is True and reranked_score.get(field_name) is not True:
+            reasons.add(reason)
+    return reasons
 
 
 def contains_section(result: dict[str, Any], expected_section: str) -> bool | None:
@@ -856,6 +988,30 @@ def print_summary(summary: dict[str, Any], mode: str) -> None:
         emit_line(f"Section match delta: {format_percentage_point_delta(comparison['section_match_delta'])}")
         emit_line(f"Path context match delta: {format_percentage_point_delta(comparison['path_context_match_delta'])}")
         emit_line(f"Overall pass rate delta: {format_percentage_point_delta(comparison['overall_pass_rate_delta'])}")
+        emit_line("Candidate preservation:")
+        emit_line(
+            "Base top-3 source identity preserved: "
+            f"{comparison['top3_source_identity_preserved_count']}/{comparison['total_questions']}"
+        )
+        emit_line(
+            "Base top-5 source coverage preserved: "
+            f"{comparison['top5_source_coverage_preserved_count']}/{comparison['total_questions']}"
+        )
+        emit_line(
+            "Candidate dropped/duplicated/introduced: "
+            f"{comparison['candidate_dropped_count']}/"
+            f"{comparison['candidate_duplicated_count']}/"
+            f"{comparison['candidate_introduced_count']}"
+        )
+        emit_line(f"Grounding metadata preservation violations: {comparison['metadata_preservation_violation_count']}")
+        emit_line(f"Would fail closed: {comparison['would_fail_closed_count']}/{comparison['total_questions']}")
+        if comparison["would_fail_closed_reasons"]:
+            reason_summary = ", ".join(
+                f"{reason}={count}" for reason, count in comparison["would_fail_closed_reasons"].items()
+            )
+            emit_line(f"Would fail closed reasons: {reason_summary}")
+        else:
+            emit_line("Would fail closed reasons: none")
     failed = [row for row in summary["per_question"] if not row["overall_pass"]]
     if failed:
         emit_line("Failed question_ids:")
