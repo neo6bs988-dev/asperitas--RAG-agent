@@ -14,6 +14,8 @@ from asperitas_agent.schemas import Chunk, SourceRecord
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "run_retrieval_eval.py"
+REPO_ROOT = SCRIPT_PATH.parents[1]
+TARGET_RISK_QUESTION_IDS = ("MVP0025-Q001", "MVP0025-Q004", "MVP0025-Q010")
 
 
 def load_eval_module():
@@ -706,6 +708,115 @@ def test_direct_policy_keeps_deterministic_test_behavior_unchanged():
     assert [row["chunk_id"] for row in reranked["Q1"]][:3] != [row["chunk_id"] for row in base_rows][:3]
 
 
+def test_target_risk_question_fixture_contract_remains_locked():
+    module = load_eval_module()
+    questions = {question.question_id: question for question in module.load_questions(REPO_ROOT / "eval" / "retrieval_questions.jsonl")}
+    expected = module.load_expected_sources(REPO_ROOT / "eval" / "expected_sources.jsonl")
+
+    assert set(TARGET_RISK_QUESTION_IDS).issubset(questions)
+    assert {
+        question_id: (
+            questions[question_id].expected_source_file,
+            questions[question_id].expected_chunk_or_section,
+            questions[question_id].expected_path_context,
+            expected[question_id]["expected_source_priority"],
+            expected[question_id]["expected_evidence_label"],
+        )
+        for question_id in TARGET_RISK_QUESTION_IDS
+    } == {
+        "MVP0025-Q001": ("AGENTS.md", "Source Priority Policy", "", "P0", "Document-Supported Fact"),
+        "MVP0025-Q004": (
+            "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+            "SINGLE SOURCE OF TRUTH",
+            "",
+            "P0",
+            "Document-Supported Fact",
+        ),
+        "MVP0025-Q010": (
+            "01_RAW_SOURCES/P1_RND_PROJECTS/2026 PTMC project.pptx",
+            "",
+            "P1_RND_PROJECTS",
+            "P1",
+            "Document-Supported Fact",
+        ),
+    }
+
+
+@pytest.mark.parametrize("base_mode", ["mvp003-deterministic-metadata", "mvp006-hybrid-metadata-vector"])
+def test_fail_closed_policy_prevents_target_risk_source_at3_regression(base_mode):
+    module = load_eval_module()
+    questions = load_target_risk_questions(module)
+    base_results = target_risk_source_at3_regression_results(questions)
+    base_summary = module.score_results(questions, base_results)
+    reranker = module.build_reranker(module.RERANKER_DETERMINISTIC_TEST)
+
+    direct_results = module.apply_reranker_to_results(
+        questions,
+        base_results,
+        reranker=reranker,
+        limit=5,
+    )
+    direct_summary = module.score_results(questions, direct_results)
+    direct_comparison = module.compare_reranker_outputs(
+        questions=questions,
+        base_results=base_results,
+        reranked_results=direct_results,
+        base_summary=base_summary,
+        reranked_summary=direct_summary,
+        base_mode=base_mode,
+        reranker_name=module.RERANKER_DETERMINISTIC_TEST,
+    )
+
+    assert direct_comparison["source_file_match_at_3_delta"] < 0.0
+    assert direct_comparison["source_file_match_at_5_delta"] == 0.0
+    assert direct_comparison["would_fail_closed_count"] == len(TARGET_RISK_QUESTION_IDS)
+    assert direct_comparison["would_fail_closed_reasons"]["source_at3_regression"] == len(TARGET_RISK_QUESTION_IDS)
+    assert direct_comparison["would_fail_closed_reasons"]["top3_source_identity_lost"] == len(TARGET_RISK_QUESTION_IDS)
+
+    application = module.apply_reranker_to_results_with_diagnostics(
+        questions,
+        base_results,
+        reranker=reranker,
+        limit=5,
+        reranker_policy=module.RERANKER_POLICY_FAIL_CLOSED,
+    )
+    fail_closed_summary = module.score_results(questions, application.results_by_question)
+    fail_closed_comparison = module.compare_reranker_outputs(
+        questions=questions,
+        base_results=base_results,
+        reranked_results=application.results_by_question,
+        base_summary=base_summary,
+        reranked_summary=fail_closed_summary,
+        base_mode=base_mode,
+        reranker_name=module.RERANKER_DETERMINISTIC_TEST,
+        reranker_policy=module.RERANKER_POLICY_FAIL_CLOSED,
+        fallback_diagnostics=application.fallback_diagnostics,
+    )
+
+    for metric in (
+        "source_file_match_at_3",
+        "source_file_match_at_5",
+        "source_priority_match",
+        "evidence_label_match",
+        "section_match",
+        "path_context_match",
+        "overall_pass_rate",
+    ):
+        assert fail_closed_summary[metric] == base_summary[metric]
+    for delta in (
+        "source_file_match_at_3_delta",
+        "source_file_match_at_5_delta",
+        "source_priority_match_delta",
+        "evidence_label_match_delta",
+        "section_match_delta",
+        "path_context_match_delta",
+        "overall_pass_rate_delta",
+    ):
+        assert fail_closed_comparison[delta] == 0.0
+    assert fail_closed_comparison["fallback_count"] == len(TARGET_RISK_QUESTION_IDS)
+    assert fail_closed_comparison["fallback_reasons"] == {"top3_source_identity_lost": len(TARGET_RISK_QUESTION_IDS)}
+
+
 def test_deterministic_test_reranker_eval_preserves_metadata_fields():
     module = load_eval_module()
     question = eval_question()
@@ -1189,6 +1300,50 @@ def source_at3_regression_fixture_rows() -> list[dict]:
         eval_candidate_for_source("other-3", source_id="OTHER-3", source_file="README-3.md", rank=4),
         eval_candidate_for_source("other-4", source_id="OTHER-4", source_file="README-4.md", rank=5),
     ]
+
+
+def load_target_risk_questions(module):
+    questions = module.load_questions(REPO_ROOT / "eval" / "retrieval_questions.jsonl")
+    by_id = {question.question_id: question for question in questions}
+    return [by_id[question_id] for question_id in TARGET_RISK_QUESTION_IDS]
+
+
+def target_risk_source_at3_regression_results(questions) -> dict[str, list[dict]]:
+    return {question.question_id: source_at3_regression_rows_for_question(question) for question in questions}
+
+
+def source_at3_regression_rows_for_question(question) -> list[dict]:
+    expected = eval_candidate_for_source(
+        f"{question.question_id}-expected",
+        source_id=f"{question.question_id}-EXPECTED",
+        source_file=question.expected_source_file,
+        rank=1,
+    )
+    expected["source_priority"] = question.expected_source_priority
+    expected["evidence_label"] = question.expected_evidence_label
+    expected["section"] = question.expected_chunk_or_section or "Registered Source Location"
+    expected["section_heading"] = expected["section"]
+    expected["section_path"] = ["Target Risk", expected["section"]]
+    expected["heading_context"] = f"Target Risk > {expected['section']}"
+    expected["title"] = f"{question.question_id} expected source"
+    expected["text"] = "registered source placeholder"
+
+    rows = [expected]
+    for index in range(1, 5):
+        distractor = eval_candidate_for_source(
+            f"{question.question_id}-distractor-{index}",
+            source_id=f"{question.question_id}-DISTRACTOR-{index}",
+            source_file=f"unrelated/{question.question_id}/distractor-{index}.md",
+            rank=index + 1,
+        )
+        distractor["title"] = f"{question.question_id} high lexical overlap {index}"
+        distractor["section"] = f"High Overlap {index}"
+        distractor["section_heading"] = distractor["section"]
+        distractor["section_path"] = ["Target Risk", distractor["section"]]
+        distractor["heading_context"] = f"Target Risk > {distractor['section']}"
+        distractor["text"] = f"{question.user_question} {question.user_question}"
+        rows.append(distractor)
+    return rows
 
 
 def fake_mvp003_result(row: dict, source_id: str = "ASP-P0-EVAL", score: float = 1.0):
