@@ -32,6 +32,7 @@ from asperitas_agent.reranking import (  # noqa: E402
     DeterministicTestReranker,
     Reranker,
     rerank_candidates,
+    rerank_candidates_fail_closed,
 )
 from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
@@ -82,6 +83,8 @@ MVP005_VECTOR_EVAL_EMBEDDING_DIM = 1024
 MVP006_HYBRID_EVAL_MODE = "mvp006-hybrid-metadata-vector"
 RERANKER_NONE = "none"
 RERANKER_DETERMINISTIC_TEST = "deterministic-test"
+RERANKER_POLICY_DIRECT = "direct"
+RERANKER_POLICY_FAIL_CLOSED = "fail-closed"
 HYBRID_CANDIDATE_MULTIPLIER = 4
 HYBRID_CANDIDATE_MINIMUM = 20
 HYBRID_MISSING_RANK = 1_000_000
@@ -104,6 +107,12 @@ class EvalQuestion:
     difficulty: str
     category: str
     expected_path_context: str = ""
+
+
+@dataclass(frozen=True)
+class RerankerApplication:
+    results_by_question: dict[str, list[dict[str, Any]]]
+    fallback_diagnostics: dict[str, tuple[str, ...]]
 
 
 def normalize_path(value: str) -> str:
@@ -644,22 +653,57 @@ def apply_reranker_to_results(
     results_by_question: dict[str, list[dict[str, Any]]],
     reranker: Reranker | None,
     limit: int,
+    reranker_policy: str = RERANKER_POLICY_DIRECT,
 ) -> dict[str, list[dict[str, Any]]]:
+    return apply_reranker_to_results_with_diagnostics(
+        questions=questions,
+        results_by_question=results_by_question,
+        reranker=reranker,
+        limit=limit,
+        reranker_policy=reranker_policy,
+    ).results_by_question
+
+
+def apply_reranker_to_results_with_diagnostics(
+    questions: list[EvalQuestion],
+    results_by_question: dict[str, list[dict[str, Any]]],
+    reranker: Reranker | None,
+    limit: int,
+    reranker_policy: str = RERANKER_POLICY_DIRECT,
+) -> RerankerApplication:
     if reranker is None:
-        return {question.question_id: [dict(row) for row in results_by_question.get(question.question_id, [])] for question in questions}
+        return RerankerApplication(
+            results_by_question={
+                question.question_id: [dict(row) for row in results_by_question.get(question.question_id, [])]
+                for question in questions
+            },
+            fallback_diagnostics={},
+        )
 
     reranked: dict[str, list[dict[str, Any]]] = {}
+    fallback_diagnostics: dict[str, tuple[str, ...]] = {}
     for question in questions:
         try:
-            reranked[question.question_id] = rerank_candidates(
-                query=question.user_question,
-                candidates=results_by_question.get(question.question_id, []),
-                reranker=reranker,
-                top_k=limit,
-            )
+            if reranker_policy == RERANKER_POLICY_FAIL_CLOSED:
+                result = rerank_candidates_fail_closed(
+                    query=question.user_question,
+                    candidates=results_by_question.get(question.question_id, []),
+                    reranker=reranker,
+                    top_k=limit,
+                )
+                reranked[question.question_id] = result.candidates
+                if result.fell_back:
+                    fallback_diagnostics[question.question_id] = result.fallback_reasons
+            else:
+                reranked[question.question_id] = rerank_candidates(
+                    query=question.user_question,
+                    candidates=results_by_question.get(question.question_id, []),
+                    reranker=reranker,
+                    top_k=limit,
+                )
         except ValueError as exc:
             raise EvalError(f"{question.question_id} reranker metadata preservation failed: {exc}") from exc
-    return reranked
+    return RerankerApplication(results_by_question=reranked, fallback_diagnostics=fallback_diagnostics)
 
 
 def compare_reranker_outputs(
@@ -670,6 +714,8 @@ def compare_reranker_outputs(
     reranked_summary: dict[str, Any],
     base_mode: str,
     reranker_name: str,
+    reranker_policy: str = RERANKER_POLICY_DIRECT,
+    fallback_diagnostics: dict[str, tuple[str, ...]] | None = None,
 ) -> dict[str, Any]:
     total = len(questions)
     top1_changed = 0
@@ -733,7 +779,7 @@ def compare_reranker_outputs(
             for reason in sorted(question_reasons):
                 would_fail_closed_reasons[reason] = would_fail_closed_reasons.get(reason, 0) + 1
 
-    return {
+    comparison = {
         "base_mode": base_mode,
         "reranker": reranker_name,
         "total_questions": total,
@@ -772,6 +818,19 @@ def compare_reranker_outputs(
         "overall_pass_rate_after": reranked_summary["overall_pass_rate"],
         "overall_pass_rate_delta": reranked_summary["overall_pass_rate"] - base_summary["overall_pass_rate"],
     }
+    if reranker_policy == RERANKER_POLICY_FAIL_CLOSED:
+        fallback_diagnostics = fallback_diagnostics or {}
+        fallback_reasons: dict[str, int] = {}
+        fallback_by_question: list[dict[str, Any]] = []
+        for question_id, reasons in sorted(fallback_diagnostics.items()):
+            fallback_by_question.append({"question_id": question_id, "fallback_reasons": list(reasons)})
+            for reason in reasons:
+                fallback_reasons[reason] = fallback_reasons.get(reason, 0) + 1
+        comparison["reranker_policy"] = reranker_policy
+        comparison["fallback_count"] = len(fallback_diagnostics)
+        comparison["fallback_reasons"] = dict(sorted(fallback_reasons.items()))
+        comparison["fallback_by_question"] = fallback_by_question
+    return comparison
 
 
 def nullable_delta(before: float | None, after: float | None) -> float | None:
@@ -1012,6 +1071,18 @@ def print_summary(summary: dict[str, Any], mode: str) -> None:
             emit_line(f"Would fail closed reasons: {reason_summary}")
         else:
             emit_line("Would fail closed reasons: none")
+        if comparison.get("reranker_policy") == RERANKER_POLICY_FAIL_CLOSED:
+            emit_line("Fail-closed fallback:")
+            emit_line(f"Fallback count: {comparison['fallback_count']}/{comparison['total_questions']}")
+            if comparison["fallback_reasons"]:
+                reason_summary = ", ".join(
+                    f"{reason}={count}" for reason, count in comparison["fallback_reasons"].items()
+                )
+                emit_line(f"Fallback reasons: {reason_summary}")
+            else:
+                emit_line("Fallback reasons: none")
+            for row in comparison["fallback_by_question"][:20]:
+                emit_line(f"- {row['question_id']}: {', '.join(row['fallback_reasons'])}")
     failed = [row for row in summary["per_question"] if not row["overall_pass"]]
     if failed:
         emit_line("Failed question_ids:")
@@ -1028,6 +1099,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--results-jsonl", type=Path, default=None, help="Optional external retrieval results to score.")
     parser.add_argument("--retriever", choices=("baseline", "mvp003", "vector", "hybrid"), default="baseline")
     parser.add_argument("--reranker", choices=(RERANKER_NONE, RERANKER_DETERMINISTIC_TEST), default=RERANKER_NONE)
+    parser.add_argument(
+        "--reranker-policy",
+        choices=(RERANKER_POLICY_DIRECT, RERANKER_POLICY_FAIL_CLOSED),
+        default=RERANKER_POLICY_DIRECT,
+        help="Optional non-default reranker safety policy.",
+    )
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
     return parser
@@ -1052,8 +1129,17 @@ def main(argv: list[str] | None = None) -> int:
         else:
             base_mode = mode
             base_results = results
-            results = apply_reranker_to_results(questions, base_results, reranker, args.limit)
+            application = apply_reranker_to_results_with_diagnostics(
+                questions=questions,
+                results_by_question=base_results,
+                reranker=reranker,
+                limit=args.limit,
+                reranker_policy=args.reranker_policy,
+            )
+            results = application.results_by_question
             mode = f"{mode}+reranker:{args.reranker}"
+            if args.reranker_policy == RERANKER_POLICY_FAIL_CLOSED:
+                mode = f"{mode}+policy:{args.reranker_policy}"
             summary = score_results(questions, results)
             summary["reranker_comparison"] = compare_reranker_outputs(
                 questions=questions,
@@ -1063,6 +1149,8 @@ def main(argv: list[str] | None = None) -> int:
                 reranked_summary=summary,
                 base_mode=base_mode,
                 reranker_name=args.reranker,
+                reranker_policy=args.reranker_policy,
+                fallback_diagnostics=application.fallback_diagnostics,
             )
     except EvalError as exc:
         emit_line(f"ERROR: {exc}", stream=sys.stderr)
