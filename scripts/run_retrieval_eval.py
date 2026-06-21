@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import faulthandler
+import gc
 import json
 import sys
 from dataclasses import dataclass
@@ -51,6 +53,20 @@ def emit_line(message: str = "", *, stream: Any | None = None) -> None:
 configure_output_streams()
 
 
+def enable_fault_diagnostics() -> None:
+    try:
+        faulthandler.enable(file=sys.stderr, all_threads=True)
+    except (AttributeError, OSError, RuntimeError):
+        return
+
+
+enable_fault_diagnostics()
+
+
+def emit_progress(message: str) -> None:
+    emit_line(f"[retrieval-eval] {message}", stream=sys.stderr)
+
+
 DIFFICULTIES = {"easy", "medium", "hard"}
 CATEGORIES = {
     "company_strategy",
@@ -89,6 +105,46 @@ HYBRID_CANDIDATE_MULTIPLIER = 4
 HYBRID_CANDIDATE_MINIMUM = 20
 HYBRID_MISSING_RANK = 1_000_000
 HYBRID_SECTION_SOURCE_SCORE_RATIO = 0.90
+THRESHOLD_METRIC_LABELS = {
+    "source_file_match_at_3": "Source file match @3",
+    "source_file_match_at_5": "Source file match @5",
+    "source_priority_match": "Source priority match",
+    "evidence_label_match": "Evidence label match",
+    "section_match": "Section match",
+    "path_context_match": "Path context match",
+    "overall_pass_rate": "Overall pass rate",
+}
+RETRIEVAL_EVAL_THRESHOLDS = {
+    "baseline": {
+        "source_file_match_at_5": 0.30,
+        "source_priority_match": 0.30,
+        "evidence_label_match": 0.30,
+        "overall_pass_rate": 0.30,
+    },
+    "mvp003": {
+        "source_file_match_at_5": 1.00,
+        "source_priority_match": 1.00,
+        "evidence_label_match": 1.00,
+        "section_match": 0.90,
+        "path_context_match": 1.00,
+        "overall_pass_rate": 0.90,
+    },
+    "vector": {
+        "source_file_match_at_5": 0.50,
+        "source_priority_match": 0.50,
+        "evidence_label_match": 0.50,
+        "path_context_match": 1.00,
+        "overall_pass_rate": 0.50,
+    },
+    "hybrid": {
+        "source_file_match_at_5": 1.00,
+        "source_priority_match": 1.00,
+        "evidence_label_match": 1.00,
+        "section_match": 1.00,
+        "path_context_match": 1.00,
+        "overall_pass_rate": 0.95,
+    },
+}
 
 
 class EvalError(Exception):
@@ -230,7 +286,9 @@ def run_baseline_retrieval(
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
     by_question: dict[str, list[dict[str, Any]]] = {}
-    for question in questions:
+    total_questions = len(questions)
+    for index, question in enumerate(questions, start=1):
+        emit_progress(f"baseline question {index}/{total_questions}: {question.question_id}")
         retrieved = search_chunks(question.user_question, chunks, limit=limit)
         rows: list[dict[str, Any]] = []
         for rank, result in enumerate(retrieved, start=1):
@@ -252,6 +310,7 @@ def run_baseline_retrieval(
                 }
             )
         by_question[question.question_id] = rows
+        gc.collect()
     return by_question
 
 
@@ -271,14 +330,18 @@ def run_mvp003_retrieval(
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
     by_question: dict[str, list[dict[str, Any]]] = {}
-    for question in questions:
+    total_questions = len(questions)
+    for index, question in enumerate(questions, start=1):
+        emit_progress(f"mvp003 question {index}/{total_questions}: {question.question_id}")
         retrieved = search_chunks_mvp003(question.user_question, chunks, records, limit=limit, include_explanations=True)
+        emit_progress(f"mvp003 question {index}/{total_questions}: {question.question_id} retrieved={len(retrieved)}")
         rows: list[dict[str, Any]] = []
         for rank, result in enumerate(retrieved, start=1):
             row = result.to_json()
             row["rank"] = rank
             rows.append(row)
         by_question[question.question_id] = rows
+        gc.collect()
     return by_question
 
 
@@ -339,7 +402,9 @@ def run_vector_retrieval(
         store.add(record, provider.embed_text(vector_eval_chunk_text(chunk, source_record)))
 
     by_question: dict[str, list[dict[str, Any]]] = {}
-    for question in questions:
+    total_questions = len(questions)
+    for index, question in enumerate(questions, start=1):
+        emit_progress(f"vector question {index}/{total_questions}: {question.question_id}")
         query_vector = provider.embed_text(question.user_question)
         retrieved = store.search(query_vector, top_k=limit)
         rows: list[dict[str, Any]] = []
@@ -351,6 +416,7 @@ def run_vector_retrieval(
             row["text"] = chunk.text if chunk else ""
             rows.append(row)
         by_question[question.question_id] = rows
+        gc.collect()
     return by_question
 
 
@@ -392,22 +458,30 @@ def run_hybrid_retrieval(
     embedding_metadata_by_chunk = {record.chunk_id: record.to_json() for record in embedding_records}
 
     by_question: dict[str, list[dict[str, Any]]] = {}
-    for question in questions:
+    total_questions = len(questions)
+    for index, question in enumerate(questions, start=1):
+        emit_progress(f"hybrid question {index}/{total_questions}: {question.question_id}")
+        emit_progress(f"hybrid question {index}/{total_questions}: scoring mvp003 candidates")
         scored_results = score_chunks_mvp003(question.user_question, chunks, records)
+        emit_progress(f"hybrid question {index}/{total_questions}: mvp003 candidates={len(scored_results)}")
         mvp003_rows = mvp003_rows_from_scored_results(scored_results, candidate_limit)
+        emit_progress(f"hybrid question {index}/{total_questions}: protected rows={len(mvp003_rows)}")
         candidates: dict[str, dict[str, Any]] = {}
         for row in mvp003_rows:
             merge_hybrid_candidate(candidates, row, source="mvp003")
-        for row in collect_hybrid_section_candidates(
+        section_rows = collect_hybrid_section_candidates(
             question=question,
             records=records,
             chunks=chunks,
             protected_rows=mvp003_rows[:limit],
             scored_results=scored_results,
-        ):
+        )
+        emit_progress(f"hybrid question {index}/{total_questions}: section candidates={len(section_rows)}")
+        for row in section_rows:
             merge_hybrid_candidate(candidates, row, source="section")
         for row in vector_results.get(question.question_id, []):
             merge_hybrid_candidate(candidates, row, source="vector")
+        emit_progress(f"hybrid question {index}/{total_questions}: merged candidates={len(candidates)}")
 
         ranked: list[dict[str, Any]] = []
         max_mvp003_score = max(
@@ -450,6 +524,8 @@ def run_hybrid_retrieval(
         for rank, row in enumerate(selected, start=1):
             row["rank"] = rank
         by_question[question.question_id] = selected
+        emit_progress(f"hybrid question {index}/{total_questions}: selected={len(selected)}")
+        gc.collect()
     return by_question
 
 
@@ -980,7 +1056,11 @@ def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dic
 
 
 def score_results(questions: list[EvalQuestion], results_by_question: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
-    per_question = [score_question(question, results_by_question.get(question.question_id, [])) for question in questions]
+    per_question = []
+    total_questions = len(questions)
+    for index, question in enumerate(questions, start=1):
+        emit_progress(f"scoring question {index}/{total_questions}: {question.question_id}")
+        per_question.append(score_question(question, results_by_question.get(question.question_id, [])))
     total = len(per_question)
     if total == 0:
         raise EvalError("No questions to score")
@@ -1019,6 +1099,50 @@ def format_percentage_point_delta(value: float | None) -> str:
     if value is None:
         return "n/a"
     return f"{value * 100:+.1f} percentage points"
+
+
+def evaluate_thresholds(summary: dict[str, Any], retriever: str) -> dict[str, Any]:
+    thresholds = RETRIEVAL_EVAL_THRESHOLDS.get(retriever)
+    if thresholds is None:
+        raise EvalError(f"No retrieval eval threshold profile defined for retriever: {retriever}")
+
+    metrics: list[dict[str, Any]] = []
+    failures: list[dict[str, Any]] = []
+    for metric_name, minimum in thresholds.items():
+        emit_progress(f"threshold check {retriever}.{metric_name}")
+        actual = summary.get(metric_name)
+        not_applicable = actual is None
+        passed = not_applicable or actual >= minimum
+        metric_result = {
+            "metric": metric_name,
+            "label": THRESHOLD_METRIC_LABELS.get(metric_name, metric_name),
+            "actual": actual,
+            "minimum": minimum,
+            "not_applicable": not_applicable,
+            "passed": passed,
+        }
+        metrics.append(metric_result)
+        if not passed:
+            failures.append(metric_result)
+
+    return {
+        "profile": retriever,
+        "passed": not failures,
+        "metrics": metrics,
+        "failures": failures,
+    }
+
+
+def print_threshold_report(report: dict[str, Any]) -> None:
+    emit_line("Threshold gate:")
+    emit_line(f"Profile: {report['profile']}")
+    emit_line(f"Decision: {'pass' if report['passed'] else 'fail'}")
+    for metric in report["metrics"]:
+        emit_line(
+            f"- {metric['label']}: actual={format_percent(metric['actual'])} "
+            f"minimum={format_percent(metric['minimum'])} "
+            f"status={'n/a' if metric.get('not_applicable') else ('pass' if metric['passed'] else 'fail')}"
+        )
 
 
 def print_summary(summary: dict[str, Any], mode: str) -> None:
@@ -1107,26 +1231,39 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
+    parser.add_argument(
+        "--enforce-thresholds",
+        action="store_true",
+        help="Exit non-zero if the selected retriever misses its source-grounding threshold profile.",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    threshold_report = None
     try:
+        emit_progress(f"loading questions: {args.questions}")
         questions = load_questions(args.questions)
+        emit_progress(f"loading expected sources: {args.expected}")
         expected = load_expected_sources(args.expected)
+        emit_progress("validating expected source alignment")
         validate_expected_alignment(questions, expected)
         if args.results_jsonl:
+            emit_progress(f"loading external results: {args.results_jsonl}")
             mode = "external-results"
             results = load_simulated_results(args.results_jsonl)
         else:
+            emit_progress(f"running retriever={args.retriever} limit={args.limit}")
             mode, results = run_retriever(args.retriever, questions, args.registry, args.chunks, args.limit)
+        emit_progress("aggregating retrieval metrics")
         base_summary = score_results(questions, results)
         reranker = build_reranker(args.reranker)
         if reranker is None:
             summary = base_summary
         else:
+            emit_progress(f"applying reranker={args.reranker}")
             base_mode = mode
             base_results = results
             application = apply_reranker_to_results_with_diagnostics(
@@ -1140,6 +1277,7 @@ def main(argv: list[str] | None = None) -> int:
             mode = f"{mode}+reranker:{args.reranker}"
             if args.reranker_policy == RERANKER_POLICY_FAIL_CLOSED:
                 mode = f"{mode}+policy:{args.reranker_policy}"
+            emit_progress("aggregating reranked metrics")
             summary = score_results(questions, results)
             summary["reranker_comparison"] = compare_reranker_outputs(
                 questions=questions,
@@ -1152,6 +1290,10 @@ def main(argv: list[str] | None = None) -> int:
                 reranker_policy=args.reranker_policy,
                 fallback_diagnostics=application.fallback_diagnostics,
             )
+        if args.enforce_thresholds:
+            emit_progress(f"enforcing threshold profile={args.retriever}")
+            threshold_report = evaluate_thresholds(summary, args.retriever)
+            summary["thresholds"] = threshold_report
     except EvalError as exc:
         emit_line(f"ERROR: {exc}", stream=sys.stderr)
         return 2
@@ -1160,6 +1302,10 @@ def main(argv: list[str] | None = None) -> int:
         emit_line(json.dumps(summary, ensure_ascii=False, indent=2))
     else:
         print_summary(summary, mode)
+        if threshold_report:
+            print_threshold_report(threshold_report)
+    if threshold_report and not threshold_report["passed"]:
+        return 1
     return 0
 
 

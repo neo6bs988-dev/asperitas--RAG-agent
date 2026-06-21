@@ -46,6 +46,15 @@ python scripts/run_retrieval_eval.py --retriever vector --limit 5
 python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
 ```
 
+Explicit retrieval threshold gate:
+
+```bash
+python scripts/run_retrieval_eval.py --retriever baseline --limit 5 --enforce-thresholds
+python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5 --enforce-thresholds
+python scripts/run_retrieval_eval.py --retriever vector --limit 5 --enforce-thresholds
+python scripts/run_retrieval_eval.py --retriever hybrid --limit 5 --enforce-thresholds
+```
+
 Conditional reranker eval gate:
 
 ```bash
@@ -53,7 +62,7 @@ python scripts/run_retrieval_eval.py --retriever mvp003 --reranker deterministic
 python scripts/run_retrieval_eval.py --retriever hybrid --reranker deterministic-test --limit 5
 ```
 
-Use the latest milestone report or decision log for current retrieval baselines, regression rules, and report format.
+Use `docs/RETRIEVAL_EVAL_THRESHOLDS.md` for executable threshold profiles. Use the latest milestone report or decision log for current retrieval baselines, regression rules, and report format.
 
 ## Source Code Tests
 
@@ -102,10 +111,18 @@ Required when retrieval, chunking, scoring, metadata filters, embeddings, vector
 
 Pass condition: no unexplained regression in required retrieval metrics.
 
+Threshold pass condition:
+
+- `--enforce-thresholds` exits with code `0` for the selected retriever.
+- Threshold metrics are reported as fresh command output.
+- `mvp003` remains the protected deterministic reference retriever.
+- `hybrid` remains an explicit comparison mode and is not made default by threshold pass status.
+
 Hard fail:
 
 - eval cannot run;
 - metrics are invented or omitted;
+- `--enforce-thresholds` exits with code `1` for a required threshold gate;
 - source IDs, source priority, or evidence labels are dropped;
 - a claimed retrieval improvement does not report before/after metrics.
 
