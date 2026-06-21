@@ -5,6 +5,7 @@ from asperitas_agent.reranking import (
     RERANK_SOURCE_GROUNDING_FIELDS,
     assert_rerank_metadata_preserved,
     rerank_candidates,
+    rerank_candidates_fail_closed,
 )
 
 
@@ -124,3 +125,151 @@ def test_reranker_rejects_negative_top_k():
 
     with pytest.raises(ValueError, match="top_k"):
         DeterministicTestReranker().rerank("source priority policy", [], top_k=-1)
+
+    with pytest.raises(ValueError, match="top_k"):
+        rerank_candidates_fail_closed("source priority policy", [], DeterministicTestReranker(), top_k=-1)
+
+
+def test_fail_closed_wrapper_returns_reranked_order_when_invariants_pass():
+    candidates = [
+        complete_candidate(chunk_id="weak", rank=1, text="unrelated body", section="General Governance"),
+        complete_candidate(chunk_id="strong", rank=2, text="source priority policy evidence hierarchy"),
+    ]
+
+    result = rerank_candidates_fail_closed("source priority policy", candidates, DeterministicTestReranker(), top_k=2)
+
+    assert [row["chunk_id"] for row in result.candidates] == ["strong", "weak"]
+    assert result.fallback_reasons == ()
+
+
+def test_fail_closed_wrapper_falls_back_on_exception():
+    candidates = [complete_candidate(chunk_id="chunk-a")]
+
+    result = rerank_candidates_fail_closed("source priority policy", candidates, RaisingReranker())
+
+    assert [row["chunk_id"] for row in result.candidates] == ["chunk-a"]
+    assert result.fallback_reasons == ("reranker_exception",)
+
+
+def test_fail_closed_wrapper_returns_deterministic_fallback_diagnostics():
+    candidates = source_distinct_candidates(6)
+
+    result = rerank_candidates_fail_closed("source priority policy", candidates, Top5CoverageLossReranker(), top_k=6)
+
+    assert result.fallback_reasons == ("top5_source_coverage_lost",)
+
+
+class RaisingReranker:
+    reranker_name = "raising"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        raise RuntimeError("boom")
+
+
+class DroppingReranker:
+    reranker_name = "dropping"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        return list(candidates)[1:]
+
+
+class DuplicatingReranker:
+    reranker_name = "duplicating"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        rows = [dict(row) for row in candidates]
+        rows[-1] = dict(rows[0])
+        return rows
+
+
+class IntroducingReranker:
+    reranker_name = "introducing"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        rows = [dict(row) for row in candidates]
+        rows[-1] = complete_candidate(chunk_id="introduced", rank=99)
+        return rows
+
+
+class CountChangingReranker:
+    reranker_name = "count-changing"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        return list(candidates)[:1]
+
+
+class Top3SourceLossReranker:
+    reranker_name = "top3-loss"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        rows = [dict(row) for row in candidates]
+        return [rows[3], rows[4], rows[0], rows[1], rows[2], rows[5]]
+
+
+class Top5CoverageLossReranker:
+    reranker_name = "top5-loss"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        rows = [dict(row) for row in candidates]
+        return [rows[0], rows[1], rows[2], rows[5], rows[3], rows[4]]
+
+
+class MetadataMutatingReranker:
+    reranker_name = "metadata-mutating"
+    reranker_version = "test"
+    deterministic = True
+
+    def rerank(self, query, candidates, top_k=None):
+        rows = [dict(row) for row in candidates]
+        rows[0]["source_priority"] = "P6"
+        return rows
+
+
+def source_distinct_candidates(count: int):
+    rows = []
+    for index in range(1, count + 1):
+        row = complete_candidate(
+            chunk_id=f"chunk-{index}",
+            rank=index,
+            text=f"source priority policy {index}",
+        )
+        row["source_id"] = f"SRC-{index}"
+        row["source_file"] = f"source-{index}.md"
+        row["content_hash"] = f"{index:0<64}"[:64]
+        rows.append(row)
+    return rows
+
+
+@pytest.mark.parametrize(
+    ("reranker", "expected_reason"),
+    [
+        (DroppingReranker(), "candidate_dropped"),
+        (DuplicatingReranker(), "candidate_duplicated"),
+        (IntroducingReranker(), "candidate_introduced"),
+        (CountChangingReranker(), "candidate_count_changed"),
+        (Top3SourceLossReranker(), "top3_source_identity_lost"),
+        (Top5CoverageLossReranker(), "top5_source_coverage_lost"),
+        (MetadataMutatingReranker(), "grounding_metadata_mutated"),
+    ],
+)
+def test_fail_closed_wrapper_falls_back_on_runtime_invariant_violations(reranker, expected_reason):
+    candidates = source_distinct_candidates(6)
+
+    result = rerank_candidates_fail_closed("source priority policy", candidates, reranker, top_k=6)
+
+    assert [row["chunk_id"] for row in result.candidates] == [row["chunk_id"] for row in candidates]
+    assert expected_reason in result.fallback_reasons

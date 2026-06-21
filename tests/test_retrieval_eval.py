@@ -309,6 +309,24 @@ def test_parser_accepts_deterministic_test_reranker():
     assert args.reranker == module.RERANKER_DETERMINISTIC_TEST
 
 
+def test_parser_defaults_to_direct_reranker_policy():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args([])
+
+    assert args.reranker_policy == module.RERANKER_POLICY_DIRECT
+
+
+def test_parser_accepts_fail_closed_reranker_policy():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args(
+        ["--retriever", "mvp003", "--reranker", "deterministic-test", "--reranker-policy", "fail-closed"]
+    )
+
+    assert args.reranker_policy == module.RERANKER_POLICY_FAIL_CLOSED
+
+
 def test_build_reranker_selects_explicit_modes():
     module = load_eval_module()
 
@@ -655,6 +673,39 @@ def test_deterministic_test_reranker_eval_reorders_rows_and_preserves_original_r
     assert row["reranker_metadata"]["reranked_rank"] == 1
 
 
+def test_fail_closed_policy_falls_back_and_reports_diagnostics():
+    module = load_eval_module()
+    question = eval_question()
+    base_rows = source_at3_regression_fixture_rows()
+    results = {"Q1": base_rows}
+
+    application = module.apply_reranker_to_results_with_diagnostics(
+        [question],
+        results,
+        reranker=module.build_reranker(module.RERANKER_DETERMINISTIC_TEST),
+        limit=5,
+        reranker_policy=module.RERANKER_POLICY_FAIL_CLOSED,
+    )
+
+    assert [row["chunk_id"] for row in application.results_by_question["Q1"]] == [row["chunk_id"] for row in base_rows]
+    assert application.fallback_diagnostics == {"Q1": ("top3_source_identity_lost",)}
+
+
+def test_direct_policy_keeps_deterministic_test_behavior_unchanged():
+    module = load_eval_module()
+    question = eval_question()
+    base_rows = source_at3_regression_fixture_rows()
+
+    reranked = module.apply_reranker_to_results(
+        [question],
+        {"Q1": base_rows},
+        reranker=module.build_reranker(module.RERANKER_DETERMINISTIC_TEST),
+        limit=5,
+    )
+
+    assert [row["chunk_id"] for row in reranked["Q1"]][:3] != [row["chunk_id"] for row in base_rows][:3]
+
+
 def test_deterministic_test_reranker_eval_preserves_metadata_fields():
     module = load_eval_module()
     question = eval_question()
@@ -915,6 +966,81 @@ def test_json_summary_is_backward_compatible_and_additive_for_reranker(tmp_path,
     assert comparison["top3_source_identity_preserved_count"] == 1
     assert comparison["candidate_dropped_count"] == 0
     assert comparison["would_fail_closed_reasons"] == {}
+    assert "fallback_count" not in comparison
+    assert "reranker_policy" not in comparison
+
+
+def test_fail_closed_json_summary_adds_fallback_diagnostics_only_when_enabled(tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(results_path, [{"question_id": "Q1", "results": source_at3_regression_fixture_rows()}])
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+            "--reranker",
+            module.RERANKER_DETERMINISTIC_TEST,
+            "--reranker-policy",
+            module.RERANKER_POLICY_FAIL_CLOSED,
+            "--limit",
+            "5",
+            "--json",
+        ]
+    )
+
+    assert exit_code == 0
+    payload = json.loads(capsys.readouterr().out)
+    comparison = payload["reranker_comparison"]
+    assert payload["source_file_match_at_3"] == 1.0
+    assert comparison["reranker_policy"] == module.RERANKER_POLICY_FAIL_CLOSED
+    assert comparison["fallback_count"] == 1
+    assert comparison["fallback_reasons"] == {"top3_source_identity_lost": 1}
+    assert comparison["fallback_by_question"] == [
+        {"question_id": "Q1", "fallback_reasons": ["top3_source_identity_lost"]}
+    ]
+    assert comparison["source_file_match_at_3_delta"] == 0.0
+
+
+def test_fail_closed_stdout_summary_is_additive_only_when_enabled(tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(results_path, [{"question_id": "Q1", "results": source_at3_regression_fixture_rows()}])
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+            "--reranker",
+            module.RERANKER_DETERMINISTIC_TEST,
+            "--reranker-policy",
+            module.RERANKER_POLICY_FAIL_CLOSED,
+            "--limit",
+            "5",
+        ]
+    )
+
+    assert exit_code == 0
+    output = capsys.readouterr().out
+    assert "Candidate preservation:" in output
+    assert "Fail-closed fallback:" in output
+    assert "Fallback count: 1/1" in output
 
 
 def test_json_summary_without_reranker_keeps_existing_shape(tmp_path, capsys):
@@ -944,6 +1070,35 @@ def test_json_summary_without_reranker_keeps_existing_shape(tmp_path, capsys):
     assert exit_code == 0
     payload = json.loads(capsys.readouterr().out)
     assert "reranker_comparison" not in payload
+
+
+def test_stdout_without_reranker_keeps_existing_shape(tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(
+        results_path,
+        [{"question_id": "Q1", "results": [eval_candidate("weak", rank=1, section="Source Priority Policy", text="source priority policy")]}],
+    )
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+        ]
+    )
+
+    assert exit_code == 0
+    output = capsys.readouterr().out
+    assert "Candidate preservation:" not in output
+    assert "Fail-closed fallback:" not in output
 
 
 def test_emit_line_flushes_output_stream():
@@ -1018,6 +1173,22 @@ def eval_candidate_for_source(
     row["source_file"] = source_file
     row["content_hash"] = f"{chunk_id:0<64}"[:64]
     return row
+
+
+def source_at3_regression_fixture_rows() -> list[dict]:
+    expected = eval_candidate_for_source("expected", source_id="EXPECTED", source_file="AGENTS.md", rank=1)
+    expected["text"] = "unrelated"
+    expected["section"] = "General"
+    expected["section_heading"] = "General"
+    expected["section_path"] = ["Governance", "General"]
+    expected["heading_context"] = "Governance > General"
+    return [
+        expected,
+        eval_candidate_for_source("other-1", source_id="OTHER-1", source_file="README-1.md", rank=2),
+        eval_candidate_for_source("other-2", source_id="OTHER-2", source_file="README-2.md", rank=3),
+        eval_candidate_for_source("other-3", source_id="OTHER-3", source_file="README-3.md", rank=4),
+        eval_candidate_for_source("other-4", source_id="OTHER-4", source_file="README-4.md", rank=5),
+    ]
 
 
 def fake_mvp003_result(row: dict, source_id: str = "ASP-P0-EVAL", score: float = 1.0):
