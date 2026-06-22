@@ -327,6 +327,22 @@ def test_parser_accepts_fail_closed_reranker_policy():
     assert args.reranker_policy == module.RERANKER_POLICY_FAIL_CLOSED
 
 
+def test_parser_defaults_to_thresholds_disabled():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args([])
+
+    assert args.enforce_thresholds is False
+
+
+def test_parser_accepts_threshold_enforcement():
+    module = load_eval_module()
+
+    args = module.build_parser().parse_args(["--retriever", "mvp003", "--enforce-thresholds"])
+
+    assert args.enforce_thresholds is True
+
+
 def test_build_reranker_selects_explicit_modes():
     module = load_eval_module()
 
@@ -1099,6 +1115,151 @@ def test_stdout_without_reranker_keeps_existing_shape(tmp_path, capsys):
     output = capsys.readouterr().out
     assert "Candidate preservation:" not in output
     assert "Fail-closed fallback:" not in output
+
+
+def test_threshold_report_passes_when_profile_minimums_are_met():
+    module = load_eval_module()
+    summary = {
+        "source_file_match_at_5": 1.0,
+        "source_priority_match": 1.0,
+        "evidence_label_match": 1.0,
+        "section_match": 0.95,
+        "path_context_match": 1.0,
+        "overall_pass_rate": 0.95,
+    }
+
+    report = module.evaluate_thresholds(summary, "mvp003")
+
+    assert report["profile"] == "mvp003"
+    assert report["passed"] is True
+    assert report["failures"] == []
+
+
+def test_threshold_report_fails_when_required_metric_regresses():
+    module = load_eval_module()
+    summary = {
+        "source_file_match_at_5": 1.0,
+        "source_priority_match": 1.0,
+        "evidence_label_match": 1.0,
+        "section_match": 0.75,
+        "path_context_match": 1.0,
+        "overall_pass_rate": 0.89,
+    }
+
+    report = module.evaluate_thresholds(summary, "mvp003")
+
+    assert report["passed"] is False
+    assert [failure["metric"] for failure in report["failures"]] == ["section_match", "overall_pass_rate"]
+
+
+def test_threshold_report_treats_unavailable_metric_as_not_applicable():
+    module = load_eval_module()
+    summary = {
+        "source_file_match_at_5": 1.0,
+        "source_priority_match": 1.0,
+        "evidence_label_match": 1.0,
+        "section_match": 1.0,
+        "path_context_match": None,
+        "overall_pass_rate": 1.0,
+    }
+
+    report = module.evaluate_thresholds(summary, "hybrid")
+
+    assert report["passed"] is True
+    path_context_metric = next(metric for metric in report["metrics"] if metric["metric"] == "path_context_match")
+    assert path_context_metric["not_applicable"] is True
+    assert path_context_metric["passed"] is True
+
+
+def test_threshold_enforcement_returns_nonzero_on_failure(tmp_path):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(
+        results_path,
+        [
+            {
+                "question_id": "Q1",
+                "results": [
+                    {
+                        "source_file": "README.md",
+                        "source_priority": "P1",
+                        "evidence_label": "Inference",
+                        "section": "Other",
+                        "title": "README",
+                        "text": "Other text",
+                    }
+                ],
+            }
+        ],
+    )
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+            "--retriever",
+            "mvp003",
+            "--enforce-thresholds",
+            "--json",
+        ]
+    )
+
+    assert exit_code == 1
+
+
+def test_progress_logging_uses_stderr_and_preserves_json_stdout(tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    results_path = tmp_path / "results.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+    write_jsonl(
+        results_path,
+        [
+            {
+                "question_id": "Q1",
+                "results": [
+                    {
+                        "source_file": "AGENTS.md",
+                        "source_priority": "P0",
+                        "evidence_label": "Document-Supported Fact",
+                        "section": "Source Priority Policy",
+                        "title": "AGENTS",
+                        "text": "Source Priority Policy and evidence hierarchy",
+                    }
+                ],
+            }
+        ],
+    )
+
+    exit_code = module.main(
+        [
+            "--questions",
+            str(questions_path),
+            "--expected",
+            str(expected_path),
+            "--results-jsonl",
+            str(results_path),
+            "--retriever",
+            "baseline",
+            "--json",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert json.loads(captured.out)["overall_pass_rate"] == 1.0
+    assert "[retrieval-eval] loading questions" in captured.err
+    assert "[retrieval-eval] aggregating retrieval metrics" in captured.err
 
 
 def test_emit_line_flushes_output_stream():
