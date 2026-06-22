@@ -402,4 +402,3 @@ def _validate_tuple(field_name: str, items: tuple[Any, ...]) -> tuple[str, ...]:
             continue
         errors.extend(f"{field_name}: {error}" for error in validate())
     return tuple(errors)
-
