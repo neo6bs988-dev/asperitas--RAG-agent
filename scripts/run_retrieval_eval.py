@@ -5,7 +5,7 @@ import faulthandler
 import gc
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -163,6 +163,12 @@ class EvalQuestion:
     difficulty: str
     category: str
     expected_path_context: str = ""
+    expected_source_id: str = ""
+    accepted_sources: tuple[str, ...] = ()
+    accepted_aliases: tuple[str, ...] = ()
+    accepted_source_ids: tuple[str, ...] = ()
+    oracle_notes: str = ""
+    multi_valid_source: bool = False
 
 
 @dataclass(frozen=True)
@@ -173,6 +179,31 @@ class RerankerApplication:
 
 def normalize_path(value: str) -> str:
     return value.replace("\\", "/").strip().casefold()
+
+
+def normalize_oracle_text(value: str) -> str:
+    normalized = normalize_section_text(normalize_path(value))
+    return " ".join(normalized.split())
+
+
+def optional_string_list(row: dict[str, Any], field_name: str) -> tuple[str, ...]:
+    value = row.get(field_name)
+    if value is None or value == "":
+        return ()
+    if isinstance(value, str):
+        return (value,)
+    if isinstance(value, list):
+        return tuple(str(item) for item in value if str(item).strip())
+    raise EvalError(f"{field_name} must be a string or list of strings")
+
+
+def optional_bool(row: dict[str, Any], field_name: str) -> bool:
+    value = row.get(field_name)
+    if value is None or value == "":
+        return False
+    if isinstance(value, bool):
+        return value
+    raise EvalError(f"{field_name} must be a boolean")
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -223,6 +254,12 @@ def load_questions(path: Path) -> list[EvalQuestion]:
                 difficulty=str(row["difficulty"]),
                 category=str(row["category"]),
                 expected_path_context=str(row.get("expected_path_context") or ""),
+                expected_source_id=str(row.get("expected_source_id") or row.get("source_id") or ""),
+                accepted_sources=optional_string_list(row, "accepted_sources"),
+                accepted_aliases=optional_string_list(row, "accepted_aliases"),
+                accepted_source_ids=optional_string_list(row, "accepted_source_ids"),
+                oracle_notes=str(row.get("oracle_notes") or ""),
+                multi_valid_source=optional_bool(row, "multi_valid_source"),
             )
         )
     return questions
@@ -256,6 +293,28 @@ def validate_expected_alignment(questions: list[EvalQuestion], expected: dict[st
         for field in ("expected_source_file", "expected_source_priority", "expected_evidence_label"):
             if str(row[field]) != getattr(question, field):
                 raise EvalError(f"{question.question_id} mismatch between questions and expected_sources for {field}")
+
+
+def merge_expected_oracle_fields(
+    questions: list[EvalQuestion],
+    expected: dict[str, dict[str, Any]],
+) -> list[EvalQuestion]:
+    merged: list[EvalQuestion] = []
+    for question in questions:
+        row = expected[question.question_id]
+        merged.append(
+            replace(
+                question,
+                expected_source_id=question.expected_source_id
+                or str(row.get("expected_source_id") or row.get("source_id") or ""),
+                accepted_sources=question.accepted_sources or optional_string_list(row, "accepted_sources"),
+                accepted_aliases=question.accepted_aliases or optional_string_list(row, "accepted_aliases"),
+                accepted_source_ids=question.accepted_source_ids or optional_string_list(row, "accepted_source_ids"),
+                oracle_notes=question.oracle_notes or str(row.get("oracle_notes") or ""),
+                multi_valid_source=question.multi_valid_source or optional_bool(row, "multi_valid_source"),
+            )
+        )
+    return merged
 
 
 def load_simulated_results(path: Path) -> dict[str, list[dict[str, Any]]]:
@@ -1024,14 +1083,62 @@ def contains_path_context(result: dict[str, Any], expected_path_context: str) ->
     return bool(normalized_needle and normalized_needle in normalized_source_file)
 
 
+def source_matches_strict(question: EvalQuestion, result: dict[str, Any]) -> bool:
+    return normalize_path(str(result.get("source_file", ""))) == normalize_path(question.expected_source_file)
+
+
+def source_matches_relaxed(question: EvalQuestion, result: dict[str, Any]) -> tuple[bool, str]:
+    if source_matches_strict(question, result):
+        return True, "expected_source_file"
+
+    source_file = str(result.get("source_file", ""))
+    source_id = str(result.get("source_id", ""))
+    title = str(result.get("title", ""))
+    normalized_source_file = normalize_path(source_file)
+    accepted_sources = {normalize_path(value) for value in question.accepted_sources}
+    if normalized_source_file in accepted_sources:
+        return True, "accepted_sources"
+
+    accepted_source_ids = {value.strip().casefold() for value in question.accepted_source_ids if value.strip()}
+    expected_source_id = question.expected_source_id.strip().casefold()
+    if expected_source_id:
+        accepted_source_ids.add(expected_source_id)
+    if source_id.strip().casefold() in accepted_source_ids:
+        return True, "accepted_source_ids"
+
+    if question.accepted_aliases:
+        haystack = normalize_oracle_text(" ".join([source_file, source_id, title]))
+        for alias in question.accepted_aliases:
+            normalized_alias = normalize_oracle_text(alias)
+            if normalized_alias and normalized_alias in haystack:
+                return True, "accepted_aliases"
+
+    return False, ""
+
+
+def first_relaxed_source_match(question: EvalQuestion, results: list[dict[str, Any]]) -> tuple[dict[str, Any] | None, str]:
+    for result in results:
+        matched, basis = source_matches_relaxed(question, result)
+        if matched:
+            return result, basis
+    return None, ""
+
+
+def combine_optional_matches(values: list[bool | None]) -> bool | None:
+    if any(value is True for value in values):
+        return True
+    if all(value is None for value in values):
+        return None
+    return False
+
+
 def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dict[str, Any]:
-    expected_file = normalize_path(question.expected_source_file)
     top3 = results[:3]
     top5 = results[:5]
-    matched = next((result for result in top5 if normalize_path(str(result.get("source_file", ""))) == expected_file), None)
+    matched = next((result for result in top5 if source_matches_strict(question, result)), None)
     section_match = contains_section(matched, question.expected_chunk_or_section) if matched else (None if not question.expected_chunk_or_section else False)
     path_context_match = contains_path_context(matched, question.expected_path_context) if matched else (None if not question.expected_path_context else False)
-    source_file_match_top3 = any(normalize_path(str(result.get("source_file", ""))) == expected_file for result in top3)
+    source_file_match_top3 = any(source_matches_strict(question, result) for result in top3)
     source_file_match_top5 = matched is not None
     source_priority_match = bool(matched and str(matched.get("source_priority")) == question.expected_source_priority)
     evidence_label_match = bool(matched and str(matched.get("evidence_label", question.expected_evidence_label)) == question.expected_evidence_label)
@@ -1042,6 +1149,66 @@ def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dic
         and section_match is not False
         and path_context_match is not False
     )
+
+    relaxed_candidates = [
+        (result, basis)
+        for result in top5
+        for relaxed_match, basis in [source_matches_relaxed(question, result)]
+        if relaxed_match
+    ]
+
+    def candidate_source_priority_match(result: dict[str, Any]) -> bool:
+        return str(result.get("source_priority")) == question.expected_source_priority
+
+    def candidate_evidence_label_match(result: dict[str, Any]) -> bool:
+        return str(result.get("evidence_label", question.expected_evidence_label)) == question.expected_evidence_label
+
+    def candidate_section_match(result: dict[str, Any]) -> bool | None:
+        return contains_section(result, question.expected_chunk_or_section)
+
+    def candidate_path_context_match(result: dict[str, Any]) -> bool | None:
+        return contains_path_context(result, question.expected_path_context)
+
+    def candidate_overall_pass(result: dict[str, Any]) -> bool:
+        candidate_section = candidate_section_match(result)
+        candidate_path_context = candidate_path_context_match(result)
+        return bool(
+            candidate_source_priority_match(result)
+            and candidate_evidence_label_match(result)
+            and candidate_section is not False
+            and candidate_path_context is not False
+        )
+
+    relaxed_passing_candidate = next(
+        ((result, basis) for result, basis in relaxed_candidates if candidate_overall_pass(result)),
+        None,
+    )
+    if overall_pass and matched:
+        relaxed_matched, relaxed_match_basis = matched, "expected_source_file"
+    elif relaxed_passing_candidate:
+        relaxed_matched, relaxed_match_basis = relaxed_passing_candidate
+    elif matched:
+        relaxed_matched, relaxed_match_basis = matched, "expected_source_file"
+    elif relaxed_candidates:
+        relaxed_matched, relaxed_match_basis = relaxed_candidates[0]
+    else:
+        relaxed_matched, relaxed_match_basis = None, ""
+
+    relaxed_source_match_top3 = source_file_match_top3 or any(source_matches_relaxed(question, result)[0] for result in top3)
+    relaxed_source_match_top5 = source_file_match_top5 or bool(relaxed_candidates)
+    relaxed_source_priority_match = source_priority_match or any(
+        candidate_source_priority_match(result) for result, _basis in relaxed_candidates
+    )
+    relaxed_evidence_label_match = evidence_label_match or any(
+        candidate_evidence_label_match(result) for result, _basis in relaxed_candidates
+    )
+    relaxed_section_match = combine_optional_matches(
+        [section_match] + [candidate_section_match(result) for result, _basis in relaxed_candidates]
+    )
+    relaxed_path_context_match = combine_optional_matches(
+        [path_context_match] + [candidate_path_context_match(result) for result, _basis in relaxed_candidates]
+    )
+    relaxed_overall_pass = overall_pass or any(candidate_overall_pass(result) for result, _basis in relaxed_candidates)
     return {
         "question_id": question.question_id,
         "source_file_match_top3": source_file_match_top3,
@@ -1052,6 +1219,20 @@ def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dic
         "path_context_match": path_context_match,
         "overall_pass": overall_pass,
         "top_result_source_file": str(results[0].get("source_file", "")) if results else "",
+        "strict_source_match_top3": source_file_match_top3,
+        "strict_source_match_top5": source_file_match_top5,
+        "strict_overall_pass": overall_pass,
+        "relaxed_source_match_top3": relaxed_source_match_top3,
+        "relaxed_source_match_top5": relaxed_source_match_top5,
+        "relaxed_source_priority_match": relaxed_source_priority_match,
+        "relaxed_evidence_label_match": relaxed_evidence_label_match,
+        "relaxed_section_match": relaxed_section_match,
+        "relaxed_path_context_match": relaxed_path_context_match,
+        "relaxed_overall_pass": relaxed_overall_pass,
+        "relaxed_matched_source_file": str(relaxed_matched.get("source_file", "")) if relaxed_matched else "",
+        "relaxed_match_basis": relaxed_match_basis,
+        "multi_valid_source": question.multi_valid_source,
+        "oracle_notes": question.oracle_notes,
     }
 
 
@@ -1076,6 +1257,14 @@ def score_results(questions: list[EvalQuestion], results_by_question: dict[str, 
     path_context_rate = None
     if path_context_rows:
         path_context_rate = sum(1 for row in path_context_rows if row["path_context_match"]) / len(path_context_rows)
+    relaxed_section_rows = [row for row in per_question if row["relaxed_section_match"] is not None]
+    relaxed_section_rate = None
+    if relaxed_section_rows:
+        relaxed_section_rate = sum(1 for row in relaxed_section_rows if row["relaxed_section_match"]) / len(relaxed_section_rows)
+    relaxed_path_context_rows = [row for row in per_question if row["relaxed_path_context_match"] is not None]
+    relaxed_path_context_rate = None
+    if relaxed_path_context_rows:
+        relaxed_path_context_rate = sum(1 for row in relaxed_path_context_rows if row["relaxed_path_context_match"]) / len(relaxed_path_context_rows)
     return {
         "total_questions": total,
         "source_file_match_at_3": rate("source_file_match_top3"),
@@ -1085,6 +1274,17 @@ def score_results(questions: list[EvalQuestion], results_by_question: dict[str, 
         "section_match": section_rate,
         "path_context_match": path_context_rate,
         "overall_pass_rate": rate("overall_pass"),
+        "strict_source_match_at_3": rate("strict_source_match_top3"),
+        "strict_source_match_at_5": rate("strict_source_match_top5"),
+        "strict_overall_pass_rate": rate("strict_overall_pass"),
+        "relaxed_source_match_at_3": rate("relaxed_source_match_top3"),
+        "relaxed_source_match_at_5": rate("relaxed_source_match_top5"),
+        "relaxed_source_priority_match": rate("relaxed_source_priority_match"),
+        "relaxed_evidence_label_match": rate("relaxed_evidence_label_match"),
+        "relaxed_section_match": relaxed_section_rate,
+        "relaxed_path_context_match": relaxed_path_context_rate,
+        "relaxed_overall_pass_rate": rate("relaxed_overall_pass"),
+        "multi_valid_source_question_count": sum(1 for question in questions if question.multi_valid_source),
         "per_question": per_question,
     }
 
@@ -1157,6 +1357,16 @@ def print_summary(summary: dict[str, Any], mode: str) -> None:
     if summary["path_context_match"] is not None:
         emit_line(f"Path context match: {format_percent(summary['path_context_match'])}")
     emit_line(f"Overall pass rate: {format_percent(summary['overall_pass_rate'])}")
+    emit_line("Relaxed oracle metrics:")
+    emit_line(f"Relaxed source match @3: {format_percent(summary['relaxed_source_match_at_3'])}")
+    emit_line(f"Relaxed source match @5: {format_percent(summary['relaxed_source_match_at_5'])}")
+    emit_line(f"Relaxed source priority match: {format_percent(summary['relaxed_source_priority_match'])}")
+    emit_line(f"Relaxed evidence label match: {format_percent(summary['relaxed_evidence_label_match'])}")
+    emit_line(f"Relaxed section match: {format_percent(summary['relaxed_section_match'])}")
+    if summary["relaxed_path_context_match"] is not None:
+        emit_line(f"Relaxed path context match: {format_percent(summary['relaxed_path_context_match'])}")
+    emit_line(f"Relaxed overall pass rate: {format_percent(summary['relaxed_overall_pass_rate'])}")
+    emit_line(f"Multi-valid source questions: {summary['multi_valid_source_question_count']}")
     comparison = summary.get("reranker_comparison")
     if comparison:
         emit_line(f"Reranker: {comparison['reranker']}")
@@ -1250,6 +1460,7 @@ def main(argv: list[str] | None = None) -> int:
         expected = load_expected_sources(args.expected)
         emit_progress("validating expected source alignment")
         validate_expected_alignment(questions, expected)
+        questions = merge_expected_oracle_fields(questions, expected)
         if args.results_jsonl:
             emit_progress(f"loading external results: {args.results_jsonl}")
             mode = "external-results"

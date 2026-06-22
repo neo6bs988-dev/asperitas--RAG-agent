@@ -221,6 +221,193 @@ def test_score_results_counts_path_context_separately_from_section():
     assert summary["overall_pass_rate"] == 1.0
 
 
+def test_merge_expected_oracle_fields_adds_optional_relaxed_metadata():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+    )
+    expected = {
+        "Q1": {
+            "question_id": "Q1",
+            "expected_source_file": "AGENTS.md",
+            "expected_source_priority": "P0",
+            "expected_evidence_label": "Document-Supported Fact",
+            "expected_source_id": "ASP-P0-AGENTS",
+            "accepted_sources": ["README.md"],
+            "accepted_aliases": ["source policy mirror"],
+            "accepted_source_ids": ["ASP-P0-README"],
+            "multi_valid_source": True,
+            "oracle_notes": "AGENTS and README both describe source policy.",
+        }
+    }
+
+    merged = module.merge_expected_oracle_fields([question], expected)[0]
+
+    assert merged.expected_source_id == "ASP-P0-AGENTS"
+    assert merged.accepted_sources == ("README.md",)
+    assert merged.accepted_aliases == ("source policy mirror",)
+    assert merged.accepted_source_ids == ("ASP-P0-README",)
+    assert merged.multi_valid_source is True
+    assert merged.oracle_notes == "AGENTS and README both describe source policy."
+
+
+def test_relaxed_accepted_sources_do_not_replace_strict_metrics():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+        accepted_sources=("README.md",),
+        multi_valid_source=True,
+    )
+    results = {
+        "Q1": [
+            {
+                "source_file": "README.md",
+                "source_id": "ASP-P0-README",
+                "source_priority": "P0",
+                "evidence_label": "Document-Supported Fact",
+                "section": "Source Priority Policy",
+                "title": "README",
+                "text": "Source Priority Policy and evidence hierarchy",
+            }
+        ]
+    }
+
+    summary = module.score_results([question], results)
+    row = summary["per_question"][0]
+
+    assert summary["source_file_match_at_5"] == 0.0
+    assert summary["overall_pass_rate"] == 0.0
+    assert summary["relaxed_source_match_at_5"] == 1.0
+    assert summary["relaxed_overall_pass_rate"] == 1.0
+    assert row["relaxed_match_basis"] == "accepted_sources"
+    assert row["multi_valid_source"] is True
+
+
+def test_relaxed_metrics_preserve_strict_pass_when_accepted_source_ranks_first():
+    module = load_eval_module()
+    question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+        accepted_sources=("README.md",),
+        multi_valid_source=True,
+    )
+    results = {
+        "Q1": [
+            {
+                "source_file": "README.md",
+                "source_id": "ASP-P0-README",
+                "source_priority": "P0",
+                "evidence_label": "Document-Supported Fact",
+                "section": "General Governance",
+                "title": "README",
+                "text": "General governance mirror.",
+            },
+            {
+                "source_file": "AGENTS.md",
+                "source_id": "ASP-P0-AGENTS",
+                "source_priority": "P0",
+                "evidence_label": "Document-Supported Fact",
+                "section": "Source Priority Policy",
+                "title": "AGENTS",
+                "text": "Source Priority Policy and evidence hierarchy",
+            },
+        ]
+    }
+
+    summary = module.score_results([question], results)
+    row = summary["per_question"][0]
+
+    assert summary["overall_pass_rate"] == 1.0
+    assert summary["relaxed_overall_pass_rate"] == 1.0
+    assert row["relaxed_match_basis"] == "expected_source_file"
+    assert row["relaxed_section_match"] is True
+
+
+def test_relaxed_source_id_and_alias_matching_are_additive():
+    module = load_eval_module()
+    source_id_question = module.EvalQuestion(
+        question_id="Q1",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+        accepted_source_ids=("ASP-P0-README",),
+    )
+    alias_question = module.EvalQuestion(
+        question_id="Q2",
+        user_question="What is the source priority policy?",
+        expected_source_file="AGENTS.md",
+        expected_source_priority="P0",
+        expected_chunk_or_section="Source Priority Policy",
+        expected_evidence_label="Document-Supported Fact",
+        rationale="AGENTS.md defines the source policy.",
+        difficulty="easy",
+        category="source_governance",
+        accepted_aliases=("source policy mirror",),
+    )
+    results = {
+        "Q1": [
+            {
+                "source_file": "README.md",
+                "source_id": "ASP-P0-README",
+                "source_priority": "P0",
+                "evidence_label": "Document-Supported Fact",
+                "section": "Source Priority Policy",
+                "title": "README",
+                "text": "Source Priority Policy",
+            }
+        ],
+        "Q2": [
+            {
+                "source_file": "docs/source-policy-mirror.md",
+                "source_id": "ASP-P0-MIRROR",
+                "source_priority": "P0",
+                "evidence_label": "Document-Supported Fact",
+                "section": "Source Priority Policy",
+                "title": "Source Policy Mirror",
+                "text": "Source Priority Policy",
+            }
+        ],
+    }
+
+    first = module.score_question(source_id_question, results["Q1"])
+    second = module.score_question(alias_question, results["Q2"])
+
+    assert first["source_file_match_top5"] is False
+    assert first["relaxed_source_match_top5"] is True
+    assert first["relaxed_match_basis"] == "accepted_source_ids"
+    assert second["source_file_match_top5"] is False
+    assert second["relaxed_source_match_top5"] is True
+    assert second["relaxed_match_basis"] == "accepted_aliases"
+
+
 def test_path_context_does_not_satisfy_section_expectation():
     module = load_eval_module()
     question = module.EvalQuestion(
