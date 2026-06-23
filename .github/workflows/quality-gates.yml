@@ -18,7 +18,7 @@ jobs:
   quality-gates:
     name: tests-artifacts-retrieval-eval
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       PYTHONUNBUFFERED: "1"
 
@@ -50,3 +50,6 @@ jobs:
 
       - name: Run MVP-003 metadata-aware retrieval eval
         run: python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
+
+      - name: Run hybrid retrieval eval
+        run: python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
