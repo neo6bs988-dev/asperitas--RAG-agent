@@ -17,6 +17,24 @@ from asperitas_agent.skill_registry import (
 )
 
 
+STAGE_APPROPRIATE_MVP016D_SKILLS = (
+    "asperitas_audit_trace",
+    "asperitas_compliance_audit",
+    "asperitas_evaluation",
+    "asperitas_mcp_expansion",
+    "asperitas_rag_development",
+    "asperitas_retrieval",
+    "asperitas_security",
+    "asperitas_source_audit",
+    "asperitas_v1_architect",
+    "asperitas_workflow",
+    "dependency_security_quality_gate",
+    "mvp_release_manager",
+    "performance_optimization_gate",
+    "source_grounding_citation",
+)
+
+
 def invalid_spec(**overrides):
     kwargs = {
         "skill_id": "invalid_skill",
@@ -58,6 +76,12 @@ def test_all_default_specs_validate():
         assert skill.validate() == ()
 
 
+def test_stage_appropriate_mvp016d_skills_are_registered():
+    registered = set(list_skill_ids())
+
+    assert set(STAGE_APPROPRIATE_MVP016D_SKILLS).issubset(registered)
+
+
 def test_unknown_skill_returns_unsupported_blocked():
     decision = DEFAULT_SKILL_REGISTRY.lookup_decision("unknown_skill")
 
@@ -80,6 +104,16 @@ def test_high_risk_skill_requires_approval():
     high_risk_without_approval = invalid_spec(risk_level="high", approval_required=False)
 
     assert "risk_policy: high-risk skill requires approval_required=true" in high_risk_without_approval.validate()
+
+
+def test_new_stage_appropriate_skills_require_approval():
+    for skill_id in STAGE_APPROPRIATE_MVP016D_SKILLS:
+        skill = require_skill(skill_id)
+
+        assert skill.risk_level == "high"
+        assert skill.approval_required is True
+        assert skill.audit_required is True
+        assert skill.source_grounding_required is True
 
 
 def test_external_call_execution_and_ingestion_default_false():
