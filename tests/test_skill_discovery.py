@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from asperitas_agent.skill_discovery import (
+    SKILL_ALIASES,
     discover_skill_files,
     validate_skill_files_against_registry,
 )
@@ -14,6 +15,11 @@ from asperitas_agent.skill_registry import SkillRegistry, require_skill
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "validate_skill_registry.py"
+EXPECTED_REMAINING_WARNINGS = [
+    "unknown well-formed skill file: embeddings-vector-db-mvp005",
+    "unknown well-formed skill file: github-pr-review",
+    "unknown well-formed skill file: open-source-adoption-review",
+]
 
 
 def write_skill(root: Path, directory: str, frontmatter: str, body: str = "# Body\n") -> Path:
@@ -58,7 +64,21 @@ def test_validates_current_default_registry_against_repo_skill_files():
     assert report["missing_skill_files"] == []
     assert report["invalid_frontmatter"] == []
     assert report["errors"] == []
-    assert report["warnings"]
+    assert report["warnings"] == EXPECTED_REMAINING_WARNINGS
+
+
+def test_no_missing_skill_files_for_registered_default_skills():
+    report = validate_skill_files_against_registry(REPO_ROOT).to_dict()
+
+    assert report["missing_skill_files"] == []
+
+
+def test_skill_aliases_are_documented_and_stable():
+    assert SKILL_ALIASES == {
+        "benchmark_workflow_preflight": ("benchmark-workflow-preflight", "mvp-implementation"),
+        "compliance_review": ("compliance-review", "compliance-biosafety-review"),
+        "retrieval_eval": ("retrieval-eval", "retrieval-eval-quality-gate"),
+    }
 
 
 def test_underscore_hyphen_matching_works(tmp_path):
