@@ -1,0 +1,24 @@
+# Repository ownership for Asperitas Agent
+# GitHub uses CODEOWNERS on the base branch to request review from owners.
+
+* @neo6bs988-dev
+
+# Governance and security files require owner review.
+/.github/ @neo6bs988-dev
+/AGENTS.md @neo6bs988-dev
+/README.md @neo6bs988-dev
+/SECURITY.md @neo6bs988-dev
+
+# Source governance, docs, and decision logs require owner review.
+/00_ADMIN/ @neo6bs988-dev
+/01_RAW_SOURCES/ @neo6bs988-dev
+/02_REDACTED_SOURCES/ @neo6bs988-dev
+/03_PROCESSED_KB/ @neo6bs988-dev
+/docs/ @neo6bs988-dev
+/09_LOGS/ @neo6bs988-dev
+
+# Agent skills and source code require owner review.
+/.agents/ @neo6bs988-dev
+/src/ @neo6bs988-dev
+/tests/ @neo6bs988-dev
+/scripts/ @neo6bs988-dev
