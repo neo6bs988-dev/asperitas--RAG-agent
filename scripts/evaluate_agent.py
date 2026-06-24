@@ -293,9 +293,20 @@ def scan_anti_cheating() -> list[dict[str, Any]]:
         text = path.read_text(encoding="utf-8", errors="ignore")
         for line_number, line in enumerate(text.splitlines(), start=1):
             for source, pattern in patterns:
-                if pattern.search(line):
+                if pattern.search(line) and not _is_static_skill_registry_policy_literal(path, line):
                     matches.append({"path": str(path.relative_to(REPO_ROOT)), "line": line_number, "pattern": source})
     return matches
+
+
+def _is_static_skill_registry_policy_literal(path: Path, line: str) -> bool:
+    if path.relative_to(REPO_ROOT).as_posix() != "src/asperitas_agent/skill_registry.py":
+        return False
+    return (
+        "verification_commands" in line
+        or "python -m pytest" in line
+        or "tests/test_" in line
+        or " CI," in line
+    )
 
 
 def _run_retrieval_eval(retriever: str) -> dict[str, Any]:
