@@ -15,7 +15,7 @@ Default eval commands remain unchanged. Thresholds are enforced only when `--enf
 
 ## Metric Set
 
-The gate uses the existing retrieval eval vocabulary:
+The gate uses the existing strict retrieval eval vocabulary:
 
 - `source_file_match_at_5`
 - `source_priority_match`
@@ -25,6 +25,8 @@ The gate uses the existing retrieval eval vocabulary:
 - `overall_pass_rate`
 
 `source_file_match_at_3` remains report-only for now. It should be used for reranker analysis and future stricter top-k policy, but it is not yet a hard fail threshold.
+
+Relaxed oracle metrics such as `relaxed_source_match_at_5` and `relaxed_overall_pass_rate` are report-only. They diagnose accepted-source, alias, and multi-valid-source behavior but do not satisfy or replace strict threshold profiles.
 
 ## Threshold Profiles
 
@@ -55,6 +57,7 @@ If a local OS or native-runtime hard exit occurs, use the last `[retrieval-eval]
 - `mvp003` remains the protected deterministic reference retriever.
 - `hybrid` remains an explicit comparison mode, not the default.
 - Thresholds must not relax source priority, evidence label, section, path-context, or metadata preservation gates.
+- Relaxed oracle metrics must remain clearly labeled and separate from strict threshold metrics.
 - Historical metrics must not be treated as fresh threshold evidence.
 - Reranker test-double results must not be claimed as quality improvement unless fresh thresholded evals support that claim.
 

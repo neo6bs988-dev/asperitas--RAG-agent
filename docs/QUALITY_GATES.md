@@ -108,6 +108,7 @@ Required when retrieval, chunking, scoring, metadata filters, embeddings, vector
 - Run `python scripts/run_retrieval_eval.py --retriever hybrid --limit 5` when hybrid retrieval, reranking, eval comparison policy, section substitution, or answer-generation evidence selection is affected.
 - Run explicit reranker eval commands when reranking code, reranker eval plumbing, or reranker policy is affected.
 - Report dataset, settings, pass/fail count, metric deltas, and regressions.
+- When oracle metadata is involved, report strict exact-source metrics and relaxed accepted-source metrics separately.
 
 Pass condition: no unexplained regression in required retrieval metrics.
 

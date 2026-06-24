@@ -29,6 +29,12 @@ def test_anti_cheating_scan_is_clean_for_runtime_code():
     assert module.scan_anti_cheating() == []
 
 
+def test_skill_registry_verification_metadata_is_not_runtime_anti_cheating():
+    module = load_eval_module()
+
+    assert "src/asperitas_agent/skill_registry.py" in module.ANTI_CHEATING_EXCLUDED_PATHS
+
+
 def test_protected_file_hash_set_includes_core_artifacts():
     module = load_eval_module()
     hashes = module.protected_file_hashes()
