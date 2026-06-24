@@ -137,7 +137,12 @@ def _result_from_dict(item: Any, index: int) -> EvalMetricResult:
 def _spec_for_result_mode(spec: EvalMetricSpec, result_mode: str | None) -> EvalMetricSpec:
     if result_mode != "strict":
         return spec
-    return replace(spec, mode="strict", pass_threshold=0.0 if spec.pass_threshold is None else spec.pass_threshold)
+    return replace(
+        spec,
+        mode="strict",
+        pass_threshold=0.0 if spec.pass_threshold is None else spec.pass_threshold,
+        requires_llm_judge=False,
+    )
 
 
 def _unknown_metric_spec(metric_id: str, mode: str = "report_only") -> EvalMetricSpec:
