@@ -4,6 +4,8 @@ Status: reference commands only
 
 These commands are for manual, human-approved release creation after review. Do not run tag or GitHub release commands from automation.
 
+Fresh command output from this manual context is required before publishing release notes, making any GO claim, creating `v1.0.0-rc1`, starting an internal dry-run, or claiming internal release.
+
 ## Verification Commands
 
 ```bash
