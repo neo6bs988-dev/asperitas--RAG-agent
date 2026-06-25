@@ -49,6 +49,7 @@ Risks:
 | P1 | Roadmap advances beyond Closure Matrix. | Checker blocks P0/P1 Fix, Final Regression, tag, dry-run, or internal release completion claims. |
 | P1 | Release-readiness posture is mistaken for final RC, internal release, or production readiness. | Use NO-GO language for later release steps and keep decision log unchanged unless posture changes. |
 | P2 | Future answer-faithfulness and external benchmark parity remain outside V1 matrix scope. | Carry to V1.1 performance handoff. |
+| P1 | Later release-note, RC tag, dry-run, GO, or internal-release claims are made without fresh command output from that later implementing context. | `python scripts/check_v1_p0_p1_gap_fix.py` blocks ambiguous release posture and requires fresh-output guard text in release/readiness docs. |
 
 ## B. Acceptance Matrix
 
@@ -80,6 +81,7 @@ GO here means the V1 gate has documented evidence and passed the listed command 
 | Stage-gate scope | verified | `python scripts/check_v1_stage_gate_scope.py` | exit code 0 in closure verification | P0 none; P1 none; P2 none | Keep later roadmap steps pending. | GO for scope integrity; NO-GO if roadmap advances later steps. |
 | MVP performance pack | verified | `python scripts/check_v1_mvp_performance_pack.py` | exit code 0 in closure verification | P0 none; P1 none; P2 none | Keep scorecard complete. | GO for performance-pack integrity; NO-GO if evidence fields disappear. |
 | Closure matrix | verified | `python scripts/check_v1_performance_closure_matrix.py` | exit code 0 in closure verification | P0 none; P1 none; P2 none | Keep this matrix complete and bounded. | GO for matrix completion after checks pass; NO-GO for later roadmap completion. |
+| P0/P1 gap-fix guard | verified | `python scripts/check_v1_p0_p1_gap_fix.py` | exit code 0 in P0/P1 gap-fix verification | P0 none; P1 release posture and fresh-output guard fixed; P2 unchanged | Keep release/readiness docs draft/posture-only until later fresh command output exists. | GO for P0/P1 gap-fix guard only; NO-GO for final RC, dry-run, internal release, or production claims. |
 
 ## C. Regression Boundary
 
@@ -136,6 +138,7 @@ python scripts/check_v1_release_readiness.py --json
 python scripts/run_retrieval_eval.py --retriever baseline --limit 5
 python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
 python scripts/check_v1_performance_closure_matrix.py
+python scripts/check_v1_p0_p1_gap_fix.py
 git diff --check
 ```
 
