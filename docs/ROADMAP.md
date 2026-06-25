@@ -16,8 +16,8 @@ The post-PR77 V1 roadmap remains active and must not be collapsed into a single 
 | 2. Benchmark Absorption & Stage-Gate Calibration | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
 | 3. MVP Performance Pack Backfill | Completed by `docs/V1_MVP_PERFORMANCE_PACK.md` |
 | 4. V1 Performance Closure Matrix | Completed by `docs/V1_PERFORMANCE_CLOSURE_MATRIX.md` after closure checks pass |
-| 5. P0/P1 Gap Fix Only | Pending |
-| 6. Final Pre-RC Regression | Pending |
+| 5. P0/P1 Gap Fix Only | Completed by `scripts/check_v1_p0_p1_gap_fix.py` after PR #86 main verification |
+| 6. Final Pre-RC Regression | Completed by `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |
 | 7. v1.0.0-rc1 | Pending |
 | 8. Internal Dry-run | Pending |
 | 9. v1.0.0-internal | Pending |

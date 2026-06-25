@@ -26,7 +26,7 @@ def test_closure_matrix_has_complete_rows_and_required_commands():
     assert module.check_matrix_text(REPO_ROOT) == []
 
 
-def test_closure_matrix_preserves_roadmap_after_matrix_only():
+def test_closure_matrix_preserves_roadmap_after_final_pre_rc_only():
     module = load_matrix_module()
 
     assert module.check_roadmap_text(REPO_ROOT) == []

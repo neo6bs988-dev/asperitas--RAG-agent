@@ -1,8 +1,8 @@
 # Asperitas AI RAG Agent v1.0.0-rc1 Release Notes
 
-Status: draft only; final RC, internal dry-run, and internal release remain pending
+Status: draft only; final pre-RC regression evidence recorded for RC preparation; final RC, internal dry-run, and internal release remain pending
 
-Fresh-evidence guard: do not publish these notes, claim GO, create a tag, start an internal dry-run, or claim internal release until the manual release context reruns the required commands and records fresh command output.
+Fresh-evidence guard: final pre-RC regression evidence is recorded in `docs/V1_FINAL_PRE_RC_REGRESSION.md` for `main` at `ebe19bd174d75a06a6e46e001776b9f60735f910`. Do not publish these notes, create a tag, start an internal dry-run, or claim internal release from this documentation change; this documentation change does not claim production readiness.
 
 ## Scope
 
@@ -33,11 +33,13 @@ It does not verify public launch readiness, customer deployment readiness, auton
 
 ## Required Manual Closeout Checks
 
-- full pytest passes
-- artifact verifier passes
-- release readiness returns `ready_for_internal_rc`
-- V1 RC smoke returns `passed`
-- chat CLI dry-run returns `dry_run_ready`
+- full pytest passes: recorded, 543 passed
+- artifact verifier passes: recorded, 48 registry records and 2821 chunks
+- release readiness returns `ready_for_internal_rc`: recorded, 14/14 checks passed
+- security guard passes with explicit input: recorded, low risk and 0 findings
+- V1 RC smoke returns `passed`: recorded, 5/5 checks passed
+- chat CLI dry-run returns `dry_run_ready`: recorded; no answer provider wired warning remains
+- baseline and MVP003 retrieval evals pass command exits: recorded, 34.4% and 93.8% overall pass rates
 - known limitations and V1.1 handoff remain visible
 
 ## Human Approval
