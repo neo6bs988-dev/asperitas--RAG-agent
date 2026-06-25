@@ -9,8 +9,11 @@ import pytest
 
 from apps.internal_dogfood_app import (
     DEFAULT_FAILURE_LOG_PATH,
+    ACCESS_KEY_NOT_CONFIGURED_WARNING,
     build_dogfood_payload,
     build_failure_record_from_dogfood_result,
+    configured_access_key,
+    evaluate_access_gate,
     run_internal_dogfood_once,
     save_failure_record_explicit,
 )
@@ -81,6 +84,50 @@ def test_explicit_save_writes_jsonl(tmp_path):
     assert records[0].query == "What is Asperitas?"
 
 
+def test_access_gate_allows_no_configured_key_with_warning_state():
+    gate = evaluate_access_gate("")
+
+    assert gate["allowed"] is True
+    assert gate["configured"] is False
+    assert gate["warning"] == ACCESS_KEY_NOT_CONFIGURED_WARNING
+
+
+def test_access_gate_blocks_wrong_key():
+    gate = evaluate_access_gate("correct-key", "wrong-key")
+
+    assert gate["allowed"] is False
+    assert gate["configured"] is True
+    assert gate["reason"] == "invalid_access_key"
+
+
+def test_access_gate_accepts_correct_key():
+    gate = evaluate_access_gate("correct-key", "correct-key")
+
+    assert gate["allowed"] is True
+    assert gate["configured"] is True
+    assert gate["reason"] == "accepted"
+
+
+def test_secret_value_is_not_returned_by_access_gate_or_printed(capsys):
+    secret = "super-secret-dogfood-key"
+
+    gate = evaluate_access_gate(secret, "wrong-key")
+    captured = capsys.readouterr()
+
+    assert secret not in str(gate)
+    assert secret not in captured.out
+    assert secret not in captured.err
+
+
+def test_configured_access_key_prefers_environment_over_streamlit_secrets():
+    class Secrets:
+        def get(self, key, default=""):
+            return "secret-value" if key == "ASPERITAS_DOGFOOD_ACCESS_KEY" else default
+
+    assert configured_access_key({"ASPERITAS_DOGFOOD_ACCESS_KEY": "env-value"}, Secrets()) == "env-value"
+    assert configured_access_key({}, Secrets()) == "secret-value"
+
+
 def test_app_imports_without_retrieval_vector_reranker_default_answer_side_effects():
     probe = subprocess.run(
         [
@@ -106,14 +153,18 @@ def test_app_imports_without_retrieval_vector_reranker_default_answer_side_effec
 
 
 def test_docs_include_internal_only_dry_run_no_provider_limitations():
-    doc = "docs/V1_1B_STREAMLIT_INTERNAL_DOGFOOD_UI.md"
-    text = open(doc, encoding="utf-8").read().lower()
+    text = (
+        open("docs/V1_1B_STREAMLIT_INTERNAL_DOGFOOD_UI.md", encoding="utf-8").read()
+        + open("docs/V1_1B_DEPLOY_GUARD_INTERNAL_LINK.md", encoding="utf-8").read()
+    ).lower()
 
     assert "internal/local" in text
     assert "dry-run only" in text
     assert "no real answer provider" in text
     assert "not public saas" in text
     assert "not production deployment" in text
+    assert "do not enter secrets or sensitive private data" in text
+    assert "asperitas_dogfood_access_key" in text
     assert DEFAULT_FAILURE_LOG_PATH.lower() in text
 
 

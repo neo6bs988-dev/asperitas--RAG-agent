@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -25,11 +26,46 @@ REDACTION_WARNING = (
     "Before saving, confirm free-text fields do not include secrets, raw private files, "
     "environment variables, credentials, or unredacted sensitive data."
 )
+ACCESS_KEY_NAME = "ASPERITAS_DOGFOOD_ACCESS_KEY"
+ACCESS_KEY_NOT_CONFIGURED_WARNING = "Access key not configured; local-only use recommended."
+INTERNAL_LANDING_COPY = (
+    "Dry-run only. No real answer provider wired. Not public SaaS. "
+    "Not production deployment. Do not enter secrets or sensitive private data."
+)
 
 
 def _stable_id(value: str, fallback: str) -> str:
     normalized = "_".join(value.strip().lower().split())
     return normalized or fallback
+
+
+def configured_access_key(
+    environ: dict[str, str] | None = None,
+    streamlit_secrets: Any | None = None,
+) -> str:
+    active_environ = environ if environ is not None else os.environ
+    env_value = str(active_environ.get(ACCESS_KEY_NAME, "")).strip()
+    if env_value:
+        return env_value
+    if streamlit_secrets is None:
+        return ""
+    try:
+        return str(streamlit_secrets.get(ACCESS_KEY_NAME, "")).strip()
+    except Exception:
+        return ""
+
+
+def evaluate_access_gate(configured_key: str, submitted_key: str = "") -> dict[str, Any]:
+    if not configured_key:
+        return {
+            "configured": False,
+            "allowed": True,
+            "warning": ACCESS_KEY_NOT_CONFIGURED_WARNING,
+            "reason": "missing_configured_key",
+        }
+    if submitted_key and submitted_key == configured_key:
+        return {"configured": True, "allowed": True, "warning": "", "reason": "accepted"}
+    return {"configured": True, "allowed": False, "warning": "", "reason": "invalid_access_key"}
 
 
 def build_dogfood_payload(
@@ -163,6 +199,17 @@ def _render_streamlit_app(st: Any) -> None:
     st.set_page_config(page_title=PAGE_TITLE, page_icon="A", layout="wide")
     st.title(PAGE_TITLE)
     st.error(INTERNAL_ONLY_BANNER)
+    st.warning(INTERNAL_LANDING_COPY)
+
+    access_key = configured_access_key(streamlit_secrets=getattr(st, "secrets", None))
+    if access_key:
+        submitted_key = st.text_input("Internal access key", type="password")
+        gate = evaluate_access_gate(access_key, submitted_key)
+        if not gate["allowed"]:
+            st.stop()
+    else:
+        gate = evaluate_access_gate("")
+        st.warning(gate["warning"])
 
     with st.form("dogfood_run_form"):
         question = st.text_area("question")
