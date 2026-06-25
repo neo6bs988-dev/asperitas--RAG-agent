@@ -6,6 +6,24 @@ This roadmap is the execution map for the first Asperitas RAG Agent. It must sta
 
 Do not mark an MVP as complete unless the relevant acceptance criteria, tests, evals, source-grounding review, compliance review, and release decision are recorded.
 
+## V1 Internal Release Preparation
+
+The post-PR77 V1 roadmap remains active and must not be collapsed into a single closeout claim. The current completed subtask is limited to Playbook v3 Absorption plus Benchmark Absorption & Stage-Gate Calibration; it is a docs/process/check-only step and does not implement performance features or alter runtime retrieval behavior.
+
+| V1 step | Status |
+|---|---|
+| 1. Playbook v3 Absorption | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
+| 2. Benchmark Absorption & Stage-Gate Calibration | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
+| 3. MVP Performance Pack Backfill | Pending |
+| 4. V1 Performance Closure Matrix | Pending |
+| 5. P0/P1 Gap Fix Only | Pending |
+| 6. Final Pre-RC Regression | Pending |
+| 7. v1.0.0-rc1 | Pending |
+| 8. Internal Dry-run | Pending |
+| 9. v1.0.0-internal | Pending |
+
+Allowed status after this subtask passes its checks: ready for next V1 step. This is not final RC readiness, internal dry-run readiness, or internal release readiness.
+
 ## MVP Status Table
 
 | MVP | Name | Status | Primary Issue(s) | Exit Condition |
