@@ -15,14 +15,14 @@ The post-PR77 V1 roadmap remains active and must not be collapsed into a single 
 | 1. Playbook v3 Absorption | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
 | 2. Benchmark Absorption & Stage-Gate Calibration | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
 | 3. MVP Performance Pack Backfill | Completed by `docs/V1_MVP_PERFORMANCE_PACK.md` |
-| 4. V1 Performance Closure Matrix | Pending |
+| 4. V1 Performance Closure Matrix | Completed by `docs/V1_PERFORMANCE_CLOSURE_MATRIX.md` after closure checks pass |
 | 5. P0/P1 Gap Fix Only | Pending |
 | 6. Final Pre-RC Regression | Pending |
 | 7. v1.0.0-rc1 | Pending |
 | 8. Internal Dry-run | Pending |
 | 9. v1.0.0-internal | Pending |
 
-Allowed status after the MVP Performance Pack Backfill passes its checks: ready for V1 Performance Closure Matrix. This is not final RC readiness, internal dry-run readiness, or internal release readiness.
+Allowed status after the V1 Performance Closure Matrix passes its checks: ready to evaluate whether P0/P1 Gap Fix Only is needed. This is not final RC readiness, internal dry-run readiness, or internal release readiness.
 
 ## MVP Status Table
 
