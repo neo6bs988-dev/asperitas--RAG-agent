@@ -18,9 +18,16 @@ The post-PR77 V1 roadmap remains active and must not be collapsed into a single 
 | 4. V1 Performance Closure Matrix | Completed by `docs/V1_PERFORMANCE_CLOSURE_MATRIX.md` after closure checks pass |
 | 5. P0/P1 Gap Fix Only | Completed by `scripts/check_v1_p0_p1_gap_fix.py` after PR #86 main verification |
 | 6. Final Pre-RC Regression | Completed by `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |
-| 7. v1.0.0-rc1 | Pending |
-| 8. Internal Dry-run | Pending |
-| 9. v1.0.0-internal | Pending |
+| 7. v1.0.0-rc1 | V1.0.0-rc1 baseline complete as prerelease at `7f28f0a60fae2d7e0b674d1111287386d2d64fc6` |
+| 8. Internal Dry-run | Pending reproducible dry-run evidence from `scripts/run_v1_internal_dry_run.py` |
+| 9. v1.0.0-internal | Pending; v1.0.0-internal pending until internal dry-run evidence passes |
+
+V1.1 handoff items:
+
+- V1.1A failure log collector
+- V1.1B local/internal web dogfood UI
+- V1.1C real RAG answer provider integration
+- V1.1D retrieval/answer baseline
 
 Allowed status after the V1 Performance Closure Matrix passes its checks: ready to evaluate whether P0/P1 Gap Fix Only is needed. This is not final RC readiness, internal dry-run readiness, or internal release readiness.
 
