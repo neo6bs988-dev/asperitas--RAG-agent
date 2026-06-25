@@ -28,7 +28,7 @@ FORBIDDEN_RELEASE_CLAIMS = (
     re.compile(r"\binternal dry-run (?:is )?(?:ready|complete|completed)\b", re.IGNORECASE),
     re.compile(r"\binternal release (?:is )?(?:ready|complete|completed)\b", re.IGNORECASE),
     re.compile(r"(?<!NO-)GO for (?:final RC|internal dry-run|internal release|production)", re.IGNORECASE),
-    re.compile(r"\bproduction readiness\b(?![^.\n]*\b(?:not|does not|without|claim)\b)", re.IGNORECASE),
+    re.compile(r"(?<!does not claim )\bproduction readiness\b(?![^.\n]*\b(?:not|does not|without|claim|claimed)\b)", re.IGNORECASE),
 )
 
 

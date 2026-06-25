@@ -1,8 +1,8 @@
 # V1.0.0-rc1 Internal Closeout Packet
 
-Status: draft packet only; final RC, internal dry-run, and internal release remain pending
+Status: final pre-RC regression evidence recorded for RC preparation only; final RC, internal dry-run, and internal release remain pending
 
-Fresh-evidence guard: this packet is not release evidence until the listed commands are rerun in the later manual release context and their fresh output is recorded.
+Fresh-evidence guard: final pre-RC regression evidence has been recorded in `docs/V1_FINAL_PRE_RC_REGRESSION.md` for `main` at `ebe19bd174d75a06a6e46e001776b9f60735f910`. This remains RC preparation evidence only and does not create or approve a tag, GitHub release, internal dry-run, internal release, and does not claim production readiness.
 
 ## Packet Contents
 
@@ -13,6 +13,7 @@ Fresh-evidence guard: this packet is not release evidence until the listed comma
 - known limitations: `docs/V1_KNOWN_LIMITATIONS.md`
 - V1.1 handoff: `docs/V1_1_PERFORMANCE_HANDOFF.md`
 - smoke runner: `scripts/run_v1_rc_smoke.py`
+- final pre-RC regression evidence: `docs/V1_FINAL_PRE_RC_REGRESSION.md`
 
 ## RC Checklist
 
@@ -28,7 +29,7 @@ Fresh-evidence guard: this packet is not release evidence until the listed comma
 
 V1 includes skills, eval, workflow, audit trace, workflow audit, security guard, chat workflow dry-run, release readiness, and this RC packet.
 
-V1 remains in pre-RC internal engineering posture until a later human-approved release step records fresh command output. It is not public SaaS, production customer deployment, autonomous wet-lab execution, external connector automation, clinical/regulatory/commercial proof, or a proven biological model.
+V1 remains in RC preparation posture until a later human-approved release step creates the tag/release. It is not public SaaS, production customer deployment, autonomous wet-lab execution, external connector automation, clinical/regulatory/commercial proof, or a proven biological model.
 
 ## V1.1 Transition Checklist
 

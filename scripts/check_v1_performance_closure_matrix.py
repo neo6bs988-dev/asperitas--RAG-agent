@@ -184,7 +184,7 @@ def check_roadmap_text(root: Path) -> list[str]:
         "| 3. MVP Performance Pack Backfill | Completed by `docs/V1_MVP_PERFORMANCE_PACK.md` |",
         "| 4. V1 Performance Closure Matrix | Completed by `docs/V1_PERFORMANCE_CLOSURE_MATRIX.md` after closure checks pass |",
         "| 5. P0/P1 Gap Fix Only | Pending |",
-        "| 6. Final Pre-RC Regression | Pending |",
+        "| 6. Final Pre-RC Regression | Completed by `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |",
         "| 7. v1.0.0-rc1 | Pending |",
         "| 8. Internal Dry-run | Pending |",
         "| 9. v1.0.0-internal | Pending |",
