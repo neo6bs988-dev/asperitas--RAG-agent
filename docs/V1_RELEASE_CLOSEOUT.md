@@ -2,6 +2,14 @@
 
 Status: V1 internal release candidate closeout
 
+## Pre-RC Roadmap Guard
+
+Playbook v3 Absorption and Benchmark Absorption & Stage-Gate Calibration are completed as a separated docs/process/check-only subtask in `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md`.
+
+The later V1 steps remain pending: MVP Performance Pack Backfill, V1 Performance Closure Matrix, P0/P1 Gap Fix Only, Final Pre-RC Regression, `v1.0.0-rc1`, Internal Dry-run, and `v1.0.0-internal`.
+
+This status means ready for next V1 step only after the subtask checks pass. It does not mean final RC readiness, tag readiness, internal dry-run completion, internal release completion, production deployment, autonomous ingestion, source expansion completion, or full V1 closure.
+
 ## Release Decision
 
 V1 is ready to be evaluated as an internal release candidate when the release-readiness checker, full test suite, artifact verifier, security guard smoke, and chat dry-run smoke all pass on `main`.

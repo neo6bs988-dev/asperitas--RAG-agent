@@ -13,6 +13,14 @@ Apply these gates before reporting a task as done. A gate is not a suggestion; i
 | Biological/compliance/public claim | Compliance/biosafety check + source-grounding check + GitHub review |
 | MVP release | All relevant gates + MVP release manager review |
 
+For the V1 Playbook v3 Absorption plus Benchmark Absorption & Stage-Gate Calibration subtask, use the docs/governance-only gate set plus:
+
+```bash
+python scripts/check_v1_stage_gate_scope.py
+```
+
+This check is a deterministic process/stage-gate integrity check. It does not replace artifact verification, pytest, retrieval evals required for no-regression evidence, or human GitHub review.
+
 ## Gate Execution Policy
 
 Use the lightest gate set that protects the changed surface.
