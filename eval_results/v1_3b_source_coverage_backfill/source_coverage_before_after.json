@@ -1,0 +1,240 @@
+{
+  "after_summary": {
+    "case_count": 4,
+    "cases_with_all_expected_paths_represented_in_chunks": 4,
+    "cases_with_all_expected_paths_represented_in_registry": 4,
+    "cases_with_any_citation_candidate": 4,
+    "cases_with_retrieval_execution": 4,
+    "chunk_represented_source_count": 12,
+    "existing_source_path_count": 12,
+    "expected_source_path_count": 12,
+    "registry_represented_source_count": 12,
+    "retrieval_miss_flag_count": 8,
+    "section_metadata_present_source_count": 12
+  },
+  "answer_generation_changed": false,
+  "artifact_mutation_statement": "This backfill deterministically appends existing repository governance/eval documents required by the V1.2 fixture to data/source_registry.csv and appends their generated chunks to data/chunks.jsonl using existing registry, loader, and chunking APIs.",
+  "backfilled_source_count": 9,
+  "backfilled_sources": [
+    {
+      "chunk_count": 25,
+      "disclosure_level": "confidential",
+      "license_status": "internal_use",
+      "parse_status": "parsed",
+      "path": "00_ADMIN/source_priority_policy.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P0-D45C934EE64E",
+      "source_priority": "P0",
+      "source_type": "policy",
+      "verification_status": "verified_internal"
+    },
+    {
+      "chunk_count": 17,
+      "disclosure_level": "confidential",
+      "license_status": "internal_use",
+      "parse_status": "parsed",
+      "path": "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-8B0062C9EB1F",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "verified_internal"
+    },
+    {
+      "chunk_count": 16,
+      "disclosure_level": "confidential",
+      "license_status": "internal_use",
+      "parse_status": "parsed",
+      "path": "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P0-5169C5E098C0",
+      "source_priority": "P0",
+      "source_type": "guardrail",
+      "verification_status": "verified_internal"
+    },
+    {
+      "chunk_count": 5,
+      "disclosure_level": "confidential",
+      "license_status": "unknown",
+      "parse_status": "parsed",
+      "path": "docs/EVALS.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-5C0DB7071FEB",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "unverified"
+    },
+    {
+      "chunk_count": 5,
+      "disclosure_level": "confidential",
+      "license_status": "unknown",
+      "parse_status": "parsed",
+      "path": "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-5D6C6B928465",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "unverified"
+    },
+    {
+      "chunk_count": 4,
+      "disclosure_level": "confidential",
+      "license_status": "unknown",
+      "parse_status": "parsed",
+      "path": "docs/evals/V1_2_FAILURE_TAXONOMY.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-8244C22D5083",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "unverified"
+    },
+    {
+      "chunk_count": 4,
+      "disclosure_level": "confidential",
+      "license_status": "unknown",
+      "parse_status": "parsed",
+      "path": "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-52F1F2C1647A",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "unverified"
+    },
+    {
+      "chunk_count": 3,
+      "disclosure_level": "confidential",
+      "license_status": "unknown",
+      "parse_status": "parsed",
+      "path": "docs/V1_KNOWN_LIMITATIONS.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-A53B89890270",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "unverified"
+    },
+    {
+      "chunk_count": 4,
+      "disclosure_level": "confidential",
+      "license_status": "unknown",
+      "parse_status": "parsed",
+      "path": "docs/V1_RELEASE_CLOSEOUT.md",
+      "section_metadata_present": true,
+      "source_id": "ASP-P1-980BFCB1AEFB",
+      "source_priority": "P1",
+      "source_type": "internal",
+      "verification_status": "unverified"
+    }
+  ],
+  "before_summary": {
+    "case_count": 4,
+    "cases_with_all_expected_paths_represented_in_chunks": 0,
+    "cases_with_all_expected_paths_represented_in_registry": 0,
+    "cases_with_any_citation_candidate": 4,
+    "cases_with_retrieval_execution": 4,
+    "chunk_represented_source_count": 1,
+    "existing_source_path_count": 12,
+    "expected_source_path_count": 12,
+    "registry_represented_source_count": 1,
+    "retrieval_miss_flag_count": 12,
+    "section_metadata_present_source_count": 1
+  },
+  "case_comparison": [
+    {
+      "case_id": "v1_2_truth_boundary_status",
+      "chunk_represented_after": 3,
+      "chunk_represented_before": 0,
+      "citation_candidate_available_after": true,
+      "citation_candidate_available_before": true,
+      "expected_source_paths": 3,
+      "registry_represented_after": 3,
+      "registry_represented_before": 0,
+      "retrieval_miss_flags_after": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md"
+      ],
+      "retrieval_miss_flags_before": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md"
+      ],
+      "section_metadata_present_after": 3,
+      "section_metadata_present_before": 0
+    },
+    {
+      "case_id": "v1_2_source_priority_company_truth",
+      "chunk_represented_after": 3,
+      "chunk_represented_before": 1,
+      "citation_candidate_available_after": true,
+      "citation_candidate_available_before": true,
+      "expected_source_paths": 3,
+      "registry_represented_after": 3,
+      "registry_represented_before": 1,
+      "retrieval_miss_flags_after": [
+        "AGENTS.md",
+        "docs/EVALS.md"
+      ],
+      "retrieval_miss_flags_before": [
+        "00_ADMIN/source_priority_policy.md",
+        "AGENTS.md",
+        "docs/EVALS.md"
+      ],
+      "section_metadata_present_after": 3,
+      "section_metadata_present_before": 1
+    },
+    {
+      "case_id": "v1_2_biosafety_gate_dogfood",
+      "chunk_represented_after": 3,
+      "chunk_represented_before": 0,
+      "citation_candidate_available_after": true,
+      "citation_candidate_available_before": true,
+      "expected_source_paths": 3,
+      "registry_represented_after": 3,
+      "registry_represented_before": 0,
+      "retrieval_miss_flags_after": [
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "docs/EVALS.md"
+      ],
+      "retrieval_miss_flags_before": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "docs/EVALS.md"
+      ],
+      "section_metadata_present_after": 3,
+      "section_metadata_present_before": 0
+    },
+    {
+      "case_id": "v1_2_actionable_eval_followup",
+      "chunk_represented_after": 3,
+      "chunk_represented_before": 0,
+      "citation_candidate_available_after": true,
+      "citation_candidate_available_before": true,
+      "expected_source_paths": 3,
+      "registry_represented_after": 3,
+      "registry_represented_before": 0,
+      "retrieval_miss_flags_after": [
+        "docs/evals/V1_2_FAILURE_TAXONOMY.md"
+      ],
+      "retrieval_miss_flags_before": [
+        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+        "docs/evals/V1_2_FAILURE_TAXONOMY.md"
+      ],
+      "section_metadata_present_after": 3,
+      "section_metadata_present_before": 0
+    }
+  ],
+  "chunks_path": "data/chunks.jsonl",
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "diagnostic_only": false,
+  "excluded_expected_sources": [
+    "AGENTS.md"
+  ],
+  "external_sources_added": false,
+  "fixture_path": "docs/evals/V1_2_GOLDEN_EVAL_SET.json",
+  "registry_path": "data/source_registry.csv",
+  "retrieval_algorithm_changed": false,
+  "schema_version": "v1.3b-1-source-coverage-backfill",
+  "source_artifact_backfill": true,
+  "truth_boundary_statement": "This is a source coverage improvement only. It is not retrieval ranking calibration, not answer-quality proof, and not evidence of production deployment, legal approval, regulatory approval, biological validation, or wet-lab capability."
+}
