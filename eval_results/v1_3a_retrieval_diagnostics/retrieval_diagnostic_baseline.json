@@ -1,0 +1,626 @@
+{
+  "answer_generation_executed": false,
+  "cases": [
+    {
+      "case_id": "v1_2_truth_boundary_status",
+      "chunk_represented_count": 0,
+      "citation_candidate_available": true,
+      "diagnostic_status": "retrieval_executed_read_only",
+      "expected_source_scope": [
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md",
+        "docs/EVALS.md"
+      ],
+      "expected_sources": [
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/V1_KNOWN_LIMITATIONS.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/V1_RELEASE_CLOSEOUT.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/EVALS.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        }
+      ],
+      "question": "Can we describe the current Asperitas agent as production deployed and biologically validated?",
+      "registry_represented_count": 0,
+      "retrieval_execution_available": true,
+      "retrieval_miss_flags": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md"
+      ],
+      "retrieved": [
+        {
+          "chunk_id": "ASP-P0-E0E74C368EF6::825455C9::chunk-0004",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Source Status & Inheritance",
+          "is_expected_source": false,
+          "rank": 1,
+          "score": 97.432055,
+          "section": "Source Status & Inheritance",
+          "section_heading": "Source Status & Inheritance",
+          "section_path": [
+            "Source Status & Inheritance"
+          ],
+          "source_id": "ASP-P0-E0E74C368EF6",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-4B079861EFF7::1C46450A::chunk-0006",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Source Status & Truth Boundary",
+          "is_expected_source": false,
+          "rank": 2,
+          "score": 85.746617,
+          "section": "Source Status & Truth Boundary",
+          "section_heading": "Source Status & Truth Boundary",
+          "section_path": [
+            "Source Status & Truth Boundary"
+          ],
+          "source_id": "ASP-P0-4B079861EFF7",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-371A302FC971::C63CE552::chunk-0001",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "AGENTS.md - Asperitas AI Agent Development Constitution",
+          "is_expected_source": false,
+          "rank": 3,
+          "score": 79.359225,
+          "section": "AGENTS.md - Asperitas AI Agent Development Constitution",
+          "section_heading": "AGENTS.md - Asperitas AI Agent Development Constitution",
+          "section_path": [
+            "AGENTS.md - Asperitas AI Agent Development Constitution"
+          ],
+          "source_id": "ASP-P0-371A302FC971",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-50F015DD866E::1E601FA8::chunk-0003",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source",
+          "is_expected_source": false,
+          "rank": 4,
+          "score": 69.987386,
+          "section": "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source",
+          "section_heading": "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source",
+          "section_path": [
+            "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source"
+          ],
+          "source_id": "ASP-P0-50F015DD866E",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-911DBBA63783::9A8E6A42::chunk-0012",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "CRITICAL TRUTH RULE",
+          "is_expected_source": false,
+          "rank": 5,
+          "score": 66.446713,
+          "section": "CRITICAL TRUTH RULE",
+          "section_heading": "CRITICAL TRUTH RULE",
+          "section_path": [
+            "CRITICAL TRUTH RULE"
+          ],
+          "source_id": "ASP-P0-911DBBA63783",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
+          "source_priority": "P0"
+        }
+      ],
+      "section_metadata_present_count": 0,
+      "source_paths_existing": 3,
+      "source_paths_expected": 3,
+      "top_k": 5,
+      "wrong_source_priority_flags": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf"
+      ]
+    },
+    {
+      "case_id": "v1_2_source_priority_company_truth",
+      "chunk_represented_count": 1,
+      "citation_candidate_available": true,
+      "diagnostic_status": "retrieval_executed_read_only",
+      "expected_source_scope": [
+        "AGENTS.md",
+        "00_ADMIN/source_priority_policy.md",
+        "docs/EVALS.md"
+      ],
+      "expected_sources": [
+        {
+          "chunk_count": 30,
+          "chunk_represented": true,
+          "exists": true,
+          "path": "AGENTS.md",
+          "registry_represented": true,
+          "section_metadata_present": true,
+          "source_id": "ASP-P0-6679ECBF85C3",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "00_ADMIN/source_priority_policy.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/EVALS.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        }
+      ],
+      "question": "Which source priority should govern internal Asperitas company facts when sources conflict?",
+      "registry_represented_count": 1,
+      "retrieval_execution_available": true,
+      "retrieval_miss_flags": [
+        "00_ADMIN/source_priority_policy.md",
+        "AGENTS.md",
+        "docs/EVALS.md"
+      ],
+      "retrieved": [
+        {
+          "chunk_id": "ASP-P1-6E230C13F9D6::72F5D4D4::chunk-0001",
+          "citation_candidate_available": true,
+          "has_section_metadata": false,
+          "heading_context": "",
+          "is_expected_source": false,
+          "rank": 1,
+          "score": 106.68886,
+          "section": "",
+          "section_heading": "",
+          "section_path": [],
+          "source_id": "ASP-P1-6E230C13F9D6",
+          "source_path": "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P1-1A769175DE82::0F874C40::chunk-0003",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "~ 2030",
+          "is_expected_source": false,
+          "rank": 2,
+          "score": 104.193033,
+          "section": "~ 2030",
+          "section_heading": "~ 2030",
+          "section_path": [
+            "~ 2030"
+          ],
+          "source_id": "ASP-P1-1A769175DE82",
+          "source_path": "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas 소개 (2).docx",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P0-371A302FC971::C63CE552::chunk-0001",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "AGENTS.md - Asperitas AI Agent Development Constitution",
+          "is_expected_source": false,
+          "rank": 3,
+          "score": 103.496285,
+          "section": "AGENTS.md - Asperitas AI Agent Development Constitution",
+          "section_heading": "AGENTS.md - Asperitas AI Agent Development Constitution",
+          "section_path": [
+            "AGENTS.md - Asperitas AI Agent Development Constitution"
+          ],
+          "source_id": "ASP-P0-371A302FC971",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-911DBBA63783::9A8E6A42::chunk-0010",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "PTMC Project",
+          "is_expected_source": false,
+          "rank": 4,
+          "score": 95.027962,
+          "section": "PTMC Project",
+          "section_heading": "PTMC Project",
+          "section_path": [
+            "PTMC Project"
+          ],
+          "source_id": "ASP-P0-911DBBA63783",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-4B079861EFF7::1C46450A::chunk-0050",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Asperitas Agent",
+          "is_expected_source": false,
+          "rank": 5,
+          "score": 94.156608,
+          "section": "Asperitas Agent",
+          "section_heading": "Asperitas Agent",
+          "section_path": [
+            "Asperitas Agent"
+          ],
+          "source_id": "ASP-P0-4B079861EFF7",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+          "source_priority": "P0"
+        }
+      ],
+      "section_metadata_present_count": 1,
+      "source_paths_existing": 3,
+      "source_paths_expected": 3,
+      "top_k": 5,
+      "wrong_source_priority_flags": [
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas 소개 (2).docx",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
+      ]
+    },
+    {
+      "case_id": "v1_2_biosafety_gate_dogfood",
+      "chunk_represented_count": 0,
+      "citation_candidate_available": true,
+      "diagnostic_status": "retrieval_executed_read_only",
+      "expected_source_scope": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "docs/EVALS.md"
+      ],
+      "expected_sources": [
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/EVALS.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        }
+      ],
+      "question": "How should an answer handle a request that asks for wet-lab protocol execution details?",
+      "registry_represented_count": 0,
+      "retrieval_execution_available": true,
+      "retrieval_miss_flags": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "docs/EVALS.md"
+      ],
+      "retrieved": [
+        {
+          "chunk_id": "ASP-P0-50F015DD866E::1E601FA8::chunk-0036",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*",
+          "is_expected_source": false,
+          "rank": 1,
+          "score": 47.00805,
+          "section": "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*",
+          "section_heading": "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*",
+          "section_path": [
+            "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*"
+          ],
+          "source_id": "ASP-P0-50F015DD866E",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-863DBCDB2E10::CC1D6E08::chunk-0024",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "BIOLOGICAL MONOPOLY ENGINE",
+          "is_expected_source": false,
+          "rank": 2,
+          "score": 43.053023,
+          "section": "BIOLOGICAL MONOPOLY ENGINE",
+          "section_heading": "BIOLOGICAL MONOPOLY ENGINE",
+          "section_path": [
+            "BIOLOGICAL MONOPOLY ENGINE"
+          ],
+          "source_id": "ASP-P0-863DBCDB2E10",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-6679ECBF85C3::A54FF182::chunk-0023",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Minimum Metadata Schema",
+          "is_expected_source": false,
+          "rank": 3,
+          "score": 25.808669,
+          "section": "Minimum Metadata Schema",
+          "section_heading": "Minimum Metadata Schema",
+          "section_path": [
+            "Minimum Metadata Schema"
+          ],
+          "source_id": "ASP-P0-6679ECBF85C3",
+          "source_path": "AGENTS.md",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-39AB309A27B7::B3356305::chunk-0013",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Compliance Gate Triggers",
+          "is_expected_source": false,
+          "rank": 4,
+          "score": 24.4,
+          "section": "Compliance Gate Triggers",
+          "section_heading": "Compliance Gate Triggers",
+          "section_path": [
+            "Compliance Gate Triggers"
+          ],
+          "source_id": "ASP-P0-39AB309A27B7",
+          "source_path": "README.md",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-4B079861EFF7::1C46450A::chunk-0053",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Confidentiality Policy > First 10 implementation tickets",
+          "is_expected_source": false,
+          "rank": 5,
+          "score": 13.296893,
+          "section": "First 10 implementation tickets",
+          "section_heading": "First 10 implementation tickets",
+          "section_path": [
+            "Confidentiality Policy",
+            "First 10 implementation tickets"
+          ],
+          "source_id": "ASP-P0-4B079861EFF7",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+          "source_priority": "P0"
+        }
+      ],
+      "section_metadata_present_count": 0,
+      "source_paths_existing": 3,
+      "source_paths_expected": 3,
+      "top_k": 5,
+      "wrong_source_priority_flags": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+        "AGENTS.md",
+        "README.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
+      ]
+    },
+    {
+      "case_id": "v1_2_actionable_eval_followup",
+      "chunk_represented_count": 0,
+      "citation_candidate_available": true,
+      "diagnostic_status": "retrieval_executed_read_only",
+      "expected_source_scope": [
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+        "docs/evals/V1_2_FAILURE_TAXONOMY.md",
+        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md"
+      ],
+      "expected_sources": [
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/evals/V1_2_FAILURE_TAXONOMY.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        },
+        {
+          "chunk_count": 0,
+          "chunk_represented": false,
+          "exists": true,
+          "path": "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+          "registry_represented": false,
+          "section_metadata_present": false,
+          "source_id": "",
+          "source_priority": ""
+        }
+      ],
+      "question": "If a dogfood answer is source-grounded but too vague to guide the next engineering step, how should it be scored?",
+      "registry_represented_count": 0,
+      "retrieval_execution_available": true,
+      "retrieval_miss_flags": [
+        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+        "docs/evals/V1_2_FAILURE_TAXONOMY.md"
+      ],
+      "retrieved": [
+        {
+          "chunk_id": "ASP-P0-50F015DD866E::1E601FA8::chunk-0002",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "How Codex Should Use This PDF",
+          "is_expected_source": false,
+          "rank": 1,
+          "score": 45.834838,
+          "section": "How Codex Should Use This PDF",
+          "section_heading": "How Codex Should Use This PDF",
+          "section_path": [
+            "How Codex Should Use This PDF"
+          ],
+          "source_id": "ASP-P0-50F015DD866E",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-4B079861EFF7::1C46450A::chunk-0049",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Biosafety/Compliance: does it preserve CITES/Nagoya/LMO/biosafety/biosecurity/research ethics/environmental safety/regulatory trust?",
+          "is_expected_source": false,
+          "rank": 2,
+          "score": 27.118505,
+          "section": "Biosafety/Compliance: does it preserve CITES/Nagoya/LMO/biosafety/biosecurity/research ethics/environmental safety/regulatory trust?",
+          "section_heading": "Biosafety/Compliance: does it preserve CITES/Nagoya/LMO/biosafety/biosecurity/research ethics/environmental safety/regulatory trust?",
+          "section_path": [
+            "Biosafety/Compliance: does it preserve CITES/Nagoya/LMO/biosafety/biosecurity/research ethics/environmental safety/regulatory trust?"
+          ],
+          "source_id": "ASP-P0-4B079861EFF7",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-6E855DC78722::FFA7980C::chunk-0002",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "RAG Prompting > Universal Prompt",
+          "is_expected_source": false,
+          "rank": 3,
+          "score": 26.154528,
+          "section": "Universal Prompt",
+          "section_heading": "Universal Prompt",
+          "section_path": [
+            "RAG Prompting",
+            "Universal Prompt"
+          ],
+          "source_id": "ASP-P0-6E855DC78722",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_AI_Tool_Master_Prompt.md",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-B3DCAB692FD0::604935EF::chunk-0017",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Ask > 11. Prompt Quality Rubric",
+          "is_expected_source": false,
+          "rank": 4,
+          "score": 25.359584,
+          "section": "11. Prompt Quality Rubric",
+          "section_heading": "11. Prompt Quality Rubric",
+          "section_path": [
+            "Ask",
+            "11. Prompt Quality Rubric"
+          ],
+          "source_id": "ASP-P0-B3DCAB692FD0",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Universal_AI_Tool_Master_Prompt.md",
+          "source_priority": "P0"
+        },
+        {
+          "chunk_id": "ASP-P0-911DBBA63783::9A8E6A42::chunk-0041",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "RESPONSE FORMAT",
+          "is_expected_source": false,
+          "rank": 5,
+          "score": 25.220303,
+          "section": "RESPONSE FORMAT",
+          "section_heading": "RESPONSE FORMAT",
+          "section_path": [
+            "RESPONSE FORMAT"
+          ],
+          "source_id": "ASP-P0-911DBBA63783",
+          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
+          "source_priority": "P0"
+        }
+      ],
+      "section_metadata_present_count": 0,
+      "source_paths_existing": 3,
+      "source_paths_expected": 3,
+      "top_k": 5,
+      "wrong_source_priority_flags": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf"
+      ]
+    }
+  ],
+  "chunks_path": "data/chunks.jsonl",
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "diagnostic_only": true,
+  "fixture_path": "docs/evals/V1_2_GOLDEN_EVAL_SET.json",
+  "non_mutation_statement": "This script reads V1.2 fixtures, source registry, chunk artifacts, and current retrieval code only. It does not mutate retrieval, ranking, embeddings, vector DB behavior, reranking, answer generation, source ingestion, source registry artifacts, chunk artifacts, or source artifacts.",
+  "registry_or_chunk_mutation": false,
+  "registry_path": "data/source_registry.csv",
+  "retrieval_behavior_changed": false,
+  "retrieval_execution_available": true,
+  "retrieval_execution_status": "available_read_only",
+  "retrieval_interface": "asperitas_agent.retrieval_mvp003.search_chunks_mvp003",
+  "schema_version": "v1.3a-retrieval-diagnostic-baseline",
+  "summary": {
+    "case_count": 4,
+    "cases_with_any_citation_candidate": 4,
+    "cases_with_retrieval_execution": 4,
+    "chunk_represented_source_count": 1,
+    "existing_source_path_count": 12,
+    "expected_source_path_count": 12,
+    "registry_represented_source_count": 1,
+    "section_metadata_present_source_count": 1
+  },
+  "top_k": 5,
+  "truth_boundary_statement": "This diagnostic reports retrieval-readiness observations against V1.2 fixture cases. It is not an answer-quality score, not an optimization result, and not evidence of deployment, biological validation, legal approval, or regulatory approval."
+}
