@@ -46,19 +46,68 @@
       "question": "Can we describe the current Asperitas agent as production deployed and biologically validated?",
       "registry_represented_count": 3,
       "retrieval_execution_available": true,
-      "retrieval_miss_flags": [
-        "docs/EVALS.md",
-        "docs/V1_KNOWN_LIMITATIONS.md",
-        "docs/V1_RELEASE_CLOSEOUT.md"
-      ],
+      "retrieval_miss_flags": [],
       "retrieved": [
+        {
+          "chunk_id": "ASP-P1-5C0DB7071FEB::EA355028::chunk-0002",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "MVP-001/MVP-002 Eval Plan > Retrieval Oracle Policy",
+          "is_expected_source": true,
+          "rank": 1,
+          "score": 154.852359,
+          "section": "Retrieval Oracle Policy",
+          "section_heading": "Retrieval Oracle Policy",
+          "section_path": [
+            "MVP-001/MVP-002 Eval Plan",
+            "Retrieval Oracle Policy"
+          ],
+          "source_id": "ASP-P1-5C0DB7071FEB",
+          "source_path": "docs/EVALS.md",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P1-A53B89890270::755E5162::chunk-0002",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "V1 Known Limitations > Retrieval And Answering",
+          "is_expected_source": true,
+          "rank": 2,
+          "score": 151.240089,
+          "section": "Retrieval And Answering",
+          "section_heading": "Retrieval And Answering",
+          "section_path": [
+            "V1 Known Limitations",
+            "Retrieval And Answering"
+          ],
+          "source_id": "ASP-P1-A53B89890270",
+          "source_path": "docs/V1_KNOWN_LIMITATIONS.md",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P1-980BFCB1AEFB::E50D03B5::chunk-0001",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "V1 Release Closeout",
+          "is_expected_source": true,
+          "rank": 3,
+          "score": 150.272893,
+          "section": "V1 Release Closeout",
+          "section_heading": "V1 Release Closeout",
+          "section_path": [
+            "V1 Release Closeout"
+          ],
+          "source_id": "ASP-P1-980BFCB1AEFB",
+          "source_path": "docs/V1_RELEASE_CLOSEOUT.md",
+          "source_priority": "P1"
+        },
         {
           "chunk_id": "ASP-P0-E0E74C368EF6::825455C9::chunk-0004",
           "citation_candidate_available": true,
           "has_section_metadata": true,
           "heading_context": "Source Status & Inheritance",
           "is_expected_source": false,
-          "rank": 1,
+          "rank": 4,
           "score": 97.381778,
           "section": "Source Status & Inheritance",
           "section_heading": "Source Status & Inheritance",
@@ -75,7 +124,7 @@
           "has_section_metadata": true,
           "heading_context": "Source Status & Truth Boundary",
           "is_expected_source": false,
-          "rank": 2,
+          "rank": 5,
           "score": 85.662488,
           "section": "Source Status & Truth Boundary",
           "section_heading": "Source Status & Truth Boundary",
@@ -85,57 +134,6 @@
           "source_id": "ASP-P0-4B079861EFF7",
           "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
           "source_priority": "P0"
-        },
-        {
-          "chunk_id": "ASP-P0-371A302FC971::C63CE552::chunk-0001",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "AGENTS.md - Asperitas AI Agent Development Constitution",
-          "is_expected_source": false,
-          "rank": 3,
-          "score": 79.326802,
-          "section": "AGENTS.md - Asperitas AI Agent Development Constitution",
-          "section_heading": "AGENTS.md - Asperitas AI Agent Development Constitution",
-          "section_path": [
-            "AGENTS.md - Asperitas AI Agent Development Constitution"
-          ],
-          "source_id": "ASP-P0-371A302FC971",
-          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
-          "source_priority": "P0"
-        },
-        {
-          "chunk_id": "ASP-P0-50F015DD866E::1E601FA8::chunk-0003",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source",
-          "is_expected_source": false,
-          "rank": 4,
-          "score": 69.914057,
-          "section": "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source",
-          "section_heading": "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source",
-          "section_path": [
-            "Codex must preserve confidentiality, remove private personal data from processed corpora, and classify every source"
-          ],
-          "source_id": "ASP-P0-50F015DD866E",
-          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
-          "source_priority": "P0"
-        },
-        {
-          "chunk_id": "ASP-P0-911DBBA63783::9A8E6A42::chunk-0012",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "CRITICAL TRUTH RULE",
-          "is_expected_source": false,
-          "rank": 5,
-          "score": 66.31772,
-          "section": "CRITICAL TRUTH RULE",
-          "section_heading": "CRITICAL TRUTH RULE",
-          "section_path": [
-            "CRITICAL TRUTH RULE"
-          ],
-          "source_id": "ASP-P0-911DBBA63783",
-          "source_path": "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
-          "source_priority": "P0"
         }
       ],
       "section_metadata_present_count": 3,
@@ -144,10 +142,7 @@
       "top_k": 5,
       "wrong_source_priority_flags": [
         "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
-        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
-        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
-        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
-        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf"
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
       ]
     },
     {
@@ -207,7 +202,7 @@
           "heading_context": "Source Priority Hierarchy",
           "is_expected_source": true,
           "rank": 1,
-          "score": 131.3,
+          "score": 137.3,
           "section": "Source Priority Hierarchy",
           "section_heading": "Source Priority Hierarchy",
           "section_path": [
@@ -341,17 +336,50 @@
       "registry_represented_count": 3,
       "retrieval_execution_available": true,
       "retrieval_miss_flags": [
-        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
         "docs/EVALS.md"
       ],
       "retrieved": [
+        {
+          "chunk_id": "ASP-P1-8B0062C9EB1F::C5051934::chunk-0012",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "LMO / GMO Checklist",
+          "is_expected_source": true,
+          "rank": 1,
+          "score": 78.7,
+          "section": "LMO / GMO Checklist",
+          "section_heading": "LMO / GMO Checklist",
+          "section_path": [
+            "LMO / GMO Checklist"
+          ],
+          "source_id": "ASP-P1-8B0062C9EB1F",
+          "source_path": "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P0-5169C5E098C0::9FEF6689::chunk-0015",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "Default Answer Pattern",
+          "is_expected_source": true,
+          "rank": 2,
+          "score": 67.485536,
+          "section": "Default Answer Pattern",
+          "section_heading": "Default Answer Pattern",
+          "section_path": [
+            "Default Answer Pattern"
+          ],
+          "source_id": "ASP-P0-5169C5E098C0",
+          "source_path": "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+          "source_priority": "P0"
+        },
         {
           "chunk_id": "ASP-P0-50F015DD866E::1E601FA8::chunk-0036",
           "citation_candidate_available": true,
           "has_section_metadata": true,
           "heading_context": "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*",
           "is_expected_source": false,
-          "rank": 1,
+          "rank": 3,
           "score": 44.355938,
           "section": "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*",
           "section_heading": "00_ADMIN/source_registries/* and 00_ADMIN/source_manifests/*",
@@ -368,7 +396,7 @@
           "has_section_metadata": true,
           "heading_context": "BIOLOGICAL MONOPOLY ENGINE",
           "is_expected_source": false,
-          "rank": 2,
+          "rank": 4,
           "score": 41.240584,
           "section": "BIOLOGICAL MONOPOLY ENGINE",
           "section_heading": "BIOLOGICAL MONOPOLY ENGINE",
@@ -385,8 +413,8 @@
           "has_section_metadata": true,
           "heading_context": "V1.2 Answer Quality Rubric",
           "is_expected_source": false,
-          "rank": 3,
-          "score": 29.514783,
+          "rank": 5,
+          "score": 31.514783,
           "section": "V1.2 Answer Quality Rubric",
           "section_heading": "V1.2 Answer Quality Rubric",
           "section_path": [
@@ -394,41 +422,6 @@
           ],
           "source_id": "ASP-P1-5D6C6B928465",
           "source_path": "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
-          "source_priority": "P1"
-        },
-        {
-          "chunk_id": "ASP-P1-52F1F2C1647A::C795903E::chunk-0004",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "V1.1A Failure Log Collector > Redaction Expectations",
-          "is_expected_source": false,
-          "rank": 4,
-          "score": 27.844454,
-          "section": "Redaction Expectations",
-          "section_heading": "Redaction Expectations",
-          "section_path": [
-            "V1.1A Failure Log Collector",
-            "Redaction Expectations"
-          ],
-          "source_id": "ASP-P1-52F1F2C1647A",
-          "source_path": "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
-          "source_priority": "P1"
-        },
-        {
-          "chunk_id": "ASP-P1-8B0062C9EB1F::C5051934::chunk-0012",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "LMO / GMO Checklist",
-          "is_expected_source": true,
-          "rank": 5,
-          "score": 23.7,
-          "section": "LMO / GMO Checklist",
-          "section_heading": "LMO / GMO Checklist",
-          "section_path": [
-            "LMO / GMO Checklist"
-          ],
-          "source_id": "ASP-P1-8B0062C9EB1F",
-          "source_path": "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
           "source_priority": "P1"
         }
       ],
@@ -439,8 +432,7 @@
       "wrong_source_priority_flags": [
         "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
         "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
-        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
-        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md"
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md"
       ]
     },
     {
@@ -488,17 +480,68 @@
       "question": "If a dogfood answer is source-grounded but too vague to guide the next engineering step, how should it be scored?",
       "registry_represented_count": 3,
       "retrieval_execution_available": true,
-      "retrieval_miss_flags": [
-        "docs/evals/V1_2_FAILURE_TAXONOMY.md"
-      ],
+      "retrieval_miss_flags": [],
       "retrieved": [
+        {
+          "chunk_id": "ASP-P1-5D6C6B928465::EAA208F3::chunk-0001",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "V1.2 Answer Quality Rubric",
+          "is_expected_source": true,
+          "rank": 1,
+          "score": 89.532848,
+          "section": "V1.2 Answer Quality Rubric",
+          "section_heading": "V1.2 Answer Quality Rubric",
+          "section_path": [
+            "V1.2 Answer Quality Rubric"
+          ],
+          "source_id": "ASP-P1-5D6C6B928465",
+          "source_path": "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P1-52F1F2C1647A::C795903E::chunk-0003",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "V1.1A Failure Log Collector > CLI",
+          "is_expected_source": true,
+          "rank": 2,
+          "score": 87.038181,
+          "section": "CLI",
+          "section_heading": "CLI",
+          "section_path": [
+            "V1.1A Failure Log Collector",
+            "CLI"
+          ],
+          "source_id": "ASP-P1-52F1F2C1647A",
+          "source_path": "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+          "source_priority": "P1"
+        },
+        {
+          "chunk_id": "ASP-P1-8244C22D5083::1BB9DBD7::chunk-0002",
+          "citation_candidate_available": true,
+          "has_section_metadata": true,
+          "heading_context": "V1.2 Dogfood Failure Taxonomy > Categories",
+          "is_expected_source": true,
+          "rank": 3,
+          "score": 78.65,
+          "section": "Categories",
+          "section_heading": "Categories",
+          "section_path": [
+            "V1.2 Dogfood Failure Taxonomy",
+            "Categories"
+          ],
+          "source_id": "ASP-P1-8244C22D5083",
+          "source_path": "docs/evals/V1_2_FAILURE_TAXONOMY.md",
+          "source_priority": "P1"
+        },
         {
           "chunk_id": "ASP-P0-50F015DD866E::1E601FA8::chunk-0002",
           "citation_candidate_available": true,
           "has_section_metadata": true,
           "heading_context": "How Codex Should Use This PDF",
           "is_expected_source": false,
-          "rank": 1,
+          "rank": 4,
           "score": 44.078982,
           "section": "How Codex Should Use This PDF",
           "section_heading": "How Codex Should Use This PDF",
@@ -510,73 +553,21 @@
           "source_priority": "P0"
         },
         {
-          "chunk_id": "ASP-P1-5D6C6B928465::EAA208F3::chunk-0001",
+          "chunk_id": "ASP-P0-5169C5E098C0::9FEF6689::chunk-0015",
           "citation_candidate_available": true,
           "has_section_metadata": true,
-          "heading_context": "V1.2 Answer Quality Rubric",
-          "is_expected_source": true,
-          "rank": 2,
-          "score": 32.532848,
-          "section": "V1.2 Answer Quality Rubric",
-          "section_heading": "V1.2 Answer Quality Rubric",
-          "section_path": [
-            "V1.2 Answer Quality Rubric"
-          ],
-          "source_id": "ASP-P1-5D6C6B928465",
-          "source_path": "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
-          "source_priority": "P1"
-        },
-        {
-          "chunk_id": "ASP-P0-D45C934EE64E::5A5121B5::chunk-0017",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "Retrieval Budget Rule",
+          "heading_context": "Default Answer Pattern",
           "is_expected_source": false,
-          "rank": 3,
-          "score": 32.446169,
-          "section": "Retrieval Budget Rule",
-          "section_heading": "Retrieval Budget Rule",
+          "rank": 5,
+          "score": 32.988793,
+          "section": "Default Answer Pattern",
+          "section_heading": "Default Answer Pattern",
           "section_path": [
-            "Retrieval Budget Rule"
-          ],
-          "source_id": "ASP-P0-D45C934EE64E",
-          "source_path": "00_ADMIN/source_priority_policy.md",
-          "source_priority": "P0"
-        },
-        {
-          "chunk_id": "ASP-P0-5169C5E098C0::9FEF6689::chunk-0016",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "Eval Questions",
-          "is_expected_source": false,
-          "rank": 4,
-          "score": 32.218298,
-          "section": "Eval Questions",
-          "section_heading": "Eval Questions",
-          "section_path": [
-            "Eval Questions"
+            "Default Answer Pattern"
           ],
           "source_id": "ASP-P0-5169C5E098C0",
           "source_path": "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
           "source_priority": "P0"
-        },
-        {
-          "chunk_id": "ASP-P1-52F1F2C1647A::C795903E::chunk-0003",
-          "citation_candidate_available": true,
-          "has_section_metadata": true,
-          "heading_context": "V1.1A Failure Log Collector > CLI",
-          "is_expected_source": true,
-          "rank": 5,
-          "score": 30.038181,
-          "section": "CLI",
-          "section_heading": "CLI",
-          "section_path": [
-            "V1.1A Failure Log Collector",
-            "CLI"
-          ],
-          "source_id": "ASP-P1-52F1F2C1647A",
-          "source_path": "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
-          "source_priority": "P1"
         }
       ],
       "section_metadata_present_count": 3,
@@ -585,7 +576,6 @@
       "top_k": 5,
       "wrong_source_priority_flags": [
         "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
-        "00_ADMIN/source_priority_policy.md",
         "04_AGENT_SYSTEM/guardrails/source_truth_rules.md"
       ]
     }

@@ -9,7 +9,7 @@
     "existing_source_path_count": 12,
     "expected_source_path_count": 12,
     "registry_represented_source_count": 12,
-    "retrieval_miss_flag_count": 8,
+    "retrieval_miss_flag_count": 3,
     "section_metadata_present_source_count": 12
   },
   "answer_generation_changed": false,
@@ -148,11 +148,7 @@
       "expected_source_paths": 3,
       "registry_represented_after": 3,
       "registry_represented_before": 0,
-      "retrieval_miss_flags_after": [
-        "docs/EVALS.md",
-        "docs/V1_KNOWN_LIMITATIONS.md",
-        "docs/V1_RELEASE_CLOSEOUT.md"
-      ],
+      "retrieval_miss_flags_after": [],
       "retrieval_miss_flags_before": [
         "docs/EVALS.md",
         "docs/V1_KNOWN_LIMITATIONS.md",
@@ -192,7 +188,6 @@
       "registry_represented_after": 3,
       "registry_represented_before": 0,
       "retrieval_miss_flags_after": [
-        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
         "docs/EVALS.md"
       ],
       "retrieval_miss_flags_before": [
@@ -212,9 +207,7 @@
       "expected_source_paths": 3,
       "registry_represented_after": 3,
       "registry_represented_before": 0,
-      "retrieval_miss_flags_after": [
-        "docs/evals/V1_2_FAILURE_TAXONOMY.md"
-      ],
+      "retrieval_miss_flags_after": [],
       "retrieval_miss_flags_before": [
         "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
         "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",

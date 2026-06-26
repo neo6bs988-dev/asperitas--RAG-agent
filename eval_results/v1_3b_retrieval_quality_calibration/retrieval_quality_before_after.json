@@ -1,0 +1,171 @@
+{
+  "after_mode": "mvp003_with_v1_3b_2_calibration_components",
+  "after_summary": {
+    "case_count": 4,
+    "citation_candidate_case_count": 4,
+    "hit_at_1_cases": 4,
+    "hit_at_3_cases": 4,
+    "hit_at_5_cases": 4,
+    "p0_retrieved_rows": 10,
+    "p1_retrieved_rows": 10,
+    "retrieval_miss_flag_count": 3,
+    "section_metadata_available_rows": 19,
+    "total_expected_hits_at_5": 9,
+    "wrong_source_proxy_flag_count": 11
+  },
+  "answer_generation_changed": false,
+  "before_mode": "mvp003_without_v1_3b_2_calibration_components",
+  "before_summary": {
+    "case_count": 4,
+    "citation_candidate_case_count": 4,
+    "hit_at_1_cases": 1,
+    "hit_at_3_cases": 2,
+    "hit_at_5_cases": 3,
+    "p0_retrieved_rows": 13,
+    "p1_retrieved_rows": 7,
+    "retrieval_miss_flag_count": 8,
+    "section_metadata_available_rows": 19,
+    "total_expected_hits_at_5": 4,
+    "wrong_source_proxy_flag_count": 16
+  },
+  "calibration_behavior": [
+    "metadata-only direct source reference boost",
+    "metadata-only section/heading overlap boost",
+    "narrow V1 status/readiness doc boost"
+  ],
+  "case_comparison": [
+    {
+      "best_expected_rank_after": 1,
+      "best_expected_rank_before": null,
+      "case_id": "v1_2_truth_boundary_status",
+      "expected_hits_at_5_after": 3,
+      "expected_hits_at_5_before": 0,
+      "retrieval_miss_flags_after": [],
+      "retrieval_miss_flags_before": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md"
+      ],
+      "top_k_retrieved_paths_after": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
+      ],
+      "top_k_retrieved_paths_before": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf"
+      ]
+    },
+    {
+      "best_expected_rank_after": 1,
+      "best_expected_rank_before": 1,
+      "case_id": "v1_2_source_priority_company_truth",
+      "expected_hits_at_5_after": 1,
+      "expected_hits_at_5_before": 1,
+      "retrieval_miss_flags_after": [
+        "AGENTS.md",
+        "docs/EVALS.md"
+      ],
+      "retrieval_miss_flags_before": [
+        "AGENTS.md",
+        "docs/EVALS.md"
+      ],
+      "top_k_retrieved_paths_after": [
+        "00_ADMIN/source_priority_policy.md",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas 소개 (2).docx",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf"
+      ],
+      "top_k_retrieved_paths_before": [
+        "00_ADMIN/source_priority_policy.md",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas 소개 (2).docx",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf"
+      ]
+    },
+    {
+      "best_expected_rank_after": 1,
+      "best_expected_rank_before": 5,
+      "case_id": "v1_2_biosafety_gate_dogfood",
+      "expected_hits_at_5_after": 2,
+      "expected_hits_at_5_before": 1,
+      "retrieval_miss_flags_after": [
+        "docs/EVALS.md"
+      ],
+      "retrieval_miss_flags_before": [
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "docs/EVALS.md"
+      ],
+      "top_k_retrieved_paths_after": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md"
+      ],
+      "top_k_retrieved_paths_before": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md"
+      ]
+    },
+    {
+      "best_expected_rank_after": 1,
+      "best_expected_rank_before": 2,
+      "case_id": "v1_2_actionable_eval_followup",
+      "expected_hits_at_5_after": 3,
+      "expected_hits_at_5_before": 2,
+      "retrieval_miss_flags_after": [],
+      "retrieval_miss_flags_before": [
+        "docs/evals/V1_2_FAILURE_TAXONOMY.md"
+      ],
+      "top_k_retrieved_paths_after": [
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md",
+        "docs/evals/V1_2_FAILURE_TAXONOMY.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md"
+      ],
+      "top_k_retrieved_paths_before": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "docs/evals/V1_2_ANSWER_QUALITY_RUBRIC.md",
+        "00_ADMIN/source_priority_policy.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "docs/V1_1A_FAILURE_LOG_COLLECTOR.md"
+      ]
+    }
+  ],
+  "chunks_path": "data/chunks.jsonl",
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "delta_summary": {
+    "hit_at_1_cases": 3,
+    "hit_at_3_cases": 2,
+    "hit_at_5_cases": 1,
+    "p0_retrieved_rows": -3,
+    "p1_retrieved_rows": 3,
+    "retrieval_miss_flag_count": -5,
+    "section_metadata_available_rows": 0,
+    "total_expected_hits_at_5": 5,
+    "wrong_source_proxy_flag_count": -5
+  },
+  "embedding_vector_or_reranker_changed": false,
+  "fixture_path": "docs/evals/V1_2_GOLDEN_EVAL_SET.json",
+  "improvement_proven_by_diagnostics": true,
+  "prompt_or_answer_contract_changed": false,
+  "reference_diagnostic_path": "eval_results/v1_3a_retrieval_diagnostics/retrieval_diagnostic_baseline.json",
+  "registry_path": "data/source_registry.csv",
+  "retrieval_algorithm_changed": true,
+  "schema_version": "v1.3b-2-retrieval-quality-calibration",
+  "source_artifacts_mutated": false,
+  "top_k": 5,
+  "truth_boundary_statement": "This report measures retrieval calibration only. It is not answer-quality proof, deployment evidence, legal approval, regulatory approval, biological validation, or wet-lab capability."
+}
