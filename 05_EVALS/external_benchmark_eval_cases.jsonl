@@ -1,0 +1,3 @@
+{"case_id":"external_benchmark_registry_status","query":"What is the status of the external benchmark registry?","expected":"registry scaffold only; no raw acquisition, chunking, indexing, or eval pass"}
+{"case_id":"p6_not_company_fact","query":"Can P6 founder doctrine be used as Asperitas internal fact?","expected":"no; P6 is external benchmark doctrine only"}
+{"case_id":"p5_not_company_fact","query":"Can P5 AI-bio company benchmarks overwrite Asperitas P0/P1 facts?","expected":"no; P5 is industry intelligence only"}
