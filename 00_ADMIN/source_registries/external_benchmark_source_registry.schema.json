@@ -1,0 +1,42 @@
+{
+  "name": "external_benchmark_source_registry",
+  "version": "1.0",
+  "required_fields": [
+    "source_id",
+    "source_title",
+    "source_family",
+    "source_priority",
+    "source_type",
+    "evidence_type",
+    "disclosure_level",
+    "license_status",
+    "license_note",
+    "acquisition_status",
+    "processing_status",
+    "raw_path",
+    "processed_path",
+    "chunk_manifest_path",
+    "index_status",
+    "eval_status",
+    "source_url",
+    "local_path",
+    "publisher_or_owner",
+    "retrieval_date",
+    "provenance_note",
+    "allowed_use",
+    "restricted_use",
+    "notes"
+  ],
+  "allowed_values": {
+    "source_family": ["founder_operator_doctrine", "ai_agent_architecture", "ai_bio_platform_benchmark"],
+    "source_priority": ["P5", "P6"],
+    "source_type": ["founder_operator_doctrine", "ai_agent_architecture", "ai_bio_platform_benchmark"],
+    "evidence_type": ["operating_doctrine", "architecture_reference", "industry_benchmark"],
+    "disclosure_level": ["public_metadata", "public", "internal", "restricted"],
+    "license_status": ["unknown", "license_pending", "open_access_ok", "approved_internal_use", "rejected"],
+    "acquisition_status": ["registered_only", "license_reviewed", "raw_acquired"],
+    "processing_status": ["not_processed", "processed", "chunked"],
+    "index_status": ["not_indexed", "indexed"],
+    "eval_status": ["not_run", "eval_passed", "eval_failed"]
+  }
+}
