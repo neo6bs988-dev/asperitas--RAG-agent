@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Asperitas External Benchmark Source Registry",
+  "type": "object",
+  "required": [
+    "source_id",
+    "category",
+    "title",
+    "organization",
+    "url",
+    "source_type",
+    "source_priority",
+    "disclosure",
+    "license_status",
+    "evidence_weight",
+    "ingestion_status",
+    "retrieval_date",
+    "use_case"
+  ],
+  "properties": {
+    "source_id": { "type": "string", "pattern": "^(FND|AGT|BIO)[0-9]{3}$" },
+    "category": {
+      "type": "string",
+      "enum": ["founder_operator_doctrine", "ai_agent_architecture", "ai_bio_platform_benchmark"]
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "organization": { "type": "string", "minLength": 1 },
+    "url": { "type": "string", "format": "uri" },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "official_webpage",
+        "official_pdf",
+        "investor_relations",
+        "sec_edgar",
+        "official_docs",
+        "github_repo",
+        "public_talk",
+        "preprint"
+      ]
+    },
+    "source_priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3", "P4", "P5", "P6"] },
+    "disclosure": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
+    "license_status": {
+      "type": "string",
+      "enum": [
+        "official_public_terms_review_required",
+        "open_source_license_review_required",
+        "sec_public_record_terms_review_required",
+        "approved_for_raw_acquisition",
+        "approved_for_processing",
+        "rejected"
+      ]
+    },
+    "evidence_weight": { "type": "string", "minLength": 1 },
+    "ingestion_status": {
+      "type": "string",
+      "enum": [
+        "registered_only",
+        "raw_acquired",
+        "processed_markdown",
+        "chunked",
+        "embedded",
+        "evaluated",
+        "rejected"
+      ]
+    },
+    "retrieval_date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "use_case": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  },
+  "additionalProperties": false
+}
