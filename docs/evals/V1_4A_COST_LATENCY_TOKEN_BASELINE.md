@@ -16,27 +16,27 @@ V1.4A adds deterministic measurement only. It records answer length, approximate
 - Cases measured: 27
 - Suite counts: `{"golden_eval": 6, "retrieval_eval_sample": 8, "v1_3c_answer_contract": 7, "v1_3d_truth_compliance_router": 6}`
 - Total answer approximate tokens: 9432
-- Total retrieved-context approximate tokens: 13215
+- Total retrieved-context approximate tokens: 7983
 - Duplicate evidence count: 0
 - Duplicate source count: 0
-- Ask-agent latency mean/p50/p95/max ms: 717.292 / 0.142 / 2809.697 / 2871.656
-- Retrieval/evidence assembly latency mean/max ms: 2795.827 / 3095.102
+- Ask-agent latency mean/p50/p95/max ms: 845.862 / 0.212 / 3328.692 / 3504.915
+- Retrieval/evidence assembly latency mean/max ms: 3268.116 / 3688.785
 
 ## Top cost/token drivers
 
-- GOLDEN-001 (golden_eval): 877 context tokens
-- GOLDEN-002 (golden_eval): 877 context tokens
-- GOLDEN-003 (golden_eval): 877 context tokens
-- GOLDEN-004 (golden_eval): 877 context tokens
-- GOLDEN-006 (golden_eval): 877 context tokens
+- GOLDEN-001 (golden_eval): 527 context tokens
+- GOLDEN-002 (golden_eval): 527 context tokens
+- GOLDEN-003 (golden_eval): 527 context tokens
+- GOLDEN-004 (golden_eval): 527 context tokens
+- GOLDEN-006 (golden_eval): 527 context tokens
 
 ## Highest-latency cases
 
-- v1_3c_status_truth_boundary (v1_3c_answer_contract): 2871.656 ms
-- GOLDEN-003 (golden_eval): 2809.697 ms
-- GOLDEN-002 (golden_eval): 2791.62 ms
-- GOLDEN-001 (golden_eval): 2738.984 ms
-- v1_3c_compliance_gate (v1_3c_answer_contract): 2738.682 ms
+- GOLDEN-004 (golden_eval): 3504.915 ms
+- v1_3c_status_truth_boundary (v1_3c_answer_contract): 3328.692 ms
+- v1_3c_compliance_gate (v1_3c_answer_contract): 3277.873 ms
+- GOLDEN-003 (golden_eval): 3222.134 ms
+- GOLDEN-006 (golden_eval): 3217.259 ms
 
 ## Scope lock
 
