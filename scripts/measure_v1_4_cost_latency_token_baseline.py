@@ -393,10 +393,15 @@ def build_report() -> dict[str, Any]:
         "highest_latency_cases": top_cases(cases, "ask_agent_runtime_ms"),
         "highest_retrieval_assembly_latency_cases": top_cases(cases, "retrieval_evidence_assembly_runtime_ms"),
         "safe_optimization_candidates_v1_4b": [
-            "Reduce duplicated evidence from repeated source paths before answer generation, with citation contract tests preserved.",
-            "Compress retrieved context excerpts after retrieval scoring and before answer assembly, without changing ranking.",
-            "Trim boilerplate in deterministic answer sections only after locking answer-contract/router tests.",
-            "Cache registry/chunk reads in evaluation harnesses; keep production behavior separate from baseline claims.",
+            "Context compression after retrieval scoring and before answer assembly, without changing ranking.",
+            "Answer-section and boilerplate trimming under V1.3C answer-contract and V1.3D router tests.",
+            "Eval harness caching for registry/chunk reads; keep production behavior separate from baseline claims.",
+        ],
+        "not_currently_prioritized_v1_4b": [
+            (
+                "Duplicate evidence reduction is not currently prioritized because measured duplicate evidence "
+                "and duplicate source counts are zero."
+            )
         ],
         "cases": cases,
         "truth_boundary_statement": (
@@ -448,6 +453,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.append(f"- {key}: {value}")
     lines.extend(["", "## Safe V1.4B candidates", ""])
     lines.extend(f"- {item}" for item in report["safe_optimization_candidates_v1_4b"])
+    lines.extend(["", "## Not Currently Prioritized", ""])
+    lines.extend(f"- {item}" for item in report["not_currently_prioritized_v1_4b"])
     lines.extend(["", "## Truth boundary", "", report["truth_boundary_statement"], ""])
     return "\n".join(lines)
 

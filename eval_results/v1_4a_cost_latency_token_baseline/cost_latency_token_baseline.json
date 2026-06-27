@@ -699,12 +699,14 @@
     "retrieval_evidence_assembly_runtime_ms",
     "answer_contract_router_section_count"
   ],
+  "not_currently_prioritized_v1_4b": [
+    "Duplicate evidence reduction is not currently prioritized because measured duplicate evidence and duplicate source counts are zero."
+  ],
   "ok": true,
   "safe_optimization_candidates_v1_4b": [
-    "Reduce duplicated evidence from repeated source paths before answer generation, with citation contract tests preserved.",
-    "Compress retrieved context excerpts after retrieval scoring and before answer assembly, without changing ranking.",
-    "Trim boilerplate in deterministic answer sections only after locking answer-contract/router tests.",
-    "Cache registry/chunk reads in evaluation harnesses; keep production behavior separate from baseline claims."
+    "Context compression after retrieval scoring and before answer assembly, without changing ranking.",
+    "Answer-section and boilerplate trimming under V1.3C answer-contract and V1.3D router tests.",
+    "Eval harness caching for registry/chunk reads; keep production behavior separate from baseline claims."
   ],
   "schema_version": "v1.4a-cost-latency-token-baseline",
   "scope_lock": {

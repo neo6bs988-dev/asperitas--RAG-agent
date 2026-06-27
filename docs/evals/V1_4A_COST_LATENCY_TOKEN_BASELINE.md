@@ -47,10 +47,13 @@ V1.4A adds deterministic measurement only. It records answer length, approximate
 
 ## Safe V1.4B candidates
 
-- Reduce duplicated evidence from repeated source paths before answer generation, with citation contract tests preserved.
-- Compress retrieved context excerpts after retrieval scoring and before answer assembly, without changing ranking.
-- Trim boilerplate in deterministic answer sections only after locking answer-contract/router tests.
-- Cache registry/chunk reads in evaluation harnesses; keep production behavior separate from baseline claims.
+- Context compression after retrieval scoring and before answer assembly, without changing ranking.
+- Answer-section and boilerplate trimming under V1.3C answer-contract and V1.3D router tests.
+- Eval harness caching for registry/chunk reads; keep production behavior separate from baseline claims.
+
+## Not Currently Prioritized
+
+- Duplicate evidence reduction is not currently prioritized because measured duplicate evidence and duplicate source counts are zero.
 
 ## Truth boundary
 
