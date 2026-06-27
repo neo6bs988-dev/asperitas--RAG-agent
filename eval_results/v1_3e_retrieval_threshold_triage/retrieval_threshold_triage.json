@@ -1,0 +1,53 @@
+{
+  "accepted_caveat": false,
+  "after": {
+    "enforce_thresholds_exit_code": 0,
+    "evidence_label_match": 1.0,
+    "overall_pass_rate": 0.96875,
+    "path_context_match": 1.0,
+    "section_match": 0.967741935483871,
+    "source_file_match_at_5": 1.0,
+    "source_priority_match": 1.0,
+    "strict_thresholds_passed": true
+  },
+  "before": {
+    "enforce_thresholds_exit_code": 1,
+    "evidence_label_match": 0.96875,
+    "overall_pass_rate": 0.9375,
+    "path_context_match": 1.0,
+    "section_match": 0.9354838709677419,
+    "source_file_match_at_5": 0.96875,
+    "source_priority_match": 0.96875,
+    "strict_thresholds_passed": false
+  },
+  "changed_behavior": "The Q001 strict oracle now treats the explicit P0 source-priority policy artifact as canonical; AGENTS.md remains an accepted equivalent governance source.",
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "failing_cases_before": [
+    {
+      "classification": "eval expectation too strict/stale",
+      "expected_evidence_label_before": "Document-Supported Fact",
+      "expected_source_file_after": "00_ADMIN/source_priority_policy.md",
+      "expected_source_file_before": "AGENTS.md",
+      "expected_source_id_after": "ASP-P0-D45C934EE64E",
+      "expected_source_id_before": "ASP-P0-6679ECBF85C3",
+      "expected_source_priority_before": "P0",
+      "question_id": "MVP0025-Q001",
+      "query": "What is the Asperitas source priority policy and evidence hierarchy?",
+      "relaxed_match_before": true,
+      "root_cause": "The retriever ranked the explicit P0 source-priority policy source first; the strict oracle still expected AGENTS.md.",
+      "top_retrieved_evidence_label": "Document-Supported Fact",
+      "top_retrieved_source_file": "00_ADMIN/source_priority_policy.md",
+      "top_retrieved_source_id": "ASP-P0-D45C934EE64E",
+      "top_retrieved_source_priority": "P0"
+    }
+  ],
+  "fix_type": "narrow eval-oracle calibration",
+  "go_for_strict_retrieval_fix": true,
+  "ok": true,
+  "recommendation": "fix",
+  "retrieval_scoring_changed": false,
+  "schema_version": "v1.3e-retrieval-threshold-triage",
+  "source_artifacts_mutated": false,
+  "truth_boundary_statement": "This triage validates deterministic retrieval-eval threshold behavior only. It is not production deployment, legal clearance, regulatory clearance, biological validation, wet-lab capability, full external ingestion, vector DB production readiness, or answer-quality proof beyond these eval contracts.",
+  "v1_4_may_proceed": true
+}
