@@ -1,0 +1,81 @@
+{
+  "answer_contract_behavior": [
+    "bottom line first",
+    "source-supported facts with citations",
+    "cited evidence excerpt list",
+    "bounded inference label",
+    "missing evidence statement",
+    "limitations/truth-boundary",
+    "next action",
+    "compliance/biosafety/legal gate when relevant"
+  ],
+  "cases": [
+    {
+      "case_id": "v1_3c_status_truth_boundary",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "required_sections": true
+      },
+      "citation_count": 5,
+      "evidence_count": 5,
+      "ok": true,
+      "query": "Can we describe the current Asperitas agent as production deployed and biologically validated?",
+      "status": "answered"
+    },
+    {
+      "case_id": "v1_3c_compliance_gate",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "required_sections": true
+      },
+      "citation_count": 5,
+      "evidence_count": 5,
+      "ok": true,
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "status": "caution"
+    },
+    {
+      "case_id": "v1_3c_missing_evidence",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "required_sections": true
+      },
+      "citation_count": 0,
+      "evidence_count": 0,
+      "ok": true,
+      "query": "No evidence available for this local no-corpus evaluation case.",
+      "status": "abstained"
+    }
+  ],
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "ok": true,
+  "retrieval_scoring_changed": false,
+  "schema_version": "v1.3c-answer-contract",
+  "source_artifacts_mutated": false,
+  "summary": {
+    "case_count": 3,
+    "cases_with_citations_when_evidence_available": 3,
+    "cases_with_missing_evidence_statement": 3,
+    "cases_with_next_action": 3,
+    "passed_case_count": 3
+  },
+  "truth_boundary_statement": "This check validates deterministic answer contract structure only. It is not answer-quality proof, deployment evidence, legal clearance, regulatory clearance, biological validation, or wet-lab capability."
+}
