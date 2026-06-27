@@ -15,15 +15,17 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = REPO_ROOT / "src"
+SCRIPT_ROOT = REPO_ROOT / "scripts"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
 
 from asperitas_agent.agent_runner import ask_agent  # noqa: E402
-from asperitas_agent.chunking import read_chunks  # noqa: E402
 from asperitas_agent.evidence_pack import build_evidence_pack  # noqa: E402
 from asperitas_agent.guardrails import evaluate_evidence_guardrail  # noqa: E402
-from asperitas_agent.registry import read_registry  # noqa: E402
 from asperitas_agent.retrieval_mvp003 import search_chunks_mvp003  # noqa: E402
+from eval_harness_cache import build_evidence_pack_cached, read_chunks_cached, read_registry_cached  # noqa: E402
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -159,7 +161,9 @@ def timed_ask_agent(query: str, top_k: int, **kwargs: Any) -> tuple[dict[str, An
 
 
 def timed_default_agent_case(case_id: str, suite: str, query: str, top_k: int) -> dict[str, Any]:
-    response, runtime_ms = timed_ask_agent(query, top_k=top_k)
+    records = read_registry_cached(REPO_ROOT / "data" / "source_registry.csv")
+    chunks = read_chunks_cached(REPO_ROOT / "data" / "chunks.jsonl")
+    response, runtime_ms = timed_ask_agent(query, top_k=top_k, records=records, chunks=chunks)
     return measure_response(case_id, suite, query, top_k, response, runtime_ms)
 
 
@@ -169,11 +173,11 @@ def timed_empty_agent_case(case_id: str, suite: str, query: str, top_k: int) -> 
 
 
 def measure_default_retrieval_assembly(query: str, top_k: int) -> float:
-    records = read_registry(REPO_ROOT / "data" / "source_registry.csv")
-    chunks = read_chunks(REPO_ROOT / "data" / "chunks.jsonl")
+    records = read_registry_cached(REPO_ROOT / "data" / "source_registry.csv")
+    chunks = read_chunks_cached(REPO_ROOT / "data" / "chunks.jsonl")
     start = time.perf_counter()
     retrieved = search_chunks_mvp003(query, chunks, records, limit=top_k, include_explanations=True)
-    pack = build_evidence_pack(query, retrieved, top_k=top_k)
+    pack = build_evidence_pack_cached(query, retrieved, top_k=top_k)
     evaluate_evidence_guardrail(pack)
     return (time.perf_counter() - start) * 1000
 
@@ -207,7 +211,12 @@ def collect_v1_3c_cases() -> list[dict[str, Any]]:
         elif case.get("mode") == "synthetic_source_map_url":
             response = contract.run_synthetic_source_map_case(case["query"])
         else:
-            response = ask_agent(case["query"], top_k=int(case["top_k"])).to_json()
+            response = ask_agent(
+                case["query"],
+                top_k=int(case["top_k"]),
+                records=read_registry_cached(REPO_ROOT / "data" / "source_registry.csv"),
+                chunks=read_chunks_cached(REPO_ROOT / "data" / "chunks.jsonl"),
+            ).to_json()
         runtime_ms = (time.perf_counter() - start) * 1000
         answer = str(response.get("answer", ""))
         evidence = [item for item in response.get("evidence", []) if isinstance(item, dict)]
@@ -278,13 +287,13 @@ def collect_retrieval_sample_cases(limit: int = 5, sample_size: int = 8) -> list
     expected = retrieval.load_expected_sources(REPO_ROOT / "eval" / "expected_sources.jsonl")
     retrieval.validate_expected_alignment(questions, expected)
     questions = retrieval.merge_expected_oracle_fields(questions, expected)[:sample_size]
-    records = read_registry(REPO_ROOT / "data" / "source_registry.csv")
-    chunks = read_chunks(REPO_ROOT / "data" / "chunks.jsonl")
+    records = read_registry_cached(REPO_ROOT / "data" / "source_registry.csv")
+    chunks = read_chunks_cached(REPO_ROOT / "data" / "chunks.jsonl")
     cases = []
     for index, question in enumerate(questions, start=1):
         start = time.perf_counter()
         results = search_chunks_mvp003(question.user_question, chunks, records, limit=limit, include_explanations=True)
-        pack = build_evidence_pack(question.user_question, results, top_k=limit)
+        pack = build_evidence_pack_cached(question.user_question, results, top_k=limit)
         runtime_ms = (time.perf_counter() - start) * 1000
         evidence = [item.to_json() for item in pack.evidence_items]
         context = "\n\n".join(context_text(item) for item in evidence)

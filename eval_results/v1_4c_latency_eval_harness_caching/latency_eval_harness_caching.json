@@ -1,0 +1,163 @@
+{
+  "bypass": "Set ASPERITAS_EVAL_CACHE=0 to disable the eval harness cache.",
+  "cache_targets": [
+    "source registry CSV reads",
+    "chunks JSONL reads",
+    "retrieval/golden fixture JSONL reads",
+    "repeated evidence pack assembly in local measurement harnesses"
+  ],
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "invalidation_strategy": "In-process cache keys include resolved path, file size, creation time, and mtime for file-backed data; evidence-pack cache keys include query, top_k, snippet config, and retrieval-result fingerprints.",
+  "measurements": [
+    {
+      "label": "v1_4a_baseline_uncached",
+      "payload_summary": {
+        "case_count": 27,
+        "ok": true,
+        "scope_lock": {
+          "answer_behavior_changed": false,
+          "measurement_only": true,
+          "retrieval_scoring_changed": false,
+          "source_artifacts_mutated": false
+        },
+        "summary": {
+          "case_count": 27,
+          "suite_counts": {
+            "golden_eval": 6,
+            "retrieval_eval_sample": 8,
+            "v1_3c_answer_contract": 7,
+            "v1_3d_truth_compliance_router": 6
+          },
+          "total_answer_approx_tokens": 9432,
+          "total_duplicate_evidence_count": 0,
+          "total_duplicate_source_count": 0,
+          "total_retrieved_context_approx_tokens": 7983
+        }
+      },
+      "runtime_ms": 60567.527
+    },
+    {
+      "label": "v1_4a_baseline_cached",
+      "payload_summary": {
+        "case_count": 27,
+        "ok": true,
+        "scope_lock": {
+          "answer_behavior_changed": false,
+          "measurement_only": true,
+          "retrieval_scoring_changed": false,
+          "source_artifacts_mutated": false
+        },
+        "summary": {
+          "case_count": 27,
+          "suite_counts": {
+            "golden_eval": 6,
+            "retrieval_eval_sample": 8,
+            "v1_3c_answer_contract": 7,
+            "v1_3d_truth_compliance_router": 6
+          },
+          "total_answer_approx_tokens": 9432,
+          "total_duplicate_evidence_count": 0,
+          "total_duplicate_source_count": 0,
+          "total_retrieved_context_approx_tokens": 7983
+        }
+      },
+      "runtime_ms": 61635.099
+    },
+    {
+      "label": "v1_4b_compression_uncached",
+      "runtime_ms": 119934.037
+    },
+    {
+      "label": "v1_4b_compression_cached",
+      "runtime_ms": 119715.339
+    },
+    {
+      "label": "golden_eval_uncached",
+      "runtime_ms": 29056.645
+    },
+    {
+      "label": "golden_eval_cached",
+      "runtime_ms": 30233.339
+    },
+    {
+      "label": "retrieval_eval_mvp003_uncached",
+      "runtime_ms": 101048.315
+    },
+    {
+      "label": "retrieval_eval_mvp003_cached",
+      "runtime_ms": 101936.102
+    }
+  ],
+  "ok": true,
+  "schema_version": "v1.4c-latency-eval-harness-caching",
+  "scope_lock": {
+    "answer_behavior_changed": false,
+    "eval_harness_only": true,
+    "production_cache_claim": false,
+    "retrieval_scoring_changed": false,
+    "source_artifacts_mutated": false
+  },
+  "summary": {
+    "behavior_preserved": true,
+    "cache_hit_count": 108,
+    "cached_cache_stats": {
+      "evidence_pack_cache_hits": 0,
+      "evidence_pack_cache_misses": 13,
+      "file_cache_hits": 24,
+      "file_cache_misses": 5
+    },
+    "documented_noop": true,
+    "golden_cached_cache_stats": {
+      "evidence_pack_cache_hits": 0,
+      "evidence_pack_cache_misses": 0,
+      "file_cache_hits": 18,
+      "file_cache_misses": 3
+    },
+    "golden_eval_runtime_delta": {
+      "after_ms": 30233.339,
+      "before_ms": 29056.645,
+      "delta_ms": 1176.694,
+      "delta_percent": 4.05
+    },
+    "measurable_latency_improvement": false,
+    "retrieval_cached_cache_stats": {
+      "evidence_pack_cache_hits": 0,
+      "evidence_pack_cache_misses": 0,
+      "file_cache_hits": 0,
+      "file_cache_misses": 4
+    },
+    "retrieval_eval_mvp003_runtime_delta": {
+      "after_ms": 101936.102,
+      "before_ms": 101048.315,
+      "delta_ms": 887.787,
+      "delta_percent": 0.879
+    },
+    "retrieval_scoring_changed": false,
+    "source_artifacts_mutated": false,
+    "uncached_cache_stats": {
+      "evidence_pack_cache_hits": 0,
+      "evidence_pack_cache_misses": 0,
+      "file_cache_hits": 0,
+      "file_cache_misses": 0
+    },
+    "v1_4a_baseline_runtime_delta": {
+      "after_ms": 61635.099,
+      "before_ms": 60567.527,
+      "delta_ms": 1067.572,
+      "delta_percent": 1.763
+    },
+    "v1_4b_cached_cache_stats": {
+      "evidence_pack_cache_hits": 13,
+      "evidence_pack_cache_misses": 13,
+      "file_cache_hits": 53,
+      "file_cache_misses": 5
+    },
+    "v1_4b_compression_check_runtime_delta": {
+      "after_ms": 119715.339,
+      "before_ms": 119934.037,
+      "delta_ms": -218.698,
+      "delta_percent": -0.182
+    }
+  },
+  "truth_boundary_statement": "This check measures deterministic local eval-harness caching only. It does not change retrieval ranking, answer content, source ingestion, embeddings, vector DB behavior, reranking, or production caching."
+}

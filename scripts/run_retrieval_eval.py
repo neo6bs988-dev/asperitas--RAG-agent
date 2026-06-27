@@ -12,10 +12,13 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = REPO_ROOT / "src"
+SCRIPT_ROOT = REPO_ROOT / "scripts"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
 
-from asperitas_agent.chunking import normalize_section_text, read_chunks  # noqa: E402
+from asperitas_agent.chunking import normalize_section_text  # noqa: E402
 from asperitas_agent.embeddings import (  # noqa: E402
     InMemoryVectorStore,
     LexicalSemanticOfflineEmbeddingProvider,
@@ -28,7 +31,6 @@ from asperitas_agent.hybrid_scoring import (  # noqa: E402
     normalize_cosine_similarity,
     score_metadata_preservation,
 )
-from asperitas_agent.registry import read_registry  # noqa: E402
 from asperitas_agent.reranking import (  # noqa: E402
     RERANK_SOURCE_GROUNDING_FIELDS,
     DeterministicTestReranker,
@@ -38,6 +40,7 @@ from asperitas_agent.reranking import (  # noqa: E402
 )
 from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003  # noqa: E402
 from asperitas_agent.retrieval_tfidf import search_chunks  # noqa: E402
+from eval_harness_cache import load_jsonl_cached, read_chunks_cached, read_registry_cached  # noqa: E402
 
 
 def configure_output_streams() -> None:
@@ -209,18 +212,13 @@ def optional_bool(row: dict[str, Any], field_name: str) -> bool:
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         raise EvalError(f"Required file not found: {path}")
-    rows: list[dict[str, Any]] = []
-    with path.open("r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            if not line.strip():
-                continue
-            try:
-                payload = json.loads(line)
-            except json.JSONDecodeError as exc:
-                raise EvalError(f"{path}:{line_number} invalid JSON: {exc}") from exc
-            if not isinstance(payload, dict):
-                raise EvalError(f"{path}:{line_number} must contain a JSON object")
-            rows.append(payload)
+    try:
+        rows = load_jsonl_cached(path)
+    except json.JSONDecodeError as exc:
+        raise EvalError(f"{path}: invalid JSON: {exc}") from exc
+    for index, payload in enumerate(rows, start=1):
+        if "__non_object__" in payload:
+            raise EvalError(f"{path}:{index} must contain a JSON object")
     if not rows:
         raise EvalError(f"Required file is empty: {path}")
     return rows
@@ -339,8 +337,8 @@ def run_baseline_retrieval(
         raise EvalError(f"Required file not found: {registry_path}")
     if not chunks_path.exists():
         raise EvalError(f"Required file not found: {chunks_path}")
-    records = {record.source_id: record for record in read_registry(registry_path)}
-    chunks = read_chunks(chunks_path)
+    records = {record.source_id: record for record in read_registry_cached(registry_path)}
+    chunks = read_chunks_cached(chunks_path)
     if not chunks:
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
@@ -383,8 +381,8 @@ def run_mvp003_retrieval(
         raise EvalError(f"Required file not found: {registry_path}")
     if not chunks_path.exists():
         raise EvalError(f"Required file not found: {chunks_path}")
-    records = read_registry(registry_path)
-    chunks = read_chunks(chunks_path)
+    records = read_registry_cached(registry_path)
+    chunks = read_chunks_cached(chunks_path)
     if not chunks:
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
@@ -439,8 +437,8 @@ def run_vector_retrieval(
         raise EvalError(f"Required file not found: {registry_path}")
     if not chunks_path.exists():
         raise EvalError(f"Required file not found: {chunks_path}")
-    records = read_registry(registry_path)
-    chunks = read_chunks(chunks_path)
+    records = read_registry_cached(registry_path)
+    chunks = read_chunks_cached(chunks_path)
     if not chunks:
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
@@ -495,8 +493,8 @@ def run_hybrid_retrieval(
         raise EvalError(f"Required file not found: {registry_path}")
     if not chunks_path.exists():
         raise EvalError(f"Required file not found: {chunks_path}")
-    records = read_registry(registry_path)
-    chunks = read_chunks(chunks_path)
+    records = read_registry_cached(registry_path)
+    chunks = read_chunks_cached(chunks_path)
     if not chunks:
         raise EvalError(f"No chunks loaded from: {chunks_path}")
 
