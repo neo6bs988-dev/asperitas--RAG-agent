@@ -1,0 +1,806 @@
+{
+  "baseline_commits": {
+    "pr_102_merge_sha": "9c3d8ee7d9cb6885540aa9f67a8ecff297d468ec",
+    "v1_3c_merge_sha": "65a200cc7736bb946bbf1ead7d71a5129bff7c61",
+    "v1_3d_merge_sha": "635db3186f3538b12934f170a314bbe50c1a1d30",
+    "v1_3e_merge_sha": "fd0c93c7a7155f4054266b1b93512c5fe9396231"
+  },
+  "cases": [
+    {
+      "answer_approx_token_count": 828,
+      "answer_char_count": 3310,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2738.984,
+      "case_id": "GOLDEN-001",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What is Asperitas?",
+      "retrieval_evidence_assembly_runtime_ms": 2722.985,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3507,
+      "source_paths": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas Operating System v9.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas Operating System v8.0 (2).pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf"
+      ],
+      "status": "caution",
+      "suite": "golden_eval",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 862,
+      "answer_char_count": 3447,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2791.62,
+      "case_id": "GOLDEN-002",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What does Asperitas say about AI and biological data?",
+      "retrieval_evidence_assembly_runtime_ms": 2660.448,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Analysis about China&AI (1).hwpx",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_AI_Tool_Master_Prompt.md"
+      ],
+      "status": "caution",
+      "suite": "golden_eval",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 737,
+      "answer_char_count": 2945,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2809.697,
+      "case_id": "GOLDEN-003",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "According to AGENTS.md, what source priority rules should the agent follow?",
+      "retrieval_evidence_assembly_runtime_ms": 2821.707,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3507,
+      "source_paths": [
+        "AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "00_ADMIN/source_priority_policy.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "README.md"
+      ],
+      "status": "answered",
+      "suite": "golden_eval",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 818,
+      "answer_char_count": 3272,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2708.305,
+      "case_id": "GOLDEN-004",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "retrieval_evidence_assembly_runtime_ms": 2616.861,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/(2025) 합성생물학 발전에 따른 LMO 규제 동향.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf"
+      ],
+      "status": "caution",
+      "suite": "golden_eval",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 115,
+      "answer_char_count": 459,
+      "answer_contract_router_section_count": 4,
+      "ask_agent_runtime_ms": 0.138,
+      "case_id": "GOLDEN-005",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 0,
+      "query": "No evidence available for this local no-corpus evaluation case.",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "abstained",
+      "suite": "golden_eval",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 814,
+      "answer_char_count": 3255,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2706.151,
+      "case_id": "GOLDEN-006",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "Summarize Asperitas source governance, evidence labels, and citation requirements.",
+      "retrieval_evidence_assembly_runtime_ms": 2642.787,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Master_Format_Advanced_Prompt_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
+      ],
+      "status": "answered",
+      "suite": "golden_eval",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 790,
+      "answer_char_count": 3157,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2871.656,
+      "case_id": "v1_3c_status_truth_boundary",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "Can we describe the current Asperitas agent as production deployed and biologically validated?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3506,
+      "source_paths": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
+      ],
+      "status": "answered",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 818,
+      "answer_char_count": 3272,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 2738.682,
+      "case_id": "v1_3c_compliance_gate",
+      "citation_count": 5,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/(2025) 합성생물학 발전에 따른 LMO 규제 동향.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf"
+      ],
+      "status": "caution",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 115,
+      "answer_char_count": 459,
+      "answer_contract_router_section_count": 4,
+      "ask_agent_runtime_ms": 0.113,
+      "case_id": "v1_3c_missing_evidence",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 0,
+      "query": "No evidence available for this local no-corpus evaluation case.",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "abstained",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 394,
+      "answer_char_count": 1573,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 0.255,
+      "case_id": "v1_3c_p6_benchmark_analogy_only",
+      "citation_count": 2,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 2,
+      "query": "Give a founder/operator benchmark comparison for Asperitas.",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "answered",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 394,
+      "answer_char_count": 1573,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 0.192,
+      "case_id": "v1_3c_ai_agent_benchmark_status_disclosure",
+      "citation_count": 2,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 2,
+      "query": "Give an AI-agent benchmark comparison for Asperitas.",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "answered",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 479,
+      "answer_char_count": 1913,
+      "answer_contract_router_section_count": 11,
+      "ask_agent_runtime_ms": 0.192,
+      "case_id": "v1_3c_db_completion_overclaim_refusal",
+      "citation_count": 2,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 2,
+      "query": "Is external web ingestion complete with production vector DB indexed?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "caution",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 338,
+      "answer_char_count": 1352,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 0.145,
+      "case_id": "v1_3c_source_map_only_url_not_citation_evidence",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 1,
+      "query": "Can a source-map-only external URL be cited as ingested evidence?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "caution",
+      "suite": "v1_3c_answer_contract",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 307,
+      "answer_char_count": 1225,
+      "answer_contract_router_section_count": 9,
+      "ask_agent_runtime_ms": 0.148,
+      "case_id": "v1_3d_internal_fact_status_boundary",
+      "citation_count": 1,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 1,
+      "query": "Is Asperitas production deployed and biologically validated?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 11,
+      "retrieved_context_char_count": 41,
+      "source_paths": [
+        "docs/V1_KNOWN_LIMITATIONS.md"
+      ],
+      "status": "caution",
+      "suite": "v1_3d_truth_compliance_router",
+      "top_k": 1
+    },
+    {
+      "answer_approx_token_count": 367,
+      "answer_char_count": 1466,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 0.155,
+      "case_id": "v1_3d_p6_analogy_doctrine_only",
+      "citation_count": 2,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 2,
+      "query": "Give a founder/operator benchmark comparison for Asperitas.",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 20,
+      "retrieved_context_char_count": 79,
+      "source_paths": [
+        "docs/ops/GSTACK_OPERATING_STACK.md",
+        "01_RAW_SOURCES/P6_EXTERNAL_BENCHMARKS/bench.md"
+      ],
+      "status": "answered",
+      "suite": "v1_3d_truth_compliance_router",
+      "top_k": 2
+    },
+    {
+      "answer_approx_token_count": 354,
+      "answer_char_count": 1416,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 0.123,
+      "case_id": "v1_3d_compliance_human_review_gate",
+      "citation_count": 1,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 1,
+      "query": "What legal approvals are required for CITES Nagoya LMO biosafety actions?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 15,
+      "retrieved_context_char_count": 58,
+      "source_paths": [
+        "04_AGENT_SYSTEM/guardrails/biosafety_compliance_checklist.md"
+      ],
+      "status": "caution",
+      "suite": "v1_3d_truth_compliance_router",
+      "top_k": 1
+    },
+    {
+      "answer_approx_token_count": 115,
+      "answer_char_count": 459,
+      "answer_contract_router_section_count": 4,
+      "ask_agent_runtime_ms": 0.05,
+      "case_id": "v1_3d_missing_evidence_abstention",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 0,
+      "query": "No evidence available for this local no-corpus router case.",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 0,
+      "retrieved_context_char_count": 0,
+      "source_paths": [],
+      "status": "abstained",
+      "suite": "v1_3d_truth_compliance_router",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 338,
+      "answer_char_count": 1352,
+      "answer_contract_router_section_count": 10,
+      "ask_agent_runtime_ms": 0.123,
+      "case_id": "v1_3d_source_map_only_evidence_risk",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 1,
+      "query": "Can a source-map-only URL be cited as ingested evidence?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 12,
+      "retrieved_context_char_count": 48,
+      "source_paths": [
+        "https://example.com/source-map-only"
+      ],
+      "status": "caution",
+      "suite": "v1_3d_truth_compliance_router",
+      "top_k": 1
+    },
+    {
+      "answer_approx_token_count": 449,
+      "answer_char_count": 1793,
+      "answer_contract_router_section_count": 11,
+      "ask_agent_runtime_ms": 0.142,
+      "case_id": "v1_3d_production_vector_db_claim_risk",
+      "citation_count": 1,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 1,
+      "query": "Is external web ingestion complete with production vector DB indexed?",
+      "retrieval_evidence_assembly_runtime_ms": null,
+      "retrieved_context_approx_token_count": 20,
+      "retrieved_context_char_count": 80,
+      "source_paths": [
+        "01_RAW_SOURCES/P6_EXTERNAL_BENCHMARKS/bench.md"
+      ],
+      "status": "caution",
+      "suite": "v1_3d_truth_compliance_router",
+      "top_k": 1
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q001",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What is the Asperitas source priority policy and evidence hierarchy?",
+      "retrieval_evidence_assembly_runtime_ms": 2837.029,
+      "retrieved_context_approx_token_count": 859,
+      "retrieved_context_char_count": 3435,
+      "source_paths": [
+        "00_ADMIN/source_priority_policy.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q002",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "Which development priorities should be completed before embeddings, vector DB, and UI work?",
+      "retrieval_evidence_assembly_runtime_ms": 2876.691,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3507,
+      "source_paths": [
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md",
+        "README.md",
+        "04_AGENT_SYSTEM/guardrails/source_truth_rules.md"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q003",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "In the AOS v10.3 universal master prompt, what is the source of truth hierarchy?",
+      "retrieval_evidence_assembly_runtime_ms": 2828.498,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3507,
+      "source_paths": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_AI_Tool_Master_Prompt.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Master_Format_Advanced_Prompt_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q004",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What limits does the master constitution place on claiming legal approval, regulatory approval, or wet-lab validation?",
+      "retrieval_evidence_assembly_runtime_ms": 3095.102,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "docs/EVALS.md",
+        "docs/V1_KNOWN_LIMITATIONS.md",
+        "docs/V1_RELEASE_CLOSEOUT.md"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q005",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "What does the Codex AI Agent build guide say about source registry and retrieval evaluation before advanced RAG?",
+      "retrieval_evidence_assembly_runtime_ms": 2973.465,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Codex_AGENTS.md",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Analysis about China&AI (1).hwpx"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q006",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "Which P0 document describes Codex master constitution database integration guidance?",
+      "retrieval_evidence_assembly_runtime_ms": 2686.596,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3508,
+      "source_paths": [
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_3_Master_Format_Advanced_Prompt_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q007",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "Where should retrieval look for Asperitas IR deck claims about company positioning and investor narrative?",
+      "retrieval_evidence_assembly_runtime_ms": 2852.902,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3507,
+      "source_paths": [
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_2_Universal_Prompt_And_Codex_Agent_Constitution.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_Master_Constitution_DB_Integration_Guide_v1_2.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Analysis about China&AI (1).hwpx"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    },
+    {
+      "answer_approx_token_count": 0,
+      "answer_char_count": 0,
+      "answer_contract_router_section_count": 0,
+      "ask_agent_runtime_ms": 0,
+      "case_id": "MVP0025-Q008",
+      "citation_count": 0,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "evidence_count": 5,
+      "query": "Which source contains the Asperitas company introduction document, Asperitas 소개?",
+      "retrieval_evidence_assembly_runtime_ms": 2730.686,
+      "retrieved_context_approx_token_count": 877,
+      "retrieved_context_char_count": 3507,
+      "source_paths": [
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas 소개 (2).docx",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_AOS_v10_0_Prompt.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Codex_AI_Agent_Build_Guidebook_v1.0.pdf",
+        "01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas Operating System v9.0.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/Asperitas Inc. IR deck.pdf"
+      ],
+      "status": "retrieved",
+      "suite": "retrieval_eval_sample",
+      "top_k": 5
+    }
+  ],
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "highest_latency_cases": [
+    {
+      "ask_agent_runtime_ms": 2871.656,
+      "case_id": "v1_3c_status_truth_boundary",
+      "query": "Can we describe the current Asperitas agent as production deployed and biologically validated?",
+      "suite": "v1_3c_answer_contract"
+    },
+    {
+      "ask_agent_runtime_ms": 2809.697,
+      "case_id": "GOLDEN-003",
+      "query": "According to AGENTS.md, what source priority rules should the agent follow?",
+      "suite": "golden_eval"
+    },
+    {
+      "ask_agent_runtime_ms": 2791.62,
+      "case_id": "GOLDEN-002",
+      "query": "What does Asperitas say about AI and biological data?",
+      "suite": "golden_eval"
+    },
+    {
+      "ask_agent_runtime_ms": 2738.984,
+      "case_id": "GOLDEN-001",
+      "query": "What is Asperitas?",
+      "suite": "golden_eval"
+    },
+    {
+      "ask_agent_runtime_ms": 2738.682,
+      "case_id": "v1_3c_compliance_gate",
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "suite": "v1_3c_answer_contract"
+    }
+  ],
+  "highest_retrieval_assembly_latency_cases": [
+    {
+      "case_id": "MVP0025-Q004",
+      "query": "What limits does the master constitution place on claiming legal approval, regulatory approval, or wet-lab validation?",
+      "retrieval_evidence_assembly_runtime_ms": 3095.102,
+      "suite": "retrieval_eval_sample"
+    },
+    {
+      "case_id": "MVP0025-Q005",
+      "query": "What does the Codex AI Agent build guide say about source registry and retrieval evaluation before advanced RAG?",
+      "retrieval_evidence_assembly_runtime_ms": 2973.465,
+      "suite": "retrieval_eval_sample"
+    },
+    {
+      "case_id": "MVP0025-Q002",
+      "query": "Which development priorities should be completed before embeddings, vector DB, and UI work?",
+      "retrieval_evidence_assembly_runtime_ms": 2876.691,
+      "suite": "retrieval_eval_sample"
+    },
+    {
+      "case_id": "MVP0025-Q007",
+      "query": "Where should retrieval look for Asperitas IR deck claims about company positioning and investor narrative?",
+      "retrieval_evidence_assembly_runtime_ms": 2852.902,
+      "suite": "retrieval_eval_sample"
+    },
+    {
+      "case_id": "MVP0025-Q001",
+      "query": "What is the Asperitas source priority policy and evidence hierarchy?",
+      "retrieval_evidence_assembly_runtime_ms": 2837.029,
+      "suite": "retrieval_eval_sample"
+    }
+  ],
+  "measurement_fields": [
+    "answer_char_count",
+    "answer_approx_token_count",
+    "evidence_count",
+    "citation_count",
+    "duplicate_evidence_count",
+    "duplicate_source_count",
+    "retrieved_context_char_count",
+    "retrieved_context_approx_token_count",
+    "ask_agent_runtime_ms",
+    "retrieval_evidence_assembly_runtime_ms",
+    "answer_contract_router_section_count"
+  ],
+  "not_currently_prioritized_v1_4b": [
+    "Duplicate evidence reduction is not currently prioritized because measured duplicate evidence and duplicate source counts are zero."
+  ],
+  "ok": true,
+  "safe_optimization_candidates_v1_4b": [
+    "Context compression after retrieval scoring and before answer assembly, without changing ranking.",
+    "Answer-section and boilerplate trimming under V1.3C answer-contract and V1.3D router tests.",
+    "Eval harness caching for registry/chunk reads; keep production behavior separate from baseline claims."
+  ],
+  "schema_version": "v1.4a-cost-latency-token-baseline",
+  "scope_lock": {
+    "answer_behavior_changed": false,
+    "measurement_only": true,
+    "retrieval_scoring_changed": false,
+    "source_artifacts_mutated": false
+  },
+  "summary": {
+    "case_count": 27,
+    "latency_ms": {
+      "max": 2871.656,
+      "mean": 717.292,
+      "p50": 0.142,
+      "p95": 2809.697
+    },
+    "retrieval_evidence_assembly_latency_ms": {
+      "max": 3095.102,
+      "mean": 2795.827
+    },
+    "suite_counts": {
+      "golden_eval": 6,
+      "retrieval_eval_sample": 8,
+      "v1_3c_answer_contract": 7,
+      "v1_3d_truth_compliance_router": 6
+    },
+    "total_answer_approx_tokens": 9432,
+    "total_duplicate_evidence_count": 0,
+    "total_duplicate_source_count": 0,
+    "total_retrieved_context_approx_tokens": 13215
+  },
+  "top_answer_length_drivers": [
+    {
+      "answer_approx_token_count": 862,
+      "case_id": "GOLDEN-002",
+      "query": "What does Asperitas say about AI and biological data?",
+      "suite": "golden_eval"
+    },
+    {
+      "answer_approx_token_count": 828,
+      "case_id": "GOLDEN-001",
+      "query": "What is Asperitas?",
+      "suite": "golden_eval"
+    },
+    {
+      "answer_approx_token_count": 818,
+      "case_id": "GOLDEN-004",
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "suite": "golden_eval"
+    },
+    {
+      "answer_approx_token_count": 818,
+      "case_id": "v1_3c_compliance_gate",
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "suite": "v1_3c_answer_contract"
+    },
+    {
+      "answer_approx_token_count": 814,
+      "case_id": "GOLDEN-006",
+      "query": "Summarize Asperitas source governance, evidence labels, and citation requirements.",
+      "suite": "golden_eval"
+    }
+  ],
+  "top_token_cost_drivers": [
+    {
+      "case_id": "GOLDEN-001",
+      "query": "What is Asperitas?",
+      "retrieved_context_approx_token_count": 877,
+      "suite": "golden_eval"
+    },
+    {
+      "case_id": "GOLDEN-002",
+      "query": "What does Asperitas say about AI and biological data?",
+      "retrieved_context_approx_token_count": 877,
+      "suite": "golden_eval"
+    },
+    {
+      "case_id": "GOLDEN-003",
+      "query": "According to AGENTS.md, what source priority rules should the agent follow?",
+      "retrieved_context_approx_token_count": 877,
+      "suite": "golden_eval"
+    },
+    {
+      "case_id": "GOLDEN-004",
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "retrieved_context_approx_token_count": 877,
+      "suite": "golden_eval"
+    },
+    {
+      "case_id": "GOLDEN-006",
+      "query": "Summarize Asperitas source governance, evidence labels, and citation requirements.",
+      "retrieved_context_approx_token_count": 877,
+      "suite": "golden_eval"
+    }
+  ],
+  "truth_boundary_statement": "This baseline measures deterministic local cost, latency, token/context size, evidence duplication, and output length. It is not an optimization, deployment claim, legal clearance, regulatory clearance, biological validation, or answer-quality proof beyond the referenced fixtures."
+}
