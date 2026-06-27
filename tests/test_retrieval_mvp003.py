@@ -1,4 +1,4 @@
-from asperitas_agent.retrieval_mvp003 import score_chunks_mvp003, search_chunks_mvp003
+from asperitas_agent.retrieval_mvp003 import score_candidate, score_chunks_mvp003, search_chunks_mvp003
 from asperitas_agent.schemas import Chunk, SourceRecord
 
 
@@ -67,6 +67,66 @@ def test_mvp003_duplicate_folder_context_prefers_industry_seed():
 
     assert results[0].source_file.startswith("01_RAW_SOURCES/P5_INDUSTRY_INTELLIGENCE")
     assert results[0].score_components["duplicate_context_bonus"] > 0
+
+
+def test_mvp003_p6_benchmark_does_not_override_internal_fact_source():
+    internal = make_source(
+        "ASP-P1-DRUG",
+        "Synthetic Biology Drug Development",
+        "synthetic-biology-drug-development.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/synthetic-biology-drug-development.pdf",
+    )
+    benchmark = make_source(
+        "ASP-P6-BENCH",
+        "AI Bio-AI Benchmark",
+        "benchmark.pdf",
+        "01_RAW_SOURCES/P6_BENCHMARK_OPERATING/benchmark.pdf",
+        priority="P6",
+    )
+    chunks = [
+        make_chunk(benchmark, "synthetic biology based drug development status and outlook " * 20),
+        make_chunk(internal, "synthetic biology based drug development status and outlook"),
+    ]
+
+    results = search_chunks_mvp003(
+        "Which document covers synthetic biology based drug development status and outlook?",
+        chunks,
+        [benchmark, internal],
+        limit=2,
+    )
+    benchmark_score = score_candidate(
+        "Which document covers synthetic biology based drug development status and outlook?",
+        chunks[0],
+        benchmark,
+    )
+
+    assert results[0].chunk.source_id == internal.source_id
+    assert benchmark_score.score_components["p6_internal_fact_penalty"] < 0
+
+
+def test_mvp003_p6_benchmark_allowed_for_benchmark_workflow_queries():
+    internal = make_source(
+        "ASP-P1-DRUG",
+        "Synthetic Biology Drug Development",
+        "synthetic-biology-drug-development.pdf",
+        "01_RAW_SOURCES/P1_ASPERITAS_INTERNAL/synthetic-biology-drug-development.pdf",
+    )
+    benchmark = make_source(
+        "ASP-P6-BENCH",
+        "AI Bio-AI Benchmark",
+        "benchmark.pdf",
+        "01_RAW_SOURCES/P6_BENCHMARK_OPERATING/benchmark.pdf",
+        priority="P6",
+    )
+    chunks = [
+        make_chunk(internal, "synthetic biology based drug development status and outlook"),
+        make_chunk(benchmark, "benchmark workflow process comparison for AI Bio-AI development patterns"),
+    ]
+
+    results = search_chunks_mvp003("benchmark workflow process comparison", chunks, [internal, benchmark], limit=2)
+
+    assert results[0].chunk.source_id == benchmark.source_id
+    assert results[0].score_components["p6_internal_fact_penalty"] == 0.0
 
 
 def test_mvp003_returns_unique_sources_for_top_k():

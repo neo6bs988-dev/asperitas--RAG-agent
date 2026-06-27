@@ -1,0 +1,11 @@
+{
+  "chunk_count": 29,
+  "created_date": "2026-06-27",
+  "embedding_dim": 128,
+  "embedding_model": "offline-lexical-semantic-hash",
+  "embedding_status": "embedded_offline_deterministic",
+  "embedding_version": "mvp005-phase5-lexical-semantic",
+  "index_status": "persisted_jsonl_offline_vector_artifact",
+  "production_vector_db_status": "not_claimed",
+  "source_id": "ASP-P6-D1F4C9FC8737"
+}

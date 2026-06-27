@@ -22,6 +22,48 @@ def chunk(text="AOS source hierarchy") -> Chunk:
     )
 
 
+def test_p6_benchmark_does_not_outrank_internal_fact_source():
+    internal = chunk("synthetic biology based drug development status and outlook")
+    benchmark = Chunk(
+        **{
+            **chunk("synthetic biology based drug development status and outlook " * 20).to_json(),
+            "chunk_id": "c2",
+            "source_id": "ASP-P6-BENCHMARK",
+            "title": "AI Bio-AI Benchmark",
+            "source_priority": "P6",
+            "source_type": "benchmark_operating_intelligence",
+            "evidence_label": "Inference",
+        }
+    )
+
+    results = search_chunks(
+        "Which document covers synthetic biology based drug development status and outlook?",
+        [benchmark, internal],
+        limit=2,
+    )
+
+    assert results[0].chunk.source_priority == "P0"
+
+
+def test_p6_benchmark_allowed_for_benchmark_workflow_queries():
+    internal = chunk("synthetic biology based drug development status and outlook")
+    benchmark = Chunk(
+        **{
+            **chunk("benchmark workflow process comparison for AI Bio-AI development patterns").to_json(),
+            "chunk_id": "c2",
+            "source_id": "ASP-P6-BENCHMARK",
+            "title": "AI Bio-AI Benchmark",
+            "source_priority": "P6",
+            "source_type": "benchmark_operating_intelligence",
+            "evidence_label": "Inference",
+        }
+    )
+
+    results = search_chunks("benchmark workflow process comparison", [internal, benchmark], limit=2)
+
+    assert results[0].chunk.source_priority == "P6"
+
+
 def test_search_returns_chunks_with_source_metadata():
     results = search_chunks("source hierarchy", [chunk()], limit=1)
 
