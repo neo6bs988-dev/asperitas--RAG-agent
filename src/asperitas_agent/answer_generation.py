@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .answer_contract import build_contract_answer, section_label
+from .answer_contract import build_contract_answer, citation_eligible_items, section_label
 from .schemas import (
     CitationCoverage,
     EvidenceItem,
@@ -73,7 +73,7 @@ def generate_grounded_answer(pack: EvidencePack, decision: GuardrailDecision) ->
         )
 
     items = list(pack.evidence_items)
-    citations = [item.citation_key for item in items if item.citation_key]
+    citations = [item.citation_key for item in citation_eligible_items(items)]
     status = "caution" if decision.decision == "caution" else "answered"
     limitations = _limitations(decision)
     return GroundedAnswer(

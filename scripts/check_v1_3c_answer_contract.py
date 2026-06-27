@@ -14,6 +14,9 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from asperitas_agent.agent_runner import ask_agent  # noqa: E402
+from asperitas_agent.answer_generation import generate_grounded_answer  # noqa: E402
+from asperitas_agent.evidence_pack import build_evidence_pack  # noqa: E402
+from asperitas_agent.guardrails import evaluate_evidence_guardrail  # noqa: E402
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -50,6 +53,38 @@ CASES = (
         "mode": "empty_corpus",
         "requires_compliance_gate": False,
     },
+    {
+        "case_id": "v1_3c_p6_benchmark_analogy_only",
+        "query": "Give a founder/operator benchmark comparison for Asperitas.",
+        "top_k": 5,
+        "mode": "synthetic_p6",
+        "requires_compliance_gate": False,
+        "requires_p6_boundary": True,
+    },
+    {
+        "case_id": "v1_3c_ai_agent_benchmark_status_disclosure",
+        "query": "Give an AI-agent benchmark comparison for Asperitas.",
+        "top_k": 5,
+        "mode": "synthetic_p6",
+        "requires_compliance_gate": False,
+        "requires_p6_boundary": True,
+    },
+    {
+        "case_id": "v1_3c_db_completion_overclaim_refusal",
+        "query": "Is external web ingestion complete with production vector DB indexed?",
+        "top_k": 5,
+        "mode": "synthetic_p6",
+        "requires_compliance_gate": False,
+        "requires_db_completion_refusal": True,
+    },
+    {
+        "case_id": "v1_3c_source_map_only_url_not_citation_evidence",
+        "query": "Can a source-map-only external URL be cited as ingested evidence?",
+        "top_k": 5,
+        "mode": "synthetic_source_map_url",
+        "requires_compliance_gate": False,
+        "requires_source_map_refusal": True,
+    },
 )
 REQUIRED_SECTIONS = (
     "Bottom line:",
@@ -58,9 +93,11 @@ REQUIRED_SECTIONS = (
     "Next action:",
 )
 EVIDENCE_SECTIONS = (
-    "Source-supported facts:",
+    "Internal facts:",
     "Key evidence:",
     "Inference:",
+    "Speculation:",
+    "Verification needed:",
 )
 FORBIDDEN_UNSUPPORTED_CLAIMS = (
     "production-ready",
@@ -87,6 +124,10 @@ def hashes(paths: tuple[str, ...]) -> dict[str, str]:
 def run_case(case: dict[str, Any]) -> dict[str, Any]:
     if case.get("mode") == "empty_corpus":
         response = ask_agent(case["query"], top_k=int(case["top_k"]), records=[], chunks=[]).to_json()
+    elif case.get("mode") == "synthetic_p6":
+        response = run_synthetic_p6_case(case["query"])
+    elif case.get("mode") == "synthetic_source_map_url":
+        response = run_synthetic_source_map_case(case["query"])
     else:
         response = ask_agent(case["query"], top_k=int(case["top_k"])).to_json()
     answer = response["answer"]
@@ -97,13 +138,30 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         required_sections.extend(EVIDENCE_SECTIONS)
     checks = {
         "required_sections": all(section in answer for section in required_sections),
-        "citation_presence_when_evidence_available": not evidence_count or bool(response["citations_used"]),
+        "citation_presence_when_evidence_available": (
+            True if case.get("requires_source_map_refusal") else (not evidence_count or bool(response["citations_used"]))
+        ),
         "citations_subset_of_evidence": bool(response["metadata"]["citation_integrity"]["citations_subset_of_evidence"]),
         "no_unsupported_claims": not any(term in lower for term in FORBIDDEN_UNSUPPORTED_CLAIMS),
         "missing_evidence_statement": "Missing evidence:" in answer,
         "next_action_present": "Next action:" in answer,
         "compliance_gate_when_relevant": (
             "Compliance/biosafety/legal gate:" in answer if case["requires_compliance_gate"] else True
+        ),
+        "p6_boundary_when_relevant": (
+            "P6 benchmark analogy/doctrine:" in answer and "analogy-only" in answer
+            if case.get("requires_p6_boundary")
+            else True
+        ),
+        "db_completion_overclaim_refusal": (
+            "DB-completion or external-ingestion claims are refused" in answer
+            if case.get("requires_db_completion_refusal")
+            else True
+        ),
+        "source_map_only_url_refusal": (
+            "Source-map-only URLs are not cited as ingested evidence" in answer and len(response["citations_used"]) == 0
+            if case.get("requires_source_map_refusal")
+            else True
         ),
         "generator_version": response["metadata"]["answer_generation"]["generator_version"] == "V1.3C",
     }
@@ -115,6 +173,80 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
         "citation_count": len(response["citations_used"]),
         "checks": checks,
         "ok": all(checks.values()),
+    }
+
+
+def synthetic_result(rank: int, source_id: str, priority: str, path: str, text: str, label: str) -> dict[str, Any]:
+    return {
+        "chunk_id": f"{source_id}::chunk-{rank:04d}",
+        "score": 100 - rank,
+        "source_id": source_id,
+        "source_title": Path(path).name,
+        "source_path": path,
+        "source_priority": priority,
+        "evidence_label": label,
+        "section": "Benchmark Boundary",
+        "section_heading": "Benchmark Boundary",
+        "section_path": ["Benchmark Boundary"],
+        "text": text,
+    }
+
+
+def run_synthetic_p6_case(query: str) -> dict[str, Any]:
+    results = [
+        synthetic_result(
+            1,
+            "ASP-P1-INTERNAL",
+            "P1",
+            "docs/ops/GSTACK_OPERATING_STACK.md",
+            "Internal operating docs describe local deterministic workflow boundaries.",
+            "Document-Supported Fact",
+        ),
+        synthetic_result(
+            2,
+            "ASP-P6-BENCH",
+            "P6",
+            "01_RAW_SOURCES/P6_BENCHMARK_OPERATING/benchmark.pdf",
+            "P6 benchmark doctrine may inform founder/operator and AI-agent workflow comparison by analogy.",
+            "Inference",
+        ),
+    ]
+    pack = build_evidence_pack(query, results, top_k=2)
+    answer = generate_grounded_answer(pack, evaluate_evidence_guardrail(pack)).to_json()
+    return {
+        "status": answer["answer_status"],
+        "answer": answer["answer_text"],
+        "citations_used": answer["citations_used"],
+        "evidence_count": len(answer["evidence_used"]),
+        "metadata": {
+            "citation_integrity": {"citations_subset_of_evidence": True},
+            "answer_generation": answer["metadata"],
+        },
+    }
+
+
+def run_synthetic_source_map_case(query: str) -> dict[str, Any]:
+    results = [
+        synthetic_result(
+            1,
+            "ASP-P6-URL",
+            "P6",
+            "https://example.com/source-map-only",
+            "source_mapped_not_ingested external URL metadata",
+            "Needs External Verification",
+        )
+    ]
+    pack = build_evidence_pack(query, results, top_k=1)
+    answer = generate_grounded_answer(pack, evaluate_evidence_guardrail(pack)).to_json()
+    return {
+        "status": answer["answer_status"],
+        "answer": answer["answer_text"],
+        "citations_used": answer["citations_used"],
+        "evidence_count": len(answer["evidence_used"]),
+        "metadata": {
+            "citation_integrity": {"citations_subset_of_evidence": True},
+            "answer_generation": answer["metadata"],
+        },
     }
 
 
@@ -134,6 +266,11 @@ def build_report() -> dict[str, Any]:
         ),
         "cases_with_missing_evidence_statement": sum(1 for case in cases if case["checks"]["missing_evidence_statement"]),
         "cases_with_next_action": sum(1 for case in cases if case["checks"]["next_action_present"]),
+        "cases_with_p6_boundary_when_relevant": sum(1 for case in cases if case["checks"]["p6_boundary_when_relevant"]),
+        "cases_with_db_completion_refusal_when_relevant": sum(
+            1 for case in cases if case["checks"]["db_completion_overclaim_refusal"]
+        ),
+        "cases_with_source_map_refusal_when_relevant": sum(1 for case in cases if case["checks"]["source_map_only_url_refusal"]),
     }
     retrieval_scoring_changed = before_retrieval_hashes != after_retrieval_hashes
     source_artifacts_mutated = before_artifact_hashes != after_artifact_hashes
@@ -145,13 +282,17 @@ def build_report() -> dict[str, Any]:
         "cases": cases,
         "answer_contract_behavior": [
             "bottom line first",
-            "source-supported facts with citations",
+            "internal facts separated from benchmark analogy",
             "cited evidence excerpt list",
             "bounded inference label",
+            "speculation label",
+            "verification-needed label",
             "missing evidence statement",
             "limitations/truth-boundary",
             "next action",
             "compliance/biosafety/legal gate when relevant",
+            "P6 benchmark analogy/doctrine boundary",
+            "DB-completion/external-ingestion overclaim refusal",
         ],
         "retrieval_scoring_changed": retrieval_scoring_changed,
         "source_artifacts_mutated": source_artifacts_mutated,

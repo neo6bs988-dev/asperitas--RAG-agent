@@ -4,7 +4,7 @@ Status: deterministic answer-contract upgrade
 
 ## Executive Bottom Line
 
-V1.3C upgrades the local deterministic answer composer so retrieved evidence is presented with a consistent internal RAG answer contract: bottom line first, cited evidence, source-supported facts, labeled inference, missing-evidence statement, limitations/truth-boundary, next action, and a compliance/biosafety/legal gate when relevant.
+V1.3C upgrades the local deterministic answer composer so retrieved evidence is presented with a consistent internal RAG answer contract: bottom line first, cited evidence, internal facts, P6 benchmark analogy/doctrine, labeled inference, speculation boundary, verification needs, missing-evidence statement, limitations/truth-boundary, next action, and a compliance/biosafety/legal gate when relevant.
 
 This is an answer-format and contract upgrade only. It does not change retrieval scoring, source ingestion, registry/chunk artifacts, embeddings, vector DB behavior, or reranking.
 
@@ -15,7 +15,7 @@ This is an answer-format and contract upgrade only. It does not change retrieval
 - No source ingestion.
 - No registry or chunk artifact mutation.
 - No embedding, vector DB, or reranker change.
-- No production, wet-lab, legal, regulatory, or foundation-model completion claim.
+- No production, wet-lab, legal, regulatory, external-ingestion, DB-completion, or foundation-model completion claim.
 - No fabricated answer-quality claim.
 
 ## Before/After Contract Behavior
@@ -25,9 +25,12 @@ Before V1.3C, the deterministic composer returned a short caveat and a `Key evid
 After V1.3C, the composer emits these sections when applicable:
 
 - `Bottom line:`
-- `Source-supported facts:`
+- `Internal facts:`
+- `P6 benchmark analogy/doctrine:`
 - `Key evidence:`
 - `Inference:`
+- `Speculation:`
+- `Verification needed:`
 - `Missing evidence:`
 - `Limitations/truth-boundary:`
 - `Compliance/biosafety/legal gate:`
@@ -47,11 +50,14 @@ Summary from `eval_results/v1_3c_answer_contract/answer_contract_baseline.json`:
 
 | Check | Result |
 | --- | ---: |
-| Cases | 3 |
-| Passed cases | 3 |
-| Cases with citations when evidence is available | 3 |
-| Cases with missing-evidence statement | 3 |
-| Cases with next action | 3 |
+| Cases | 7 |
+| Passed cases | 7 |
+| Cases with citations/source-map refusal when evidence is available | 7 |
+| Cases with missing-evidence statement | 7 |
+| Cases with next action | 7 |
+| P6 boundary checks when relevant | 7 |
+| Source-map refusal checks when relevant | 7 |
+| DB-completion refusal checks when relevant | 7 |
 | Retrieval scoring changed | false |
 | Source artifacts mutated | false |
 
@@ -60,6 +66,13 @@ Covered cases:
 - status/truth-boundary query
 - compliance-gate query
 - missing-evidence abstention query
+- founder/operator benchmark comparison with P6 analogy-only disclosure
+- AI-agent benchmark comparison with P6 analogy-only disclosure
+- DB-completion and external-ingestion overclaim refusal
+
+## P6 / Source-Map Boundary
+
+V1.3C treats P6 benchmark material as analogy/doctrine only. It cannot override P0-P4 or internal evidence and must not be presented as an Asperitas internal fact. Source-map-only URLs are not citation-eligible ingested evidence unless acquisition, license, chunking, embedding, indexing, and eval logs exist.
 
 ## Truth Boundary
 
