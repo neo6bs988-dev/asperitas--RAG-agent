@@ -21,6 +21,33 @@ from .schemas import Chunk, SourceRecord
 
 
 ENABLE_V1_3B_CALIBRATION = True
+BENCHMARK_QUERY_TERMS = {
+    "benchmark",
+    "benchmarks",
+    "benchmarking",
+    "comparison",
+    "compare",
+    "workflow",
+    "workflows",
+    "operating",
+    "process",
+    "patterns",
+}
+INTERNAL_FACT_QUERY_TERMS = {
+    "asperitas",
+    "internal",
+    "company",
+    "document",
+    "source",
+    "covers",
+    "synthetic",
+    "biology",
+    "drug",
+    "development",
+    "status",
+    "outlook",
+    "strategy",
+}
 
 
 @dataclass
@@ -80,6 +107,16 @@ def _query_context(tokens: set[str], normalized_query: str) -> set[str]:
     if tokens & {"synthetic", "biology", "biofoundry", "crispr", "protein", "antibiotic", "drug", "cell", "genetic"}:
         context.add("science")
     return context
+
+
+def _p6_internal_fact_penalty(record: SourceRecord, tokens: set[str]) -> float:
+    if record.source_priority != "P6":
+        return 0.0
+    if tokens & BENCHMARK_QUERY_TERMS:
+        return 0.0
+    if tokens & INTERNAL_FACT_QUERY_TERMS:
+        return -80.0
+    return 0.0
 
 
 def _priority_bonus(record: SourceRecord, context: set[str]) -> float:
@@ -294,6 +331,7 @@ def score_candidate(query: str, chunk: Chunk, record: SourceRecord, base_score: 
     context = _query_context(query_tokens, normalized_query)
     components["priority_bonus"] = _priority_bonus(record, context)
     components["evidence_label_bonus"] = _evidence_bonus(record, context)
+    components["p6_internal_fact_penalty"] = _p6_internal_fact_penalty(record, query_tokens)
     components["duplicate_context_bonus"] = _duplicate_adjustment(record, normalized_query)
     components.update(_calibration_components(record, chunk, query_tokens, normalized_query))
 

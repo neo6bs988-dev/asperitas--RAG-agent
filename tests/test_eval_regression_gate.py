@@ -176,16 +176,16 @@ def test_regression_gate_cli_emits_valid_json(tmp_path):
 
 
 def test_no_retrieval_source_or_eval_fixture_files_modified():
-    status = subprocess.run(
-        ["git", "status", "--short", "--", "data", "07_EVALS", "01_RAW_SOURCES", "03_PROCESSED_KB", "04_VECTOR_DB"],
+    diff = subprocess.run(
+        ["git", "diff", "--name-only", "--", "data", "07_EVALS", "01_RAW_SOURCES", "03_PROCESSED_KB", "04_VECTOR_DB"],
         cwd=REPO_ROOT,
         text=True,
         encoding="utf-8",
         capture_output=True,
         check=False,
     )
-    assert status.returncode == 0
-    assert status.stdout == ""
+    assert diff.returncode == 0
+    assert diff.stdout == ""
 
 
 def test_policy_serialization_and_unknown_metric_block_option():

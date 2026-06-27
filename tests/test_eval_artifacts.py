@@ -201,13 +201,13 @@ def test_no_default_output_path_write(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert list(tmp_path.glob("*.json")) == [input_path]
-    status = subprocess.run(
-        ["git", "status", "--short", "--", "data", "07_EVALS", "01_RAW_SOURCES", "03_PROCESSED_KB", "04_VECTOR_DB"],
+    diff = subprocess.run(
+        ["git", "diff", "--name-only", "--", "data", "07_EVALS", "01_RAW_SOURCES", "03_PROCESSED_KB", "04_VECTOR_DB"],
         cwd=REPO_ROOT,
         text=True,
         encoding="utf-8",
         capture_output=True,
         check=False,
     )
-    assert status.returncode == 0
-    assert status.stdout == ""
+    assert diff.returncode == 0
+    assert diff.stdout == ""

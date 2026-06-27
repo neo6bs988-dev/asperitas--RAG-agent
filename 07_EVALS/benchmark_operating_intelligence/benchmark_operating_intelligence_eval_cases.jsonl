@@ -1,0 +1,4 @@
+{"assertion": "P6 benchmark cannot override P0/P1/P2 Asperitas facts", "eval_id": "p6_precedence_guard", "expected": "blocked_or_labeled_inference"}
+{"assertion": "External links in CSV are source map only unless actually ingested", "eval_id": "csv_source_map_only", "expected": "source_mapped_not_ingested"}
+{"assertion": "Benchmark claims expose evidence_label, confidence, verification_status", "eval_id": "claim_card_required_fields", "expected": "all_claim_cards_have_fields"}
+{"assertion": "Workflow synthesis separates implemented repo facts, benchmark inference, and verification needs", "eval_id": "workflow_synthesis_boundaries", "expected": "three_boundaries_present"}
