@@ -1,0 +1,114 @@
+{
+  "cases": [
+    {
+      "case_id": "v1_3d_internal_fact_status_boundary",
+      "checks": {
+        "expected_citations": true,
+        "expected_status": true,
+        "forbidden_text_absent": true,
+        "generator_contract_preserved": true,
+        "required_text": true
+      },
+      "citation_count": 1,
+      "ok": true,
+      "query": "Is Asperitas production deployed and biologically validated?",
+      "status": "caution"
+    },
+    {
+      "case_id": "v1_3d_p6_analogy_doctrine_only",
+      "checks": {
+        "expected_citations": true,
+        "expected_status": true,
+        "forbidden_text_absent": true,
+        "generator_contract_preserved": true,
+        "required_text": true
+      },
+      "citation_count": 2,
+      "ok": true,
+      "query": "Give a founder/operator benchmark comparison for Asperitas.",
+      "status": "answered"
+    },
+    {
+      "case_id": "v1_3d_compliance_human_review_gate",
+      "checks": {
+        "expected_citations": true,
+        "expected_status": true,
+        "forbidden_text_absent": true,
+        "generator_contract_preserved": true,
+        "required_text": true
+      },
+      "citation_count": 1,
+      "ok": true,
+      "query": "What legal approvals are required for CITES Nagoya LMO biosafety actions?",
+      "status": "caution"
+    },
+    {
+      "case_id": "v1_3d_missing_evidence_abstention",
+      "checks": {
+        "expected_citations": true,
+        "expected_status": true,
+        "forbidden_text_absent": true,
+        "generator_contract_preserved": true,
+        "required_text": true
+      },
+      "citation_count": 0,
+      "ok": true,
+      "query": "No evidence available for this local no-corpus router case.",
+      "status": "abstained"
+    },
+    {
+      "case_id": "v1_3d_source_map_only_evidence_risk",
+      "checks": {
+        "expected_citations": true,
+        "expected_status": true,
+        "forbidden_text_absent": true,
+        "generator_contract_preserved": true,
+        "required_text": true
+      },
+      "citation_count": 0,
+      "ok": true,
+      "query": "Can a source-map-only URL be cited as ingested evidence?",
+      "status": "caution"
+    },
+    {
+      "case_id": "v1_3d_production_vector_db_claim_risk",
+      "checks": {
+        "expected_citations": true,
+        "expected_status": true,
+        "forbidden_text_absent": true,
+        "generator_contract_preserved": true,
+        "required_text": true
+      },
+      "citation_count": 1,
+      "ok": true,
+      "query": "Is external web ingestion complete with production vector DB indexed?",
+      "status": "caution"
+    }
+  ],
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "ok": true,
+  "retrieval_scoring_changed": false,
+  "router_behavior": [
+    "internal factual answers remain bounded by retrieved evidence",
+    "P6 benchmark material is analogy/doctrine only",
+    "source-map-only URLs are not citation-eligible as ingested evidence",
+    "missing evidence triggers abstention",
+    "compliance/biosafety/legal questions carry a human-review gate",
+    "production, deployment, vector-DB, external-ingestion, legal, regulatory, wet-lab, and foundation-model completion claims require evidence"
+  ],
+  "schema_version": "v1.3d-truth-compliance-router",
+  "source_artifacts_mutated": false,
+  "summary": {
+    "case_count": 6,
+    "passed_case_count": 6,
+    "router_cases": [
+      "v1_3d_internal_fact_status_boundary",
+      "v1_3d_p6_analogy_doctrine_only",
+      "v1_3d_compliance_human_review_gate",
+      "v1_3d_missing_evidence_abstention",
+      "v1_3d_source_map_only_evidence_risk",
+      "v1_3d_production_vector_db_claim_risk"
+    ]
+  },
+  "truth_boundary_statement": "This check validates deterministic router behavior only. It does not prove legal clearance, regulatory clearance, production deployment, wet-lab validation, full source ingestion, or answer quality beyond these fixtures."
+}

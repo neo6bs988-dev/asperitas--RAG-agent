@@ -11,6 +11,7 @@ from .schemas import (
     GuardrailDecision,
     GuardrailDecisionSummary,
 )
+from .truth_compliance_router import route_grounded_answer
 
 
 GENERATOR_NAME = "deterministic-grounded-answer-composer"
@@ -60,7 +61,7 @@ def _coverage(pack: EvidencePack, citations: list[str], all_claims_cited: bool) 
 def generate_grounded_answer(pack: EvidencePack, decision: GuardrailDecision) -> GroundedAnswer:
     if decision.should_abstain:
         limitations = _limitations(decision) or ["Retrieved evidence was insufficient for a grounded answer."]
-        return GroundedAnswer(
+        answer = GroundedAnswer(
             query=pack.query,
             answer_status="abstained",
             answer_text=build_contract_answer(pack, decision),
@@ -71,12 +72,14 @@ def generate_grounded_answer(pack: EvidencePack, decision: GuardrailDecision) ->
             limitations=limitations,
             metadata=GroundedAnswerMetadata(generator_name=GENERATOR_NAME, generator_version=GENERATOR_VERSION),
         )
+        routed, _router = route_grounded_answer(pack, decision, answer)
+        return routed
 
     items = list(pack.evidence_items)
     citations = [item.citation_key for item in citation_eligible_items(items)]
     status = "caution" if decision.decision == "caution" else "answered"
     limitations = _limitations(decision)
-    return GroundedAnswer(
+    answer = GroundedAnswer(
         query=pack.query,
         answer_status=status,
         answer_text=build_contract_answer(pack, decision),
@@ -87,3 +90,5 @@ def generate_grounded_answer(pack: EvidencePack, decision: GuardrailDecision) ->
         limitations=limitations,
         metadata=GroundedAnswerMetadata(generator_name=GENERATOR_NAME, generator_version=GENERATOR_VERSION),
     )
+    routed, _router = route_grounded_answer(pack, decision, answer)
+    return routed
