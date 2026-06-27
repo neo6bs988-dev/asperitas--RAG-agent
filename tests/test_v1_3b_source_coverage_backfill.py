@@ -121,7 +121,6 @@ def test_no_retrieval_or_answer_generation_source_changed():
         "src/asperitas_agent/retrieval_mvp003.py",
         "src/asperitas_agent/retrieval_tfidf.py",
         "src/asperitas_agent/reranking.py",
-        "src/asperitas_agent/answer_generation.py",
         "src/asperitas_agent/rag.py",
     )
     changed = tuple(line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip())

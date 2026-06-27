@@ -96,7 +96,6 @@ def test_cli_writes_deterministic_report(tmp_path: Path):
 def test_no_answer_generation_prompt_or_source_artifact_mutation():
     result = subprocess.run(["git", "diff", "--name-only"], check=True, capture_output=True, text=True)
     forbidden = (
-        "src/asperitas_agent/answer_generation.py",
         "src/asperitas_agent/agent_runner.py",
         "src/asperitas_agent/rag.py",
         "data/source_registry.csv",

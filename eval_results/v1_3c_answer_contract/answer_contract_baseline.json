@@ -138,7 +138,7 @@
       "evidence_count": 2,
       "ok": true,
       "query": "Is external web ingestion complete with production vector DB indexed?",
-      "status": "answered"
+      "status": "caution"
     },
     {
       "case_id": "v1_3c_source_map_only_url_not_citation_evidence",
