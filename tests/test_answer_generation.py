@@ -116,7 +116,7 @@ def test_integration_full_pipeline_generates_grounded_answer():
 
     assert answer["answer_status"] in {"answered", "caution"}
     assert answer["citations_used"]
-    assert answer["metadata"]["generator_version"] == "MVP-007"
+    assert answer["metadata"]["generator_version"] == "V1.3C"
 
 
 def test_answer_generation_code_does_not_reference_benchmark_answer_files():

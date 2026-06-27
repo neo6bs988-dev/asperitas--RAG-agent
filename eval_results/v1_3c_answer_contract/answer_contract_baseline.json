@@ -1,0 +1,181 @@
+{
+  "answer_contract_behavior": [
+    "bottom line first",
+    "internal facts separated from benchmark analogy",
+    "cited evidence excerpt list",
+    "bounded inference label",
+    "speculation label",
+    "verification-needed label",
+    "missing evidence statement",
+    "limitations/truth-boundary",
+    "next action",
+    "compliance/biosafety/legal gate when relevant",
+    "P6 benchmark analogy/doctrine boundary",
+    "DB-completion/external-ingestion overclaim refusal"
+  ],
+  "cases": [
+    {
+      "case_id": "v1_3c_status_truth_boundary",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 5,
+      "evidence_count": 5,
+      "ok": true,
+      "query": "Can we describe the current Asperitas agent as production deployed and biologically validated?",
+      "status": "answered"
+    },
+    {
+      "case_id": "v1_3c_compliance_gate",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 5,
+      "evidence_count": 5,
+      "ok": true,
+      "query": "What approvals are required for CITES Nagoya LMO biosafety actions?",
+      "status": "caution"
+    },
+    {
+      "case_id": "v1_3c_missing_evidence",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 0,
+      "evidence_count": 0,
+      "ok": true,
+      "query": "No evidence available for this local no-corpus evaluation case.",
+      "status": "abstained"
+    },
+    {
+      "case_id": "v1_3c_p6_benchmark_analogy_only",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 2,
+      "evidence_count": 2,
+      "ok": true,
+      "query": "Give a founder/operator benchmark comparison for Asperitas.",
+      "status": "answered"
+    },
+    {
+      "case_id": "v1_3c_ai_agent_benchmark_status_disclosure",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 2,
+      "evidence_count": 2,
+      "ok": true,
+      "query": "Give an AI-agent benchmark comparison for Asperitas.",
+      "status": "answered"
+    },
+    {
+      "case_id": "v1_3c_db_completion_overclaim_refusal",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 2,
+      "evidence_count": 2,
+      "ok": true,
+      "query": "Is external web ingestion complete with production vector DB indexed?",
+      "status": "answered"
+    },
+    {
+      "case_id": "v1_3c_source_map_only_url_not_citation_evidence",
+      "checks": {
+        "citation_presence_when_evidence_available": true,
+        "citations_subset_of_evidence": true,
+        "compliance_gate_when_relevant": true,
+        "db_completion_overclaim_refusal": true,
+        "generator_version": true,
+        "missing_evidence_statement": true,
+        "next_action_present": true,
+        "no_unsupported_claims": true,
+        "p6_boundary_when_relevant": true,
+        "required_sections": true,
+        "source_map_only_url_refusal": true
+      },
+      "citation_count": 0,
+      "evidence_count": 1,
+      "ok": true,
+      "query": "Can a source-map-only external URL be cited as ingested evidence?",
+      "status": "caution"
+    }
+  ],
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "ok": true,
+  "retrieval_scoring_changed": false,
+  "schema_version": "v1.3c-answer-contract",
+  "source_artifacts_mutated": false,
+  "summary": {
+    "case_count": 7,
+    "cases_with_citations_when_evidence_available": 7,
+    "cases_with_db_completion_refusal_when_relevant": 7,
+    "cases_with_missing_evidence_statement": 7,
+    "cases_with_next_action": 7,
+    "cases_with_p6_boundary_when_relevant": 7,
+    "cases_with_source_map_refusal_when_relevant": 7,
+    "passed_case_count": 7
+  },
+  "truth_boundary_statement": "This check validates deterministic answer contract structure only. It is not answer-quality proof, deployment evidence, legal clearance, regulatory clearance, biological validation, or wet-lab capability."
+}
