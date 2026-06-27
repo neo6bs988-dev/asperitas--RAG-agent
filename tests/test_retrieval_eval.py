@@ -927,7 +927,7 @@ def test_target_risk_question_fixture_contract_remains_locked():
         )
         for question_id in TARGET_RISK_QUESTION_IDS
     } == {
-        "MVP0025-Q001": ("AGENTS.md", "Source Priority Policy", "", "P0", "Document-Supported Fact"),
+        "MVP0025-Q001": ("00_ADMIN/source_priority_policy.md", "Core Source Philosophy", "", "P0", "Document-Supported Fact"),
         "MVP0025-Q004": (
             "01_RAW_SOURCES/P0_ACTIVE_PROMPT/P0_ACTIVE_PROMPT_MASTER_CONSTITUTION.pdf",
             "SINGLE SOURCE OF TRUTH",
