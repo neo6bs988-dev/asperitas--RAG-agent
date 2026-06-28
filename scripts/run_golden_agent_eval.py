@@ -11,11 +11,15 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = REPO_ROOT / "src"
+SCRIPT_ROOT = REPO_ROOT / "scripts"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
 
 from asperitas_agent.agent_runner import ask_agent  # noqa: E402
 from asperitas_agent.failure_taxonomy import classify_failure  # noqa: E402
+from eval_harness_cache import load_jsonl_cached, read_chunks_cached, read_registry_cached  # noqa: E402
 
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -70,29 +74,18 @@ def load_golden_cases(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         raise FileNotFoundError(f"golden query file not found: {path}")
 
-    cases: list[dict[str, Any]] = []
+    cases = load_jsonl_cached(path)
     seen_ids: set[str] = set()
-    with path.open("r", encoding="utf-8") as handle:
-        for line_number, raw_line in enumerate(handle, start=1):
-            line = raw_line.strip()
-            if not line:
-                continue
-            try:
-                record = json.loads(line)
-            except json.JSONDecodeError as exc:
-                raise ValueError(f"{path}:{line_number}: invalid JSON: {exc}") from exc
-            if not isinstance(record, dict):
-                raise ValueError(f"{path}:{line_number}: each JSONL record must be an object")
-            missing = sorted(REQUIRED_FIELDS - set(record))
-            if missing:
-                raise ValueError(f"{path}:{line_number}: missing required fields: {', '.join(missing)}")
-            case_id = record.get("id")
-            if not isinstance(case_id, str) or not case_id.strip():
-                raise ValueError(f"{path}:{line_number}: id must be a non-empty string")
-            if case_id in seen_ids:
-                raise ValueError(f"{path}:{line_number}: duplicate id: {case_id}")
-            seen_ids.add(case_id)
-            cases.append(record)
+    for line_number, record in enumerate(cases, start=1):
+        missing = sorted(REQUIRED_FIELDS - set(record))
+        if missing:
+            raise ValueError(f"{path}:{line_number}: missing required fields: {', '.join(missing)}")
+        case_id = record.get("id")
+        if not isinstance(case_id, str) or not case_id.strip():
+            raise ValueError(f"{path}:{line_number}: id must be a non-empty string")
+        if case_id in seen_ids:
+            raise ValueError(f"{path}:{line_number}: duplicate id: {case_id}")
+        seen_ids.add(case_id)
     if not 5 <= len(cases) <= 8:
         raise ValueError(f"golden query file must contain 5 to 8 cases, found {len(cases)}")
     return cases
@@ -110,7 +103,12 @@ def run_agent_for_case(case: dict[str, Any]) -> dict[str, Any]:
         return ask_agent(query, top_k=top_k, records=[], chunks=[]).to_json()
     if mode not in ("default", "", None):
         raise ValueError(f"{case['id']}: unsupported mode: {mode}")
-    return ask_agent(query, top_k=top_k).to_json()
+    return ask_agent(
+        query,
+        top_k=top_k,
+        records=read_registry_cached(REPO_ROOT / "data" / "source_registry.csv"),
+        chunks=read_chunks_cached(REPO_ROOT / "data" / "chunks.jsonl"),
+    ).to_json()
 
 
 def _contains_all(text: str, needles: list[Any]) -> bool:
