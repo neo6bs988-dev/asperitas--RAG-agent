@@ -189,7 +189,7 @@ def build_contract_answer(pack: EvidencePack, decision: GuardrailDecision) -> st
     first_citation = citations[0] if citations else ""
     status = "caution" if decision.decision == "caution" else "answered"
     caveat = (
-        "Caution: this draft is based only on the retrieved evidence and should be used with the listed limitations."
+        "Caution: retrieved cited evidence only."
         if status == "caution"
         else "This draft is limited to the retrieved cited evidence."
     )
@@ -215,17 +215,17 @@ def build_contract_answer(pack: EvidencePack, decision: GuardrailDecision) -> st
     else:
         lines.append("- No ingested citation-eligible evidence is available.")
     lines.extend(["", "Inference:"])
-    lines.append("- Any synthesis above is a bounded inference from the cited retrieved evidence, not a new source claim.")
+    lines.append("- Bounded inference from cited evidence only; not a new source claim.")
     lines.extend(["", "Speculation:"])
-    lines.append("- Speculation is not promoted to fact by this contract.")
+    lines.append("- Not promoted to fact.")
     lines.extend(["", "Verification needed:"])
-    lines.append("- External benchmark comparisons require source-status disclosure and human review before external use.")
+    lines.append("- Benchmark comparisons need source-status disclosure and human review before external use.")
     if source_map_items:
-        lines.append("- Source-map-only URLs are not cited as ingested evidence unless acquisition, license, chunking, embedding, indexing, and eval logs exist.")
+        lines.append("- Source-map-only URLs are not cited as ingested evidence without acquisition, license, chunking, embedding, indexing, and eval logs.")
     if p6_items and internal_items:
         lines.append("- P6 benchmark material is analogy/doctrine only and cannot override internal/P0-P4 evidence.")
     if asks_db_completion_claim(pack.query):
-        lines.append("- DB-completion or external-ingestion claims are refused unless acquisition, license, chunk, embed, index, and eval logs prove completion.")
+        lines.append("- DB-completion or external-ingestion claims are refused without acquisition, license, chunk, embed, index, and eval logs.")
     if asks_benchmark_comparison(pack.query) and p6_items:
         lines.append("- Founder/operator or AI-agent benchmark comparison is analogy-only, not an Asperitas internal fact.")
     lines.extend(["", missing_evidence_line(pack, decision)])
@@ -233,9 +233,7 @@ def build_contract_answer(pack: EvidencePack, decision: GuardrailDecision) -> st
     lines.extend(["", "Limitations/truth-boundary:"])
     if limitations:
         lines.extend(f"- {limitation}" for limitation in limitations)
-    lines.append(
-        "- This answer does not establish production deployment, wet-lab capability, biological validation, legal clearance, or regulatory clearance."
-    )
+    lines.append("- Does not establish production deployment, wet-lab capability, biological validation, legal clearance, or regulatory clearance.")
     if requires_compliance_gate(pack.query, items, decision):
         lines.extend(["", "Compliance/biosafety/legal gate:"])
         lines.append("- Human review is required before public, investor, legal, regulatory, biosafety, or wet-lab-sensitive use.")
@@ -251,13 +249,13 @@ def _source_fact(item: EvidenceItem) -> str:
     label = item.evidence_label or "unlabeled evidence"
     priority = item.source_priority or "unknown priority"
     section = section_label(item)
-    return f"{source} ({priority}, {label}, section: {section}) supports this evidence item. {item.citation_key}"
+    return f"{source} ({priority}, {label}, section: {section}). {item.citation_key}"
 
 
 def _p6_fact(item: EvidenceItem) -> str:
     source = item.source_path or item.source_title or item.source_id or "unknown benchmark source"
     section = section_label(item)
     return (
-        f"{source} (P6 benchmark, section: {section}) may inform founder/operator or AI-agent benchmark analogy/doctrine only; "
-        f"it is not Asperitas internal fact evidence and cannot override P0-P4/internal evidence. {item.citation_key}"
+        f"{source} (P6 benchmark, section: {section}) informs analogy/doctrine only; "
+        f"not Asperitas internal fact evidence and cannot override P0-P4/internal evidence. {item.citation_key}"
     )
