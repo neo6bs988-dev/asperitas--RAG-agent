@@ -1,0 +1,121 @@
+{
+  "artifact_sources": {
+    "v1_4a": "C:\\Users\\jbc89\\OneDrive\\문서\\Asperitas AI agent\\repo\\eval_results\\v1_4a_cost_latency_token_baseline\\cost_latency_token_baseline.json",
+    "v1_4b": "C:\\Users\\jbc89\\OneDrive\\문서\\Asperitas AI agent\\repo\\eval_results\\v1_4b_token_context_compression\\token_context_compression.json",
+    "v1_4c": "C:\\Users\\jbc89\\OneDrive\\문서\\Asperitas AI agent\\repo\\eval_results\\v1_4c_latency_eval_harness_caching\\latency_eval_harness_caching.json",
+    "v1_4d": "C:\\Users\\jbc89\\OneDrive\\문서\\Asperitas AI agent\\repo\\eval_results\\v1_4d_answer_boilerplate_trimming\\answer_boilerplate_trimming.json"
+  },
+  "baseline_commits": {
+    "pr_102_merge_sha": "9c3d8ee7d9cb6885540aa9f67a8ecff297d468ec",
+    "v1_3c_merge_sha": "65a200cc7736bb946bbf1ead7d71a5129bff7c61",
+    "v1_3d_merge_sha": "635db3186f3538b12934f170a314bbe50c1a1d30",
+    "v1_3e_merge_sha": "fd0c93c7a7155f4054266b1b93512c5fe9396231",
+    "v1_4a_merge_sha": "699f66e960fe114fc0ff816b7000aee23e9fd9ac",
+    "v1_4b_merge_sha": "d06db9c3b71a0a81a15e70c1d683d23e21fa82b1",
+    "v1_4c_merge_sha": "46a3053b96e25f40b4f5bf20f192b87ad0fdaa93",
+    "v1_4d_merge_sha": "e29c2f36ab8249103a9d251a95dd0795aa1ee464"
+  },
+  "blocked_claim_fragments": [
+    "production deployment claim",
+    "legal clearance claim",
+    "regulatory clearance claim",
+    "biological validation claim",
+    "full external ingestion proof",
+    "broad answer-quality proof"
+  ],
+  "blocked_claim_fragments_absent": true,
+  "created_at_utc": "1970-01-01T00:00:00Z",
+  "inference_and_recommendation": [
+    "V1.5 is ready to start because V1.4 completed measurement, context compression, cache instrumentation, and answer trimming without detected contract or router regressions.",
+    "Latency work should move to V1.5 only with explicit bottleneck isolation; V1.4C is not evidence of a latency improvement."
+  ],
+  "measured_facts": [
+    "V1.4A recorded 27 local measurement cases.",
+    "V1.4B retrieved-context approximate tokens changed from 13215 to 7983.",
+    "V1.4C recorded 108 cache hits and a +2913.355 ms net runtime delta across measured harnesses.",
+    "V1.4D answer approximate tokens changed from 9432 to 8561."
+  ],
+  "ok": true,
+  "preservation": {
+    "citations_evidence_source_paths_preserved": true,
+    "p6_source_map_compliance_boundaries_preserved": true,
+    "required_preservation_items": [
+      "V1.3C answer contract",
+      "V1.3D truth/compliance router",
+      "citations, evidence counts, and source paths",
+      "P6/source-map/compliance boundaries",
+      "mvp003 retrieval thresholds",
+      "source registry and chunk artifacts"
+    ],
+    "retrieval_scoring_changed": false,
+    "retrieval_thresholds_preserved": true,
+    "source_artifacts_mutated": false,
+    "v1_3c_answer_contract_preserved": true,
+    "v1_3d_truth_compliance_router_preserved": true
+  },
+  "remaining_bottlenecks": [
+    "V1.4C cache produced 108 cache hits but measured net runtime slowdown, so latency remains a measurement/infrastructure bottleneck.",
+    "Retrieval/evidence assembly remains the largest measured runtime driver in V1.4A.",
+    "Answer and context size are lower after V1.4B/V1.4D, but no broad answer-quality improvement is claimed from token metrics."
+  ],
+  "schema_version": "v1.4e-final-optimization-closeout",
+  "scope_lock": {
+    "answer_behavior_changed": false,
+    "embedding_vector_db_reranker_changed": false,
+    "measurement_reporting_only": true,
+    "retrieval_scoring_changed": false,
+    "source_artifacts_mutated": false,
+    "unsupported_quality_claim": false
+  },
+  "summary": {
+    "aggregate": {
+      "answer_approx_token_delta": -871,
+      "latency_claim": "No latency improvement claimed; V1.4C measured a net slowdown.",
+      "net_runtime_delta_ms": 2913.355,
+      "retrieved_context_approx_token_delta": -5232
+    },
+    "v1_4a_baseline": {
+      "answer_approx_tokens": 9432,
+      "case_count": 27,
+      "duplicate_evidence_count": 0,
+      "duplicate_source_count": 0,
+      "retrieved_context_approx_tokens": 7983
+    },
+    "v1_4b_context_compression": {
+      "after_retrieved_context_approx_tokens": 7983,
+      "before_retrieved_context_approx_tokens": 13215,
+      "citation_count_preserved": true,
+      "evidence_count_preserved": true,
+      "retrieved_context_approx_token_delta": -5232,
+      "source_paths_preserved": true
+    },
+    "v1_4c_eval_harness_caching": {
+      "cache_hit_count": 108,
+      "classification": "infra/measurement only; not a latency win",
+      "documented_noop": true,
+      "measurable_latency_improvement": false,
+      "net_runtime_delta_ms": 2913.355
+    },
+    "v1_4d_answer_boilerplate_trimming": {
+      "after_answer_approx_tokens": 8561,
+      "answer_approx_token_delta": -871,
+      "before_answer_approx_tokens": 9432,
+      "citation_count_preserved": true,
+      "evidence_count_preserved": true,
+      "section_count_delta": 0,
+      "source_paths_preserved": true
+    }
+  },
+  "truth_boundary_statement": "This closeout summarizes deterministic local V1.4 metrics only. It is not a production deployment claim, legal or regulatory clearance, biological validation, full external ingestion proof, foundation-model claim, or broad answer-quality proof.",
+  "v1_5_readiness": {
+    "decision": "GO",
+    "reasons": [
+      "V1.3C/V1.3D behavior is preserved by passing gates.",
+      "V1.4B reduced retrieved context tokens without retrieval scoring or source-artifact mutation.",
+      "V1.4D reduced answer tokens while preserving sections, citations, evidence, and source paths.",
+      "V1.4C remains classified as eval-harness infrastructure, not a latency win.",
+      "Remaining bottlenecks are documented for V1.5 rather than silently broadened into V1.4E."
+    ],
+    "recommended_next_step": "Start V1.5 Modular Agent Pack from fresh main."
+  }
+}
