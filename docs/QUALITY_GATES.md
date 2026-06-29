@@ -2,49 +2,50 @@
 
 Apply these gates before reporting a task as done. A gate is not a suggestion; it is the minimum evidence needed to call a change complete.
 
+The goal is not merely passing tests. The goal is benchmark-informed, source-grounded, compliance-native, regression-resistant progress.
+
 ## Gate Selection Matrix
 
-| Change type | Required gates |
+| Change Type | Required Gates |
 |---|---|
-| Docs/governance only | Artifact verification + GitHub review |
-| Source code | Source code tests + artifact verification + GitHub review |
-| Chunking/retrieval/scoring | Source code tests + artifact verification + chunk audit + retrieval evaluation + GitHub review |
-| Answer generation/citation | Source code tests + source-grounding check + retrieval evaluation if retrieval is touched + GitHub review |
-| Biological/compliance/public claim | Compliance/biosafety check + source-grounding check + GitHub review |
-| MVP release | All relevant gates + MVP release manager review |
-
-For the V1 Playbook v3 Absorption plus Benchmark Absorption & Stage-Gate Calibration subtask, use the docs/governance-only gate set plus:
-
-```bash
-python scripts/check_v1_stage_gate_scope.py
-```
-
-This check is a deterministic process/stage-gate integrity check. It does not replace artifact verification, pytest, retrieval evals required for no-regression evidence, or human GitHub review.
+| Docs/governance only | Re-read edited files, Markdown/path sanity, truth-boundary review, PR review |
+| Source code | Targeted tests, relevant lint/type/schema checks, artifact verification, PR review |
+| Source registry/metadata/chunks | Schema/artifact verification, chunk audit if affected, source-policy review |
+| Retrieval/ranking/scoring | Targeted tests, retrieval evals, threshold gates when applicable, regression review |
+| Answer generation/citation | Answer contract checks, claim/citation checks, source-grounding review, compliance review |
+| Compliance/security | Refusal/escalation tests, leakage/adversarial checks where available, human-risk review |
+| Token/cost/latency | Before/after metric evidence, no quality regression, net runtime evidence for latency claims |
+| CI/workflow | Workflow syntax/path review, targeted CI dispatch or next-best static review |
+| Release/main | Full relevant suite, artifact readiness, retrieval/golden evals, metric gates, diff checks |
 
 ## Gate Execution Policy
 
 Use the lightest gate set that protects the changed surface.
 
-| Gate class | Runs where | Purpose |
+| Gate Class | Runs Where | Purpose |
 |---|---|---|
-| Always local before PR | Developer/Codex workstation | Catch broken tests and artifact drift before review. |
-| Required CI | GitHub Actions | Prevent unverified changes from silently entering `main`. |
-| Conditional local retrieval gates | Developer/Codex workstation | Measure retrieval, chunking, metadata, vector, hybrid, reranker, or answer-generation changes before PR. |
-| Optional expensive gates | Developer/Codex workstation or manual workflow dispatch | Run slow eval comparisons when risk justifies the cost. |
-| Release-only gates | Release branch or milestone closeout | Produce complete MVP evidence and release notes. |
+| Targeted local checks | Developer/Codex workspace | Fast feedback on changed behavior |
+| Required CI | GitHub Actions | Prevent unverified changes from entering `main` |
+| Conditional retrieval gates | Local or CI | Protect retrieval, evidence, and source boundaries |
+| Conditional answer gates | Local or CI | Protect answer contract, citation faithfulness, and truth routing |
+| Conditional security gates | Local, CI, or manual | Protect secrets, leakage, prompt injection, and excessive agency surfaces |
+| Release-only gates | Release branch or closeout | Produce complete milestone evidence |
+
+If a run times out or disconnects, split validation by gate and report exact pass/fail evidence.
 
 ## Canonical Commands
 
-Run from the repository root.
+Run from the repository root when available.
 
-Always local before PR:
+Core checks:
 
 ```bash
 python -m pytest
 python scripts/verify_artifacts.py
+git diff --check
 ```
 
-Conditional retrieval/chunking/metadata/vector/hybrid gate:
+Retrieval/chunking/metadata checks:
 
 ```bash
 python scripts/audit_chunk_sections.py --json
@@ -54,7 +55,7 @@ python scripts/run_retrieval_eval.py --retriever vector --limit 5
 python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
 ```
 
-Explicit retrieval threshold gate:
+Threshold gates:
 
 ```bash
 python scripts/run_retrieval_eval.py --retriever baseline --limit 5 --enforce-thresholds
@@ -63,157 +64,144 @@ python scripts/run_retrieval_eval.py --retriever vector --limit 5 --enforce-thre
 python scripts/run_retrieval_eval.py --retriever hybrid --limit 5 --enforce-thresholds
 ```
 
-Conditional reranker eval gate:
+Answer/truth/compliance checks when present:
 
 ```bash
-python scripts/run_retrieval_eval.py --retriever mvp003 --reranker deterministic-test --limit 5
-python scripts/run_retrieval_eval.py --retriever hybrid --reranker deterministic-test --limit 5
+python scripts/check_v1_3c_answer_contract.py
+python scripts/check_v1_3d_truth_compliance_router.py
 ```
 
-Use `docs/RETRIEVAL_EVAL_THRESHOLDS.md` for executable threshold profiles. Use the latest milestone report or decision log for current retrieval baselines, regression rules, and report format.
+Use the latest milestone report, decision log, or `docs/V1_5_PERFORMANCE_ROADMAP.md` for current baselines and required metric interpretation.
 
-## Source Code Tests
+## Documentation Gate
+
+Required when docs, prompts, governance files, PR templates, workflow docs, or roadmap files change.
+
+Pass condition:
+
+- edited files can be fetched/read as UTF-8 Markdown or expected text;
+- headings and code fences are intact;
+- no false implementation status is introduced;
+- source hierarchy and truth boundary remain intact;
+- no confidential/private data is exposed;
+- PR body states docs-only scope and skipped tests rationale.
+
+Docs-only changes do not require pytest or retrieval eval unless they change executable commands, artifacts, source registry, chunks, eval fixtures, or code paths.
+
+## Source Code Gate
 
 Required when source code changes.
 
-- Add or update tests for changed behavior.
-- Run `python -m pytest`.
-- Report command, result, failures, and skipped tests.
+Pass condition:
 
-Pass condition: changed behavior is covered and tests pass, or the blocker is explicit.
-
-Hard fail: source code changed but tests were not run and no blocker was documented.
-
-## Artifact Verification
-
-Required when generated files, schemas, docs, prompts, datasets, configs, or governance files change.
-
-- Re-read created or edited files.
-- Check paths, names, frontmatter, links, and required sections.
-- Verify generated artifacts are in the intended location.
-- Run `python scripts/verify_artifacts.py` when executable artifacts, datasets, schemas, source registry, chunks, or project outputs may be affected.
-
-Pass condition: artifact exists and matches the requested contract.
-
-Hard fail: artifact path is wrong, generated file is missing, or the task claims implementation that does not exist.
-
-## Chunk Section Audit
-
-Required when chunking, section metadata, heading detection, schemas, or chunk artifacts change.
-
-- Run `python scripts/audit_chunk_sections.py --json`.
-- Report total chunks, chunks with section metadata, chunks missing section metadata, and notable section values.
-
-Pass condition: section metadata behavior is reported and no unexplained schema regression appears.
-
-## Retrieval Evaluation
-
-Required when retrieval, chunking, scoring, metadata filters, embeddings, vector DB, hybrid search, reranking, or answer generation changes.
-
-- Run `python scripts/run_retrieval_eval.py --retriever baseline --limit 5`.
-- Run `python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5`.
-- Run `python scripts/run_retrieval_eval.py --retriever vector --limit 5` when embeddings, vector retrieval, hybrid retrieval, reranking, or eval comparison policy is affected.
-- Run `python scripts/run_retrieval_eval.py --retriever hybrid --limit 5` when hybrid retrieval, reranking, eval comparison policy, section substitution, or answer-generation evidence selection is affected.
-- Run explicit reranker eval commands when reranking code, reranker eval plumbing, or reranker policy is affected.
-- Report dataset, settings, pass/fail count, metric deltas, and regressions.
-- When oracle metadata is involved, report strict exact-source metrics and relaxed accepted-source metrics separately.
-
-Pass condition: no unexplained regression in required retrieval metrics.
-
-Threshold pass condition:
-
-- `--enforce-thresholds` exits with code `0` for the selected retriever.
-- Threshold metrics are reported as fresh command output.
-- `mvp003` remains the protected deterministic reference retriever.
-- `hybrid` remains an explicit comparison mode and is not made default by threshold pass status.
+- changed behavior is covered by targeted tests;
+- `python -m pytest` or narrower justified test command passes;
+- skipped tests have rationale and residual risk.
 
 Hard fail:
 
-- eval cannot run;
+- source code changed without tests or documented blocker;
+- tests are claimed without being run;
+- gates are relaxed to force a pass.
+
+## Retrieval Gate
+
+Required when retrieval, chunking, scoring, metadata filters, embeddings, vector DB, hybrid search, reranking, eval oracle, or answer evidence selection changes.
+
+Pass condition:
+
+- required retriever modes are evaluated;
+- before/after metrics are reported when claiming improvement;
+- no unexplained regression appears;
+- source IDs, source priority, source paths, section metadata, and evidence labels are preserved;
+- `mvp003` remains the protected deterministic reference unless explicitly changed by approved task.
+
+Hard fail:
+
 - metrics are invented or omitted;
-- `--enforce-thresholds` exits with code `1` for a required threshold gate;
-- source IDs, source priority, or evidence labels are dropped;
-- a claimed retrieval improvement does not report before/after metrics.
+- threshold gate fails and is ignored;
+- a comparison mode is silently made default;
+- retrieval improvement is claimed without evidence.
 
-## Citation / Source-Grounding Check
+## Claim-To-Citation Gate
 
-Required when answers, citations, evidence labels, source hierarchy, or hallucination controls change.
+Required when answer generation, citation rendering, evidence labels, truth routing, or unsupported-claim handling changes.
 
-- Confirm answers trace claims to source IDs.
-- Confirm unsupported claims are removed or labeled.
-- Confirm evidence labels and confidence are preserved.
-- Confirm insufficient evidence produces uncertainty instead of fabrication.
+Target state:
 
-Pass condition: material claims are traceable or explicitly marked uncertain.
+- split material answers into atomic claims;
+- attach each claim to one or more source spans;
+- grade claims as supported, unsupported, contradicted, too vague, or needs verification;
+- report answer-level groundedness and unsupported-claim rate.
 
-Hard fail: an output path can produce unsupported claims as facts.
+Until this is fully implemented, PRs must at least perform source-grounding review and preserve existing answer contract checks.
 
-## Compliance / Biosafety Check
+## Compliance And Biosafety Gate
 
-Required when biological data, biodiversity data, CITES, Nagoya Protocol, LMO, K-BDS, privacy, security, regulatory, legal, IP, investor, partner, or public-communication risk is affected.
+Required when biological data, biodiversity access, CITES, Nagoya, LMO, K-BDS, privacy, security, regulatory, legal, IP, investor, partner, public-communication, or wet-lab-sensitive risk is affected.
 
-- Identify risk domain.
-- Identify missing approvals or evidence.
-- Block or escalate unsafe output.
-- Distinguish internal, investor-facing, partner-facing, public, and restricted outputs.
+Pass condition:
 
-Pass condition: risk is either cleared, mitigated, or explicitly escalated.
+- risk domain is identified;
+- missing approvals or evidence are explicit;
+- unsafe outputs are blocked or escalated;
+- internal, investor-facing, partner-facing, public, and restricted outputs are distinguished.
 
-Hard fail: regulated biological, confidential, personal, legal, or investor-sensitive claims are exposed without review.
+Hard fail:
 
-## Documentation Update Check
+- regulated biological, confidential, personal, legal, or investor-sensitive claims are exposed without review;
+- wet-lab validation or regulatory approval is implied without evidence.
 
-Required when behavior, workflow, commands, evals, milestones, or user-facing outputs change.
+## Security And Adversarial Gate
 
-- Update relevant docs.
-- Keep docs operational and current.
-- Avoid vague status claims.
-- Link to concrete commands when the document describes executable gates.
+Use when tools, external actions, retrieval sources, prompts, file ingestion, secrets, connectors, or agent autonomy are affected.
 
-Pass condition: docs match the implemented state.
+Check for:
 
-## GitHub Review Check
+- prompt injection;
+- malicious retrieved-document instructions;
+- source poisoning;
+- PII or confidential leakage;
+- over-privileged tools;
+- excessive agency;
+- insecure output handling;
+- secret or credential exposure.
 
-Required before commits, pushes, PRs, and merge decisions.
+## Performance Gate
 
-- Inspect changed files.
-- Confirm no source code was changed for docs-only tasks.
-- Confirm no secrets or confidential content were added.
-- Use `.github/pull_request_template.md` for PRs.
-- Summarize risks and review focus.
+Performance claims require measured evidence.
 
-Pass condition: PR or commit scope is clear and reviewable.
+| Claim | Required Evidence |
+|---|---|
+| Token reduction | Before/after answer or context token metrics |
+| Cost reduction | Before/after cost estimate or token proxy |
+| Latency improvement | Net runtime improvement, preferably p50/p95 when available |
+| Retrieval improvement | Before/after retrieval metrics |
+| Answer quality improvement | Faithfulness, citation, unsupported-claim, or golden task evidence |
+| Compliance improvement | Refusal/escalation/adversarial pass evidence |
 
-## CI Status
+Cache hit count alone is not a latency win.
 
-The executable CI gate is `.github/workflows/quality-gates.yml`.
+## GitHub Review Gate
 
-CI should run on:
+Required before merge.
 
-- push to `main`;
-- pull requests to `main`;
-- manual workflow dispatch.
-
-Current required CI gates:
-
-- `python -m pytest`
-- `python scripts/verify_artifacts.py`
-- `python scripts/audit_chunk_sections.py --json`
-- `python scripts/run_retrieval_eval.py --retriever baseline --limit 5`
-- `python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5`
-
-CI intentionally does not run every vector, hybrid, reranker, answer-faithfulness, or compliance release gate on every PR. Those gates remain conditional local or release-only until they are fast, stable, and thresholded enough for required CI.
-
-CI passing does not automatically mean a PR is strategically correct. It means the minimum executable checks passed.
+- Changed files match the objective.
+- No source code changed for docs/governance-only work.
+- No secrets, credentials, endpoints, generated indexes, or model binaries were added unexpectedly.
+- No false production-status claim was introduced.
+- Skipped checks and residual risks are documented.
+- The PR is small enough to review.
 
 ## Merge Safety
 
-Repository branch protection should require the `Quality Gates` workflow before merging to `main`.
+A PR may merge only when scope, validation, truth boundary, and residual risks are clear.
 
-Codex or a human reviewer must still confirm:
+A PR must remain blocked when:
 
-- local conditional gates were run when the changed surface required them;
-- no source code changed for docs/governance-only work;
-- no retrieval mode was silently replaced or removed;
-- no secrets, credentials, endpoints, model binaries, generated indexes, or cloud resources were added;
-- risks and skipped checks are documented in the PR body.
+- pass/fail evidence is unclear;
+- CI failure is unexplained;
+- retrieval/answer behavior changed without relevant evals;
+- source provenance or evidence labels are dropped;
+- compliance risk is hidden;
+- docs and implementation disagree materially.

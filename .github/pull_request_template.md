@@ -2,92 +2,127 @@
 
 ## Objective
 
-- [ ] The objective is stated clearly.
-- [ ] The change matches the requested scope.
+- [ ] Objective is stated clearly.
+- [ ] Change matches requested scope.
 - [ ] Unrelated files are excluded.
+- [ ] Truth boundary is explicit.
 
 ## Change Type
 
 - [ ] Docs/governance only
 - [ ] Source code
 - [ ] Tests
-- [ ] Retrieval/chunking/scoring
-- [ ] Answer generation/citation
-- [ ] Compliance/biosafety/regulatory
-- [ ] MVP release
+- [ ] Source registry / metadata / chunks
+- [ ] Retrieval / ranking / scoring
+- [ ] Answer generation / citation / truth router
+- [ ] Compliance / biosafety / security
+- [ ] Token / cost / latency metrics
+- [ ] CI / workflow / release
 
-## Always-Local Checks
+## Scope Safety
 
+- [ ] No direct `main` edit unless explicitly approved.
+- [ ] Branch scope is narrow and reviewable.
+- [ ] No unrelated refactor included.
+- [ ] No generated artifact churn included unless intentional and explained.
+- [ ] No secrets, credentials, endpoints, model binaries, generated indexes, or cloud resources added unexpectedly.
+
+## Truth Boundary
+
+This PR does not claim completion unless verified by evidence:
+
+- [ ] production vector DB
+- [ ] production KG
+- [ ] full source ingestion
+- [ ] legal/regulatory approval
+- [ ] wet-lab validation
+- [ ] deployed autonomous agent
+- [ ] proprietary biological foundation model
+- [ ] customer/investor commitment
+- [ ] product-market fit
+
+Notes:
+
+## Required Checks
+
+### Docs/Governance
+
+- [ ] Edited docs were re-read from branch.
+- [ ] Markdown/headings/links/paths are sane.
+- [ ] No false implementation status introduced.
+- [ ] No confidential or personal data exposed.
+- [ ] Not applicable.
+
+### Source Code
+
+- [ ] Targeted tests run:
 - [ ] `python -m pytest`
+- [ ] Lint/type/schema check if relevant:
+- [ ] Not applicable; reason:
+
+### Artifact / Registry / Chunking
+
 - [ ] `python scripts/verify_artifacts.py`
-- [ ] Not applicable because this is docs/governance only; reason:
-
-## Conditional Local Checks
-
-Run when the PR changes retrieval, chunking, metadata, embeddings, vector search, hybrid retrieval, reranking, eval fixtures, or answer-generation behavior.
-
 - [ ] `python scripts/audit_chunk_sections.py --json`
+- [ ] Not applicable; reason:
+
+### Retrieval / Ranking / Scoring
+
 - [ ] `python scripts/run_retrieval_eval.py --retriever baseline --limit 5`
 - [ ] `python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5`
 - [ ] `python scripts/run_retrieval_eval.py --retriever vector --limit 5`
 - [ ] `python scripts/run_retrieval_eval.py --retriever hybrid --limit 5`
+- [ ] `--enforce-thresholds` run where required.
 - [ ] Not applicable; reason:
 
-Run when reranking code, reranker eval plumbing, or reranker docs/policy change.
+### Answer / Citation / Truth Router
 
-- [ ] `python scripts/run_retrieval_eval.py --retriever mvp003 --reranker deterministic-test --limit 5`
-- [ ] `python scripts/run_retrieval_eval.py --retriever hybrid --reranker deterministic-test --limit 5`
-- [ ] Not applicable; reason:
-
-## CI Checks
-
-- [ ] GitHub Actions `Quality Gates` workflow ran on this PR branch.
-- [ ] `Quality Gates` passed, or failure is linked and explained.
-- [ ] CI covered `pytest`, artifact verification, chunk audit, baseline eval, and `mvp003` eval.
-- [ ] Any local-only vector, hybrid, reranker, release, or compliance gates are reported below.
-
-## Retrieval Metrics
-
-| Metric | Before | After | Delta |
-|---|---:|---:|---:|
-| Source file match @3 | | | |
-| Source file match @5 | | | |
-| Source priority match | | | |
-| Evidence label match | | | |
-| Section match | | | |
-| Overall pass rate | | | |
-
-## Source-Grounding / Citation Impact
-
-- [ ] Source IDs are preserved.
-- [ ] Source priority is preserved.
-- [ ] Evidence labels are preserved.
+- [ ] Answer contract check run where available.
+- [ ] Truth/compliance router check run where available.
+- [ ] Source IDs, priorities, evidence labels, paths, and confidence preserved.
 - [ ] Unsupported claims are removed or labeled.
-- [ ] Not applicable.
+- [ ] Not applicable; reason:
 
-## Compliance / Biosafety Impact
+### Compliance / Security
 
-- [ ] CITES/Nagoya/LMO/K-BDS risk reviewed if relevant.
-- [ ] Privacy/security/IP/legal risk reviewed if relevant.
-- [ ] No confidential, secret, or personal data added.
-- [ ] Public/investor-facing claims are source-supported.
-- [ ] Not applicable.
+- [ ] CITES/Nagoya/LMO/biosafety/biosecurity reviewed if relevant.
+- [ ] Privacy/security/IP/legal/investor/public-claim risk reviewed if relevant.
+- [ ] Prompt injection, source poisoning, leakage, and excessive agency considered if relevant.
+- [ ] Human approval need stated.
+- [ ] Not applicable; reason:
+
+## Metrics
+
+Report only measured metrics. Do not infer wins.
+
+| Metric | Before | After | Delta | Evidence |
+|---|---:|---:|---:|---|
+| Retrieved-context tokens | | | | |
+| Answer tokens | | | | |
+| Runtime / p50 / p95 | | | | |
+| Retrieval pass rate | | | | |
+| Expected-source hit rate | | | | |
+| Citation/claim support rate | | | | |
+| Refusal/escalation pass rate | | | | |
+
+## Source-Grounding Review
+
+- [ ] Source IDs preserved.
+- [ ] Source priority preserved.
+- [ ] Source paths/provenance preserved.
+- [ ] Evidence labels preserved.
+- [ ] Missing evidence is labeled.
+- [ ] P6 benchmark doctrine is not treated as Asperitas internal fact.
 
 ## Risk Summary
 
 Known risks:
 
+Skipped checks and rationale:
+
 Deferred work:
 
 Human approval needed:
-
-## Merge Safety
-
-- [ ] Branch is up to date with `main`.
-- [ ] No source code changed for docs/governance-only work.
-- [ ] No generated indexes, model binaries, secrets, credentials, endpoints, or cloud resources were added.
-- [ ] Branch protection requires the `Quality Gates` workflow before merge, or repository admin follow-up is listed below.
-- [ ] Remaining manual checks:
 
 ## Merge Decision
 
