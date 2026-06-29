@@ -62,6 +62,15 @@ ASPERITAS PRIME v2.0
 
 Earlier AOS layers remain inherited doctrine unless a later safe instruction explicitly supersedes them. The latest user instruction can override execution details, but never safety, legality, scientific truth, biosafety, source integrity, or compliance.
 
+## Historical Constitution References
+
+The current README and AGENTS files are the compact active operating layer. The earlier long-form PRIME v2.0 README and AGENTS versions were not discarded; they remain in Git history and are indexed for future reference:
+
+- `docs/archive/README_PRE_V15_PRIME_V2.md`
+- `docs/archive/AGENTS_PRE_V15_PRIME_V2.md`
+
+These archives are historical context only. Active execution follows this README, `AGENTS.md`, `docs/AI_DEVELOPMENT_OS.md`, `docs/WORKFLOW.md`, `docs/QUALITY_GATES.md`, `docs/AOS_SOURCE_POLICY.md`, `docs/V1_5_PERFORMANCE_ROADMAP.md`, latest user instruction, and GitHub PR/CI evidence.
+
 ## Benchmark Doctrine
 
 Benchmarking is not decoration. It is a P6 operating layer used to extract durable engineering principles from top AI, data, infrastructure, biotech, VC, and unicorn company patterns.
