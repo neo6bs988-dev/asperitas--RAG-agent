@@ -2,6 +2,23 @@
 
 Use this workflow for all Asperitas AI RAG Agent changes. The goal is to keep every change small, verifiable, source-grounded, compliance-aware, and aligned with the benchmark-beating performance doctrine in `README.md` and `AGENTS.md`.
 
+## V1.5A Preflight Overlay
+
+For V1.5 and later tasks, perform this preflight before editing:
+
+- Risk level: low, medium, or high.
+- Changed surface: docs, templates, CI, source code, retrieval, answer generation, compliance/security, or evals.
+- Verification scope: docs sanity, targeted tests, retrieval eval, compliance review, CI review, or release gate.
+- Test budget: targeted checks by default; full local suites or broad GitHub Actions expansion only when risk justifies them.
+- Metric provenance: label results as `Fresh Run`, `Historical`, or `Not Run`.
+- Branch/PR path: use a non-main branch and GitHub PR review for mergeable work.
+
+V1.5A operating loop:
+
+```text
+Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
+```
+
 ## 1. Clarify Objective
 
 - State the requested outcome in one sentence.
@@ -60,6 +77,8 @@ Avoid source code changes during docs/governance tasks.
 Use `docs/QUALITY_GATES.md`.
 
 Docs-only changes may skip pytest and retrieval eval when they do not affect source code, source registry, chunks, retrieval, ranking, scoring, embeddings, vector DB, reranking, answer generation, or eval fixtures. The PR must state this clearly.
+
+For V1.5A+, run changed-area verification first. Docs/templates-only work normally uses cheap QA: re-read edited files, check headings/links/paths/code fences, inspect the diff, and run `git diff --check`.
 
 Behavior changes require targeted tests and relevant evals.
 

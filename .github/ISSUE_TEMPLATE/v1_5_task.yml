@@ -1,0 +1,102 @@
+name: V1.5 Task
+description: Track V1.5+ harness-first, cost-aware, regression-safe work.
+title: "[V1.5] "
+labels:
+  - v1.5
+  - needs-triage
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: State the smallest user-visible outcome.
+      placeholder: "Close the missing V1.5A governance gap without changing source behavior."
+    validations:
+      required: true
+  - type: dropdown
+    id: risk_level
+    attributes:
+      label: Risk level
+      description: Classify the change before implementation.
+      options:
+        - Low
+        - Medium
+        - High
+    validations:
+      required: true
+  - type: dropdown
+    id: affected_surface
+    attributes:
+      label: Affected surface
+      description: Select every surface touched by the change.
+      multiple: true
+      options:
+        - Docs
+        - Templates
+        - CI/config
+        - Source code
+        - Retrieval/chunking/metadata
+        - Embeddings/vector DB
+        - Reranking
+        - Answer generation/citation
+        - Compliance/security
+        - Evals/fixtures
+    validations:
+      required: true
+  - type: dropdown
+    id: compliance_gate
+    attributes:
+      label: Compliance gate
+      description: Identify whether compliance or human approval applies.
+      options:
+        - Not applicable
+        - Source-grounding review required
+        - Compliance/biosafety review required
+        - Human approval required
+        - Blocked pending evidence
+    validations:
+      required: true
+  - type: textarea
+    id: verification_scope
+    attributes:
+      label: Verification scope
+      description: List the targeted checks, tests, evals, or GitHub Actions gates required for this issue.
+      placeholder: "Docs/templates: re-read changed files, inspect diff, run git diff --check."
+    validations:
+      required: true
+  - type: textarea
+    id: skipped_test_rationale
+    attributes:
+      label: Skipped-test rationale
+      description: If any standard check is skipped, explain why and name the residual risk.
+      placeholder: "pytest and retrieval eval skipped because this is docs/templates-only and no executable behavior changed."
+  - type: textarea
+    id: metrics_logging
+    attributes:
+      label: Metric logging expectations
+      description: Name each metric to report and label it Fresh Run, Historical, or Not Run.
+      placeholder: "Retrieval metrics: Not Run, docs-only. git diff --check: Fresh Run."
+    validations:
+      required: true
+  - type: textarea
+    id: ci_unverified
+    attributes:
+      label: CI-unverified handling
+      description: Note how GitHub Actions disconnections, cancellations, or timeouts should be handled for this issue.
+      placeholder: "Treat CI timeout as validation-scope evidence; rerun or narrow the required gate before merge readiness."
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals and stop conditions
+      description: List forbidden scope, overclaim boundaries, and stop conditions.
+      placeholder: "Do not change source code, CI YAML, retrieval behavior, chunks, generated indexes, dependencies, services, secrets, or cloud resources."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define what must be true before the issue can close.
+      placeholder: "V1.5A policy is reflected in docs/templates; skipped checks are recorded with rationale; no V1.4 regression."
+    validations:
+      required: true

@@ -84,6 +84,29 @@ Gate:
 - no source code behavior change;
 - PR merged to main.
 
+Required V1.5A operating loop:
+
+```text
+Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
+```
+
+Preflight must name risk level, changed surface, verification scope, compliance gate, skipped-check rationale, residual risk, and metric provenance.
+
+Changed-surface verification defaults to targeted checks:
+
+- docs/templates: re-read files, check headings/links/paths/code fences, inspect diff, run `git diff --check`;
+- source code: focused tests for changed behavior;
+- retrieval/chunking/metadata/embeddings/vector/reranking: targeted tests plus relevant retrieval/chunk gates;
+- answer/citation: answer/citation tests and source-grounding review;
+- compliance/security: targeted risk tests and compliance/biosafety review;
+- evals/fixtures/metrics: affected eval command or targeted eval tests.
+
+Full suites, broad retrieval comparisons, release gates, or expanded GitHub Actions are reserved for high-risk work, release/main readiness, CI/config changes, core RAG/eval/compliance/security changes, or behavior-changing source code.
+
+Metric evidence must be labeled `Fresh Run`, `Historical`, or `Not Run`. GitHub Actions disconnections, cancellations, and timeouts are validation-scope evidence; rerun or narrow the required gate instead of treating the timeout itself as product failure.
+
+V1.5A must preserve the V1.4 no-regression boundary: no answer behavior change, retrieval scoring change, source ingestion, chunk regeneration, embedding/vector DB behavior change, reranking behavior change, generated index/model binary addition, or false production/compliance/legal/wet-lab/customer/investor claim.
+
 ### V1.5B Claim-To-Citation Verifier Design
 
 Scope:

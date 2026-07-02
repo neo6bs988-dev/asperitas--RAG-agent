@@ -22,6 +22,30 @@ The goal is not merely passing tests. The goal is benchmark-informed, source-gro
 
 Use the lightest gate set that protects the changed surface.
 
+## V1.5A Risk And Changed-Area Selection
+
+V1.5+ tasks must classify risk and changed surface before editing.
+
+| Risk level | Typical examples | Verification posture |
+|---|---|---|
+| Low | Docs/templates wording, issue template fields, decision-log note, non-executable governance sync | Cheap QA plus GitHub review. Skip `pytest` and retrieval eval with rationale. |
+| Medium | CI/config changes, executable scripts, source code with narrow behavior, eval report generator changes | Targeted tests for the changed area plus artifact verification when artifacts may be affected. |
+| High | Core RAG/retrieval, chunking, metadata, embeddings, vector DB, reranking, answer generation, compliance/security behavior, release/main readiness | Full relevant local gates, retrieval/compliance evals as applicable, and GitHub Actions review. |
+
+| Changed surface | Minimum V1.5A verification |
+|---|---|
+| Docs/templates | Re-read files, check headings/links/paths/code fences, inspect diff, run `git diff --check`. |
+| CI/config | Inspect YAML/config diff, run `git diff --check`, and run targeted local command if the config can be exercised locally. |
+| Source code | Add/update focused tests and run targeted `pytest`; run full `python -m pytest` for shared behavior or unclear blast radius. |
+| Retrieval/chunking/metadata/embeddings/vector/reranking | Run targeted tests plus required retrieval/chunk gates. |
+| Answer generation/citation | Run answer/citation tests and source-grounding review; run retrieval eval if evidence selection or retrieval is touched. |
+| Compliance/security | Run targeted compliance/security tests and compliance/biosafety review. |
+| Evals/fixtures/metrics | Run targeted eval tests or the affected eval command, and label metrics as `Fresh Run`, `Historical`, or `Not Run`. |
+
+Conserve GitHub Actions minutes by running targeted checks by default. Run full suites, broad retrieval comparisons, release gates, or expanded CI only when risk justifies it.
+
+GitHub Actions disconnections, cancellations, and timeouts are validation-scope evidence. Record what happened, rerun or narrow the gate when required, and do not call the timeout itself a product failure unless required gates remain unclear, fail, or cannot be rerun.
+
 | Gate Class | Runs Where | Purpose |
 |---|---|---|
 | Targeted local checks | Developer/Codex workspace | Fast feedback on changed behavior |
