@@ -106,6 +106,25 @@ Rules:
 - If CI or a long validation run disconnects, split validation and recover exact pass/fail evidence.
 - Never merge or mark ready if pass/fail status is unclear.
 
+## V1.5A Harness-First Verification Rule
+
+For V1.5 and later work, start every task by naming:
+
+- risk level: low, medium, or high;
+- changed surface: docs, templates, CI, source code, retrieval, answer generation, compliance/security, or evals;
+- required verification scope;
+- skipped checks, if any, with rationale and residual risk.
+
+Use this loop:
+
+```text
+Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
+```
+
+Conserve local test budget and GitHub Actions minutes by running targeted checks by default. Use full local suites, broad retrieval comparisons, release gates, or expanded CI only when the changed surface or risk level justifies them.
+
+Treat GitHub Actions disconnections, cancellations, and timeouts as validation-scope evidence. Rerun or narrow the required gate when needed; do not call the timeout itself a product failure unless required gates remain unclear, fail, or cannot be rerun.
+
 ## Benchmark Doctrine
 
 Benchmarking is P6 operating doctrine, not Asperitas internal fact.

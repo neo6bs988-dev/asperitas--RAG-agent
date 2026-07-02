@@ -31,6 +31,18 @@ V1.1 handoff items:
 
 Allowed status after the V1 Performance Closure Matrix passes its checks: ready to evaluate whether P0/P1 Gap Fix Only is needed. This is not final RC readiness, internal dry-run readiness, or internal release readiness.
 
+## V1.5 Gap Closure And Performance Hardening
+
+V1.5 begins with V1.5A harness-first, cost-aware, regression-safe documentation and gate sync. The active policy file is `docs/V1_5_PERFORMANCE_ROADMAP.md`.
+
+Required V1.5A operating loop:
+
+```text
+Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
+```
+
+V1.5A is governance and verification-policy work only. It does not implement V2 vector DB/KG, V3 modular agents, V4 ML/DL, production RAG, production KG, production vector DB, answer behavior changes, retrieval scoring changes, source ingestion, generated indexes, legal approval, regulatory approval, wet-lab validation, customer traction, or production readiness.
+
 ## MVP Status Table
 
 | MVP | Name | Status | Primary Issue(s) | Exit Condition |

@@ -74,6 +74,20 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 9. Merge only when scope and pass/fail evidence are clear.
 10. Update the next Codex prompt based on gaps found.
 
+## V1.5A Harness-First Discipline
+
+V1.5A makes the default development loop harness-first, cost-aware, and regression-safe:
+
+```text
+Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
+```
+
+Every task should name risk level, changed surface, verification scope, skipped checks, residual risk, and metric provenance before merge readiness is claimed.
+
+Cheap QA means re-reading edited files, checking headings/paths/code fences, inspecting the diff, and running `git diff --check`. Targeted verification means running the smallest command set that protects the changed surface. Full suites, broad retrieval evals, release gates, or expanded GitHub Actions coverage are reserved for high-risk work, release/main work, CI/config changes, core RAG/eval/compliance/security changes, or behavior-changing source code.
+
+Metrics must be labeled as `Fresh Run`, `Historical`, or `Not Run`. GitHub Actions disconnections, cancellations, and timeouts are validation-scope evidence, not product failures unless required gates remain unclear, fail, or cannot be rerun.
+
 ## Performance Doctrine
 
 Token minimization must never reduce reasoning quality. Reduce useless context, not critical evidence.

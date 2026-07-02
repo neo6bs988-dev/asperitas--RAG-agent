@@ -7,6 +7,16 @@
 - [ ] Unrelated files are excluded.
 - [ ] Truth boundary is explicit.
 
+## V1.5A Preflight
+
+- Risk level: [ ] Low [ ] Medium [ ] High
+- Affected surface: [ ] Docs [ ] Templates [ ] CI/config [ ] Source code [ ] Retrieval/chunking/metadata [ ] Embeddings/vector DB [ ] Reranking [ ] Answer generation/citation [ ] Compliance/security [ ] Evals/fixtures
+- Compliance gate: [ ] Not applicable [ ] Reviewed [ ] Requires human approval
+- Verification scope:
+- Skipped-test/eval rationale:
+- Residual risk:
+- Metric provenance: [ ] Fresh Run [ ] Historical [ ] Not Run / N/A
+
 ## Change Type
 
 - [ ] Docs/governance only
@@ -119,6 +129,8 @@ Report only measured metrics. Do not infer wins.
 Known risks:
 
 Skipped checks and rationale:
+
+GitHub Actions disconnections/timeouts, if any:
 
 Deferred work:
 
