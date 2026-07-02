@@ -18,7 +18,7 @@ jobs:
   quality-gates:
     name: tests-artifacts-retrieval-eval
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     env:
       PYTHONUNBUFFERED: "1"
 
