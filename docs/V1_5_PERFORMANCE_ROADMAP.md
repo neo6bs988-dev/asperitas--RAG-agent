@@ -111,15 +111,18 @@ V1.5A must preserve the V1.4 no-regression boundary: no answer behavior change, 
 
 Scope:
 
-- define atomic claim schema;
-- define support grades: supported, unsupported, contradicted, too vague, needs verification;
-- define evidence span attachment;
-- define output metrics.
+- add `docs/V1_5B_CLAIM_TO_CITATION_VERIFIER_DESIGN.md`;
+- define the claim-to-citation verifier purpose and current V1.3/V1.4/V1.5A gap;
+- define atomic claim and evidence span schemas;
+- define support grades including supported, partially supported, unsupported, contradicted, citation missing, citation mismatch, ambiguous, not verifiable from context, and compliance blocked;
+- define biology-specific entity fields and compliance/truth-boundary tags;
+- define eval metrics, fixture requirements, V1.5C gates, risk register, non-goals, and acceptance criteria.
 
 Gate:
 
 - design doc;
-- test fixture plan;
+- decision log;
+- test fixture and golden-set requirements;
 - no answer behavior change until implementation PR.
 
 ### V1.5C Claim-To-Citation Verifier Implementation
