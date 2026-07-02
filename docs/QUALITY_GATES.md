@@ -112,6 +112,10 @@ Pass condition:
 
 Docs-only changes do not require pytest or retrieval eval unless they change executable commands, artifacts, source registry, chunks, eval fixtures, or code paths.
 
+In GitHub Actions, docs/templates/decision-log-only pull requests may take the lightweight Quality Gates path. That path must still check changed surface, Markdown/code-fence sanity, issue-template shape when relevant, and truth-boundary/no-overclaim language, then report skipped pytest/retrieval evals as `Not Run` with rationale. Any source, runtime, artifact, retrieval, eval fixture, dependency, CI workflow, or generated-file change must use the full Quality Gates path.
+
+The full Quality Gates job keeps a conservative runtime budget so unit tests, artifact checks, chunk audit, baseline retrieval eval, MVP-003 retrieval eval, and hybrid retrieval eval can complete when the changed surface requires them. Increasing this timeout is a CI runtime-policy change only; it does not weaken retrieval gates or claim retrieval performance improvement.
+
 ## Source Code Gate
 
 Required when source code changes.

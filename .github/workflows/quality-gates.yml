@@ -18,38 +18,142 @@ jobs:
   quality-gates:
     name: tests-artifacts-retrieval-eval
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     env:
       PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      - name: Detect changed surface
+        id: surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" > changed_files.txt
+          else
+            git diff --name-only HEAD^ HEAD > changed_files.txt
+          fi
+
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from pathlib import Path
+          import fnmatch
+
+          changed = [line.strip() for line in Path("changed_files.txt").read_text(encoding="utf-8").splitlines() if line.strip()]
+          docs_only_patterns = (
+              "README.md",
+              "AGENTS.md",
+              "docs/*.md",
+              "docs/**/*.md",
+              ".github/pull_request_template.md",
+              ".github/ISSUE_TEMPLATE/*.yml",
+              ".github/ISSUE_TEMPLATE/*.yaml",
+              "09_LOGS/decision_logs/*.md",
+          )
+          is_pull_request = "${{ github.event_name }}" == "pull_request"
+          docs_only = is_pull_request and bool(changed) and all(
+              any(fnmatch.fnmatch(path, pattern) for pattern in docs_only_patterns)
+              for path in changed
+          )
+          print(f"docs_only={'true' if docs_only else 'false'}")
+          print("changed_files<<EOF")
+          print("\n".join(changed))
+          print("EOF")
+          PY
+
+      - name: Run docs-only quality gate
+        if: steps.surface.outputs.docs_only == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          changed = [line.strip() for line in Path("changed_files.txt").read_text(encoding="utf-8").splitlines() if line.strip()]
+          allowed_prefixes = (
+              "docs/",
+              ".github/ISSUE_TEMPLATE/",
+              "09_LOGS/decision_logs/",
+          )
+          allowed_exact = {"README.md", "AGENTS.md", ".github/pull_request_template.md"}
+
+          unexpected = [
+              path for path in changed
+              if path not in allowed_exact and not path.startswith(allowed_prefixes)
+          ]
+          if unexpected:
+              raise SystemExit(f"unexpected docs-only path(s): {unexpected}")
+
+          md_files = [path for path in changed if path.endswith(".md")]
+          for path in md_files:
+              text = Path(path).read_text(encoding="utf-8")
+              if text.count("```") % 2:
+                  raise SystemExit(f"unbalanced Markdown code fence: {path}")
+
+          yaml_files = [
+              path for path in changed
+              if path.startswith(".github/ISSUE_TEMPLATE/") and path.endswith((".yml", ".yaml"))
+          ]
+          for path in yaml_files:
+              text = Path(path).read_text(encoding="utf-8")
+              if not re.search(r"(?m)^name:\s*\S+", text):
+                  raise SystemExit(f"issue template missing name: {path}")
+              if not re.search(r"(?m)^body:\s*$", text):
+                  raise SystemExit(f"issue template missing body: {path}")
+
+          combined = "\n".join(Path(path).read_text(encoding="utf-8") for path in changed if Path(path).is_file())
+          overclaim = re.compile(
+              r"(?is)\b(is|are|now|ready|validated|approved|deployed|implemented|complete|completed|production-ready)\b"
+              r".{0,120}\b(production\s+(rag|kg|vector\s+db)|wet-lab\s+validation|"
+              r"legal\s+approval|regulatory\s+approval|foundation[-\s]model)\b"
+          )
+          for match in overclaim.finditer(combined):
+              start = max(0, match.start() - 120)
+              end = min(len(combined), match.end() + 120)
+              context = combined[start:end].casefold()
+              if not any(marker in context for marker in ("does not", "do not", "no ", "not ", "without evidence", "forbidden", "boundary")):
+                  raise SystemExit(f"possible production-status overclaim near: {match.group(0)}")
+
+          print("Docs-only Quality Gates passed.")
+          print("Metric provenance: Fresh Run for docs-only CI checks; Not Run for pytest/retrieval eval by changed-surface policy.")
+          PY
+
       - name: Install project
+        if: steps.surface.outputs.docs_only != 'true'
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,parsers]"
 
       - name: Run unit tests
+        if: steps.surface.outputs.docs_only != 'true'
         run: python -m pytest
 
       - name: Verify artifacts
+        if: steps.surface.outputs.docs_only != 'true'
         run: python scripts/verify_artifacts.py
 
       - name: Audit chunk section metadata
+        if: steps.surface.outputs.docs_only != 'true'
         run: python scripts/audit_chunk_sections.py --json
 
       - name: Run baseline retrieval eval
+        if: steps.surface.outputs.docs_only != 'true'
         run: python scripts/run_retrieval_eval.py --retriever baseline --limit 5
 
       - name: Run MVP-003 metadata-aware retrieval eval
+        if: steps.surface.outputs.docs_only != 'true'
         run: python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
 
       - name: Run hybrid retrieval eval
+        if: steps.surface.outputs.docs_only != 'true'
         run: python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
