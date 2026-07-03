@@ -92,6 +92,41 @@ A feature is not benchmark-beating because the document says so. It becomes benc
 - clearer GitHub audit trail and reproducibility
 - stronger biology-specific decision quality
 
+## Workflow Complexity and Security Doctrine
+
+AI-assisted development speed must not flatten the agent workflow. Vibe-coded shortcuts are acceptable only when they preserve the real system boundaries, audit trail, tests, diagnostics, and future eval hooks.
+
+The verifier and RAG workflow must remain separable:
+
+```text
+source registry/raw sources
+-> parsing/chunking
+-> metadata/evidence span layer
+-> retrieval/reranking
+-> answer contract
+-> atomic claim extraction
+-> evidence-span matching
+-> support-status classification
+-> report aggregation
+-> answer contract integration
+-> adversarial/security eval
+-> biology/compliance golden set
+-> metrics/regression gate
+```
+
+Do not collapse extraction, matching, classification, report aggregation, and answer integration into one broad helper. Small PRs are required, but small PRs must not oversimplify the architecture or hide state transitions.
+
+V1.5 and later work must preserve four completion pillars:
+
+| Pillar | Requirement |
+|---|---|
+| Golden set | Biology/compliance-specific claim verification ground truth, including entity, numeric, citation, unsupported, contradicted, and compliance-sensitive cases |
+| Report aggregation | Claim-level support results aggregated into answer-level diagnostics and blocker/warning signals |
+| Adversarial/security eval pack | Wrong citation, unsupported claim, numeric mismatch, biology entity mismatch, compliance overclaim, prompt injection, secret leakage, unsafe tool use, and excessive-agency tests |
+| Metrics/regression gate | False-supported rate, false-contradicted rate, citation-mismatch detection, unsupported detection recall, compliance-sensitive recall, latency, cost, and workflow-boundary regressions |
+
+Security is a first-class gate, not a final cleanup step. New code must preserve least privilege, avoid unnecessary network/cloud/service calls, treat retrieved or external text as untrusted input, protect secrets and confidential source text, and avoid autonomous changes to production-like data, source registries, vector DBs, KGs, deployment configuration, legal/compliance status, or wet-lab status.
+
 ## Hard Filters
 
 Every major initiative must pass three non-negotiable filters:
