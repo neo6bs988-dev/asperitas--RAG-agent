@@ -65,7 +65,10 @@ def valid_span(**overrides) -> EvidenceSpan:
 def valid_report(**overrides) -> ClaimVerificationReport:
     status = overrides.pop("support_status", "supported")
     failure_mode = overrides.pop("failure_mode", None if status == "supported" else "cited_span_does_not_support_claim")
-    blocking = overrides.pop("blocking", status in {"unsupported", "contradicted", "citation_missing", "citation_mismatch"})
+    blocking = overrides.pop(
+        "blocking",
+        status in {"unsupported", "contradicted", "citation_missing", "citation_mismatch", "compliance_blocked"},
+    )
     claim = overrides.pop(
         "claim",
         valid_claim(
@@ -158,7 +161,7 @@ def test_mixed_supported_partial_and_unsupported_counts():
     assert summary.partially_supported_claims == 1
     assert summary.unsupported_claims == 1
     assert summary.answer_faithfulness_status == "fail"
-    assert summary.blocking_failures == ()
+    assert summary.blocking_failures == ("unsupported:C3:cited_span_does_not_support_claim",)
     assert "unsupported:C3:cited_span_does_not_support_claim" in summary.warnings
     assert summary.validate() == ()
 
@@ -175,7 +178,7 @@ def test_contradicted_creates_blocking_diagnostic():
     assert summary.validate() == ()
 
 
-def test_citation_missing_and_mismatch_counts_and_warnings():
+def test_citation_missing_and_mismatch_counts_warnings_and_blockers():
     reports = [
         report_for_status("C1", "citation_missing"),
         report_for_status("C2", "citation_mismatch"),
@@ -187,6 +190,8 @@ def test_citation_missing_and_mismatch_counts_and_warnings():
     assert summary.citation_mismatch_claims == 1
     assert "citation_missing:C1:no_citation" in summary.warnings
     assert "citation_mismatch:C2:citation_points_to_wrong_source" in summary.warnings
+    assert "citation_missing:C1:no_citation" in summary.blocking_failures
+    assert "citation_mismatch:C2:citation_points_to_wrong_source" in summary.blocking_failures
     assert summary.validate() == ()
 
 
@@ -204,7 +209,7 @@ def test_ambiguous_and_not_verifiable_counts():
     assert summary.validate() == ()
 
 
-def test_compliance_truth_boundary_tags_are_preserved_as_warnings_only():
+def test_compliance_truth_boundary_tags_are_preserved_as_warnings_only_for_supported_claims():
     claim = valid_claim(
         claim_id="C1",
         compliance_tags=("biosafety", "legal_regulatory_approval_claim"),
@@ -219,6 +224,19 @@ def test_compliance_truth_boundary_tags_are_preserved_as_warnings_only():
     assert "compliance_flag:biosafety" in summary.warnings
     assert "compliance_flag:legal_regulatory_approval_claim" in summary.warnings
     assert summary.blocking_failures == ()
+    assert summary.validate() == ()
+
+
+def test_compliance_blocked_creates_blocking_diagnostic():
+    summary = aggregate_claim_verification_reports(
+        [report_for_status("C1", "compliance_blocked")],
+        question="What requires review?",
+    )
+
+    assert summary.compliance_blocked_claims == 1
+    assert summary.answer_faithfulness_status == "fail"
+    assert summary.blocking_failures == ("compliance_blocked:C1:compliance_sensitive_unverified_claim",)
+    assert "compliance_blocked:C1:compliance_sensitive_unverified_claim" in summary.warnings
     assert summary.validate() == ()
 
 
