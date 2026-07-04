@@ -143,7 +143,11 @@ def classify_claim_support(
             metadata={"matcher_diagnostics": list(resolution.diagnostics)},
         )
 
+    matched_span_ids = {match.span_id for match in resolution.matched_spans}
+    matched_candidate_spans = tuple(span for span in candidate_spans if span.span_id in matched_span_ids) or candidate_spans
+    matched_candidate_span_ids = {span.span_id for span in matched_candidate_spans}
     signals = tuple(_span_signal(claim.claim_text, span, active_config) for span in candidate_spans)
+    matched_signals = tuple(signal for signal in signals if signal.span.span_id in matched_candidate_span_ids)
     if all(signal.not_verifiable for signal in signals):
         return _build_report(
             claim=claim,
@@ -160,6 +164,22 @@ def classify_claim_support(
     contradictory = tuple(signal for signal in signals if signal.contradiction or signal.numeric_conflict)
     strong = tuple(signal for signal in signals if _is_strong_support(signal, active_config))
     partial = tuple(signal for signal in signals if _is_partial_support(signal, active_config))
+    matched_contradictory = tuple(signal for signal in matched_signals if signal.contradiction or signal.numeric_conflict)
+    matched_strong = tuple(signal for signal in matched_signals if _is_strong_support(signal, active_config))
+    matched_partial = tuple(signal for signal in matched_signals if _is_partial_support(signal, active_config))
+
+    if (strong or partial) and not (matched_strong or matched_partial or matched_contradictory):
+        return _build_report(
+            claim=claim,
+            candidate_spans=candidate_spans,
+            status="citation_mismatch",
+            confidence=0.86,
+            rationale="Support signal came from an uncited candidate span, while the resolved cited span did not support the claim.",
+            failure_mode="citation_points_to_wrong_source",
+            blocking=True,
+            warnings=tuple(dict.fromkeys((*span_warnings, "support_from_uncited_span"))),
+            metadata=_signal_metadata(resolution.diagnostics, signals),
+        )
 
     if contradictory and (strong or len(contradictory) < len(signals)):
         return _build_report(
