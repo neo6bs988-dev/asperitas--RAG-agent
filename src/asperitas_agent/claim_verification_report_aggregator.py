@@ -43,6 +43,8 @@ _WARNING_STATUSES = {
     "compliance_blocked",
 }
 
+_BLOCKING_STATUSES = {"contradicted", "compliance_blocked"}
+
 
 @dataclass(frozen=True)
 class ClaimVerificationReportAggregationConfig:
@@ -100,7 +102,7 @@ def aggregate_claim_verification_reports(
         if failure_mode:
             aggregate_failure_modes.append(failure_mode)
 
-        if status == "contradicted":
+        if report.blocking or status in _BLOCKING_STATUSES:
             blocking_failures.append(_claim_signal(claim.claim_id, status, failure_mode))
         if status in _WARNING_STATUSES or report.warnings or compliance_tags:
             warnings.append(_claim_signal(claim.claim_id, status, failure_mode))
