@@ -77,7 +77,7 @@ V1.5 does not prove or claim:
 - legal approval;
 - regulatory approval;
 - autonomous lab capability;
-- proprietary or completed biological foundation model capability.
+- biological foundation-model capability.
 
 Any future claim in these categories requires separate merged implementation, metrics, eval artifacts, and review evidence.
 
