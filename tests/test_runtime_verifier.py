@@ -219,3 +219,26 @@ def test_invalid_caller_summary_with_enabled_runtime_verifier_falls_back():
     assert summary.answer_faithfulness_status == "not_scored"
     assert summary.metrics["runtime_verification_skipped_reason"] == "caller_supplied_summary_schema_invalid"
     assert summary.metrics["runtime_verifier_error_type"] == "ValueError"
+
+
+def test_valid_caller_summary_with_enabled_runtime_verifier_gets_runtime_diagnostics():
+    summary = build_runtime_answer_verification_summary(
+        question="What does the runtime verify?",
+        answer="The source registry preserves source IDs [E1].",
+        evidence_items=[runtime_evidence_item()],
+        enabled=True,
+        caller_supplied_summary=valid_caller_summary(),
+    )
+
+    assert summary is not None
+    assert summary.answer_id == "caller-summary"
+    assert summary.answer_faithfulness_status == "not_scored"
+    for key in RUNTIME_DIAGNOSTIC_FIELDS:
+        assert key in summary.metrics
+    assert summary.metrics["runtime_verifier_enabled"] is True
+    assert summary.metrics["runtime_verification_attempted"] is False
+    assert summary.metrics["runtime_verification_skipped_reason"] == "caller_supplied_summary_preferred"
+    assert summary.metrics["metadata_only_fallback_used"] is False
+    assert summary.metrics["verifier_input_claim_count"] == 0
+    assert summary.metrics["verifier_output_claim_count"] == 0
+    assert "caller_supplied_summary_preferred" in summary.metrics["diagnostics"]

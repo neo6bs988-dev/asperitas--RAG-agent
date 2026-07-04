@@ -64,7 +64,17 @@ def build_runtime_answer_verification_summary(
                 failure_modes=("verifier_not_applicable",),
                 exception=exc,
             )
-        return caller_supplied_summary
+        return _with_runtime_metrics(
+            caller_supplied_summary,
+            enabled=True,
+            attempted=False,
+            skipped_reason="caller_supplied_summary_preferred",
+            fallback_used=False,
+            input_claim_count=caller_supplied_summary.total_claims,
+            output_claim_count=caller_supplied_summary.total_claims,
+            diagnostics=("caller_supplied_summary_preferred",),
+            runtime_evidence_metadata=(),
+        )
 
     answer_text = _answer_text(answer)
     if not answer_text:
@@ -403,7 +413,8 @@ def _with_runtime_metrics(
 ) -> AnswerVerificationSummary:
     existing_metrics = dict(summary.metrics)
     existing_diagnostics = tuple(str(item) for item in existing_metrics.get("diagnostics", ()) if str(item).strip())
-    merged_diagnostics = tuple(dict.fromkeys((*existing_diagnostics, "runtime_verification_completed", *diagnostics)))
+    completion_diagnostics = ("runtime_verification_completed",) if attempted and not skipped_reason and not fallback_used else ()
+    merged_diagnostics = tuple(dict.fromkeys((*existing_diagnostics, *completion_diagnostics, *diagnostics)))
     metrics = {
         **existing_metrics,
         **_runtime_metrics(
