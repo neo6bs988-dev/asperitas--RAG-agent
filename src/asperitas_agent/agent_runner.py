@@ -11,6 +11,7 @@ from .evidence_pack import build_evidence_pack
 from .guardrails import evaluate_evidence_guardrail
 from .registry import read_registry
 from .retrieval_mvp003 import search_chunks_mvp003
+from .runtime_verifier import build_runtime_answer_verification_summary
 from .schemas import AgentResponse, Chunk, GroundedAnswer, SourceRecord
 
 
@@ -79,6 +80,7 @@ def ask_agent(
     records: list[SourceRecord] | None = None,
     chunks: list[Chunk] | None = None,
     answer_verification_summary: AnswerVerificationSummary | None = None,
+    runtime_verifier_enabled: bool = False,
 ) -> AgentResponse:
     clean_query = _validate_inputs(query, top_k)
     loaded_records, loaded_chunks = _load_records_and_chunks(registry_path, chunks_path, records, chunks)
@@ -92,6 +94,16 @@ def ask_agent(
     citation_subset_ok = set(answer.citations_used) <= evidence_keys
     if not citation_subset_ok:
         raise RuntimeError("generated answer used citations not present in the evidence pack")
+
+    verification_summary = answer_verification_summary
+    if runtime_verifier_enabled:
+        verification_summary = build_runtime_answer_verification_summary(
+            question=clean_query,
+            answer=answer,
+            evidence_items=pack.evidence_items,
+            enabled=True,
+            caller_supplied_summary=answer_verification_summary,
+        )
 
     return AgentResponse(
         query=clean_query,
@@ -107,6 +119,6 @@ def ask_agent(
             citation_subset_ok=citation_subset_ok,
             evidence_keys=evidence_keys,
             retriever_metadata=pack.retriever.to_json(),
-            answer_verification_summary=answer_verification_summary,
+            answer_verification_summary=verification_summary,
         ),
     )
