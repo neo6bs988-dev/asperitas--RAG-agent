@@ -253,6 +253,34 @@ def test_runtime_verifier_metadata_absent_when_summary_absent_and_empty_summary_
     assert json.loads(json.dumps(empty, sort_keys=True, separators=(",", ":"))) == empty
 
 
+def test_runtime_verifier_enabled_attaches_metadata_without_changing_answer_payload():
+    records, chunks = sample_inputs()
+
+    baseline = ask_agent("What is Asperitas?", top_k=2, records=records, chunks=chunks).to_json()
+    enriched = ask_agent(
+        "What is Asperitas?",
+        top_k=2,
+        records=records,
+        chunks=chunks,
+        runtime_verifier_enabled=True,
+    ).to_json()
+
+    assert enriched["answer"] == baseline["answer"]
+    assert enriched["status"] == baseline["status"]
+    assert enriched["citations_used"] == baseline["citations_used"]
+    assert enriched["evidence"] == baseline["evidence"]
+    assert enriched["guardrail"] == baseline["guardrail"]
+
+    enriched_metadata = dict(enriched["metadata"])
+    verification = enriched_metadata.pop(ANSWER_VERIFICATION_METADATA_KEY)
+    assert enriched_metadata == baseline["metadata"]
+    assert verification["runtime_verifier_enabled"] is True
+    assert verification["runtime_verification_attempted"] is True
+    assert "metadata_only_fallback_used" in verification
+    assert "verifier_schema_version" in verification
+    assert json.loads(json.dumps(enriched, sort_keys=True, separators=(",", ":"))) == enriched
+
+
 def test_runtime_metadata_attachment_does_not_mutate_inputs_or_call_runtime_pipeline(monkeypatch):
     def fail_if_called(*args, **kwargs):
         raise AssertionError("runtime pipeline function should not be called by metadata attachment")

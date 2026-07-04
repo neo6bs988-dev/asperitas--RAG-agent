@@ -10,6 +10,17 @@ from .schemas import GroundedAnswer
 INTEGRATION_NAME = "v1.5d-answer-verification-metadata-integration"
 INTEGRATION_VERSION = "V1.5D"
 ANSWER_VERIFICATION_METADATA_KEY = "answer_verification"
+RUNTIME_DIAGNOSTIC_KEYS = (
+    "runtime_verifier_enabled",
+    "runtime_verification_attempted",
+    "runtime_verification_skipped_reason",
+    "metadata_only_fallback_used",
+    "verifier_input_claim_count",
+    "verifier_output_claim_count",
+    "verifier_failure_modes",
+    "verifier_schema_version",
+    "runtime_evidence_metadata",
+)
 
 
 def build_answer_verification_metadata(summary: AnswerVerificationSummary) -> dict[str, Any]:
@@ -17,29 +28,31 @@ def build_answer_verification_metadata(summary: AnswerVerificationSummary) -> di
     summary.require_valid()
     summary_payload = summary.to_dict()
     metrics = dict(summary_payload.get("metrics") or {})
-    return _json_safe(
-        {
-            "integration_name": INTEGRATION_NAME,
-            "integration_version": INTEGRATION_VERSION,
-            "deterministic": True,
-            "summary_schema_version": summary.schema_version,
-            "answer_id": summary.answer_id,
-            "answer_faithfulness_status": summary.answer_faithfulness_status,
-            "total_claims": summary.total_claims,
-            "status_counts": metrics.get("status_counts", {}),
-            "blocking_failures": list(summary.blocking_failures),
-            "warnings": list(summary.warnings),
-            "claim_ids": metrics.get("claim_ids", []),
-            "citation_keys": metrics.get("citation_keys", []),
-            "evidence_span_ids": metrics.get("evidence_span_ids", []),
-            "source_ids": metrics.get("source_ids", []),
-            "failure_modes": metrics.get("failure_modes", []),
-            "compliance_tags": metrics.get("compliance_tags", []),
-            "diagnostics": metrics.get("diagnostics", []),
-            "claim_details": metrics.get("claim_details", []),
-            "summary": summary_payload,
-        }
-    )
+    payload = {
+        "integration_name": INTEGRATION_NAME,
+        "integration_version": INTEGRATION_VERSION,
+        "deterministic": True,
+        "summary_schema_version": summary.schema_version,
+        "answer_id": summary.answer_id,
+        "answer_faithfulness_status": summary.answer_faithfulness_status,
+        "total_claims": summary.total_claims,
+        "status_counts": metrics.get("status_counts", {}),
+        "blocking_failures": list(summary.blocking_failures),
+        "warnings": list(summary.warnings),
+        "claim_ids": metrics.get("claim_ids", []),
+        "citation_keys": metrics.get("citation_keys", []),
+        "evidence_span_ids": metrics.get("evidence_span_ids", []),
+        "source_ids": metrics.get("source_ids", []),
+        "failure_modes": metrics.get("failure_modes", []),
+        "compliance_tags": metrics.get("compliance_tags", []),
+        "diagnostics": metrics.get("diagnostics", []),
+        "claim_details": metrics.get("claim_details", []),
+        "summary": summary_payload,
+    }
+    for key in RUNTIME_DIAGNOSTIC_KEYS:
+        if key in metrics:
+            payload[key] = metrics[key]
+    return _json_safe(payload)
 
 
 def expose_answer_verification_metadata(
