@@ -6,6 +6,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_DIR = ROOT / "02_SOURCE_REGISTRY"
 SCHEMA_PATH = REGISTRY_DIR / "source_registry.schema.json"
 EXAMPLE_PATH = REGISTRY_DIR / "source_registry.example.json"
+CITATION_FIXTURE_SCHEMA_PATH = ROOT / "07_EVALS" / "citation_fidelity" / "fixture.schema.json"
+COMPLIANCE_FIXTURE_SCHEMA_PATH = ROOT / "07_EVALS" / "biology_compliance_golden_set" / "fixture.schema.json"
 
 
 def load_json(path: Path) -> dict:
@@ -51,3 +53,13 @@ def test_unreviewed_license_entries_block_external_output() -> None:
         if entry["license_status"] in gated_license_statuses:
             assert entry["embedding_allowed"] is False
             assert entry["external_output_allowed"] is False
+
+
+def test_v11_1_eval_fixture_schemas_parse_as_json() -> None:
+    citation_schema = load_json(CITATION_FIXTURE_SCHEMA_PATH)
+    compliance_schema = load_json(COMPLIANCE_FIXTURE_SCHEMA_PATH)
+
+    assert citation_schema["title"] == "Citation Fidelity Fixture v11.1"
+    assert compliance_schema["title"] == "Biology Compliance Golden Case v11.1"
+    assert "expected_support_status" in citation_schema["required"]
+    assert "expected_route" in compliance_schema["required"]
