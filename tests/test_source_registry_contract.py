@@ -16,7 +16,7 @@ def test_registry_files_parse_as_json() -> None:
     schema = load_json(SCHEMA_PATH)
     example = load_json(EXAMPLE_PATH)
 
-    assert schema["schema_version"] == "v11.1"
+    assert schema["properties"]["schema_version"]["const"] == "v11.1"
     assert example["schema_version"] == "v11.1"
     assert isinstance(example["entries"], list)
     assert example["entries"]
