@@ -15,6 +15,7 @@ from .loaders import load_documents
 from .rag import build_answer
 from .registry import default_registry_path, ensure_registry, read_registry, validate_registry, write_registry
 from .retrieval_tfidf import search_chunks
+from .source_registry_contract import load_source_registry_document, validate_source_registry_document
 from .verification import verify_artifacts
 
 
@@ -42,6 +43,21 @@ def cmd_validate_registry(args: argparse.Namespace) -> int:
         path = ensure_registry(root)
     ok, errors = validate_registry(path)
     _json_print({"ok": ok, "registry": path.as_posix(), "errors": errors})
+    return 0 if ok else 1
+
+
+def cmd_validate_registry_contract(args: argparse.Namespace) -> int:
+    root = repo_root(Path.cwd())
+    path = Path(args.path) if args.path else root / "02_SOURCE_REGISTRY" / "source_registry.example.json"
+    if not path.is_absolute():
+        path = root / path
+    if not path.exists():
+        _json_print({"ok": False, "registry_contract": path.as_posix(), "errors": [f"Registry contract document not found: {path.as_posix()}"]})
+        return 1
+    document = load_source_registry_document(path)
+    errors = validate_source_registry_document(document)
+    ok = not errors
+    _json_print({"ok": ok, "registry_contract": path.as_posix(), "errors": errors})
     return 0 if ok else 1
 
 
@@ -130,6 +146,9 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     validate = sub.add_parser("validate-registry")
     validate.set_defaults(func=cmd_validate_registry)
+    validate_contract = sub.add_parser("validate-registry-contract")
+    validate_contract.add_argument("--path", default=None, help="Registry contract JSON path. Defaults to 02_SOURCE_REGISTRY/source_registry.example.json")
+    validate_contract.set_defaults(func=cmd_validate_registry_contract)
     inventory = sub.add_parser("inventory")
     inventory.set_defaults(func=cmd_inventory)
     ingest = sub.add_parser("ingest")
