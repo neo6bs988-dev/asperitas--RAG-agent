@@ -28,3 +28,12 @@ This PR does not claim completion of production RAG, vector DB, KG, eval suite, 
 ## Rollback Plan
 
 ## Next Action
+
+## Required Report
+
+Changed files:
+Verification:
+Retrieval metrics:
+Compliance/source-grounding review:
+Risks or skipped checks:
+Recommended next step:
