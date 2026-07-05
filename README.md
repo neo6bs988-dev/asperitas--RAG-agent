@@ -17,6 +17,7 @@ This repository is the Phase-0 core for Asperitas internal RAG and agent develop
 | Chunk files or fixtures | Production vector database |
 | Benchmark doctrine | Asperitas internal fact |
 | Retrieval/eval scaffold | Full RAG/KG/eval production system |
+| Agent-stack roadmap | Proprietary agent stack implemented |
 | Model output or hypothesis | Wet-lab validation |
 | Compliance checklist | Legal or regulatory approval |
 | Investor or market signal | Committed capital or product-market fit |
@@ -57,10 +58,23 @@ ASPERITAS PRIME v2.0
 + AOS v10.3 Advanced Prompt Layer
 + AOS v10.4 Security/Privacy/Eval/Token Discipline
 + AOS v11.0 Outcome-First Reasoning
++ V11.1 Supergap Agent Build Leader Doctrine
 + user-approved project memory and GitHub evidence
 ```
 
 Earlier AOS layers remain inherited doctrine unless a later safe instruction explicitly supersedes them. The latest user instruction can override execution details, but never safety, legality, scientific truth, biosafety, source integrity, or compliance.
+
+V11.1 adds two practical rules:
+
+1. Build a proprietary agent stack over frontier models before claiming any proprietary base model or foundation-model capability.
+2. Treat data flywheel, agent runtime, evals, tracing, tool interfaces, safety/security/governance, source-grounded RAG, biosafety gates, DBTL support, and GitHub verification as one operating system.
+
+## V11.1 Control Documents
+
+- `docs/V11_1_SUPERGAP_AGENT_BUILD_LEADER.md` — latest doctrine for proprietary agent stack, data flywheel, eval/trace/control-plane, compliance gates, and non-overclaim boundaries.
+- `docs/IDEAL_REPO_STRUCTURE_V11_1.md` — target repo architecture and stage-gated folder model.
+- `docs/CODEX_NEXT_PROMPT_V11_1_REPO_ALIGNMENT.md` — Codex-ready prompt for the next implementation PR with explicit reasoning level.
+- `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md` — active Top Source Triad plus v11.1 add-on baseline.
 
 ## Historical Constitution References
 
@@ -69,7 +83,7 @@ The current README and AGENTS files are the compact active operating layer. The 
 - `docs/archive/README_PRE_V15_PRIME_V2.md`
 - `docs/archive/AGENTS_PRE_V15_PRIME_V2.md`
 
-These archives are historical context only. Active execution follows this README, `AGENTS.md`, `docs/AI_DEVELOPMENT_OS.md`, `docs/WORKFLOW.md`, `docs/QUALITY_GATES.md`, `docs/AOS_SOURCE_POLICY.md`, `docs/V1_5_PERFORMANCE_ROADMAP.md`, latest user instruction, and GitHub PR/CI evidence.
+These archives are historical context only. Active execution follows this README, `AGENTS.md`, `docs/AI_DEVELOPMENT_OS.md`, `docs/WORKFLOW.md`, `docs/QUALITY_GATES.md`, `docs/AOS_SOURCE_POLICY.md`, `docs/V1_5_PERFORMANCE_ROADMAP.md`, `docs/V11_1_SUPERGAP_AGENT_BUILD_LEADER.md`, latest user instruction, and GitHub PR/CI evidence.
 
 ## Benchmark Doctrine
 
@@ -204,13 +218,14 @@ Build in this order unless a higher-priority safe instruction overrides it:
 11. Claim-to-citation verifier
 12. Adversarial and security eval pack
 13. Biology-specific golden set
-14. Vector database and KG integration
-15. Modular agent pack
-16. Workflow/API/UI integration
-17. ML/DL optimization layer
-18. Foundation-model-readiness data flywheel
+14. Trace/eval control plane
+15. Vector database and KG integration
+16. Modular agent pack
+17. Workflow/API/UI integration
+18. ML/DL optimization layer
+19. Foundation-model-readiness data flywheel
 
-Do not split into many autonomous agents before the shared RAG core, eval suite, source registry, and compliance gates are stable.
+Do not split into many autonomous agents before the shared RAG core, eval suite, source registry, compliance gates, and trace/eval control plane are stable.
 
 ## Performance Roadmap
 
@@ -284,6 +299,19 @@ Retrieval metrics:
 Compliance/source-grounding review:
 Risks or skipped checks:
 Recommended next step:
+```
+
+## V11.1 Required PR Addendum
+
+Every governance, RAG, eval, compliance, security, or agent-workflow PR should also include:
+
+```text
+V11.1 alignment:
+Codex reasoning level: 매우높음 / 높음 / 중간 / 낮음
+Complexity level used:
+Why simpler pattern is enough or insufficient:
+Eval/trace impact:
+Production-status boundary:
 ```
 
 ## Final Repository Rule
