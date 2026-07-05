@@ -2,25 +2,39 @@
 
 The Asperitas AI Development OS is the operating model for building a source-grounded, eval-driven, compliance-native, biology-specific AI agent infrastructure with Codex, GitHub, tests, evals, reusable skills, and executable quality gates.
 
-This document is an operating layer, not evidence that production RAG, vector DB, KG, legal review, wet-lab validation, autonomous lab operation, or a biological foundation model is complete.
+This document is an operating layer, not evidence that production RAG, vector DB, KG, legal review, wet-lab validation, autonomous lab operation, commercial deployment, or a biological foundation model is complete.
 
 ## Current Operating State
 
 - V1.3 strengthened retrieval diagnostics, source coverage, answer contract, and truth/compliance routing.
 - V1.4 strengthened token/context efficiency and closed optimization readiness.
-- V1.5 is the next operating focus: gap closure, documentation sync, GitHub-native gates, performance hardening, and modular-agent readiness.
+- V1.5 is the current operating focus: gap closure, documentation sync, GitHub-native gates, performance hardening, and modular-agent readiness.
+- V1.6 and later work should harden claim-to-citation verification, adversarial/security evals, biology/compliance golden sets, and measurable latency/cost/token performance.
+- MVP-011 through MVP-013 define the web-productization and commercialization-readiness pathway after the internal RAG/API/UI foundation is credible.
 
 The repository should be treated as Phase-0 core infrastructure: source registry, metadata, retrieval, answer contract, truth/compliance router, eval harnesses, decision logs, and agent scaffolds.
+
+## Top Source Triad Baseline
+
+Future development uses the Top Source Triad as operating doctrine:
+
+1. `ASPERITAS_PROJECT_SOURCE_CONSTITUTION_v11_0_KR.pdf`
+2. `Asperitas_AI_Lead_Expert_GPT_Training_Source_v1_0_KR.pdf`
+3. `딥리서치를 통해 GPT 채팅 학습용 자료.pdf`
+
+The triad is not implementation evidence. It defines how work should proceed: outcome-first, source-grounded, MVP-gated, audit-ready, compliance-aware, token-efficient, and Digital Devil's Advocate reviewed.
 
 ## System Layers
 
 | Layer | Purpose | Source of Truth |
 |---|---|---|
 | Strategy layer | Mission, benchmark doctrine, roadmap, operating philosophy | Project chat, AOS/PRIME docs, `README.md` |
+| Source-triad layer | Latest operating baseline and development doctrine | `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md` |
 | Agent instruction layer | Codex/agent behavior and stop rules | `AGENTS.md`, `.agents/skills/*` |
 | Governance layer | Source priority, confidentiality, truth boundary, compliance | `docs/AOS_SOURCE_POLICY.md`, registry docs |
 | Workflow layer | Human + Codex execution loop | `docs/WORKFLOW.md`, PR template |
 | Quality layer | Tests, evals, CI, metrics, merge gates | `docs/QUALITY_GATES.md`, GitHub Actions |
+| Productization layer | Backend/API, auth, web UI, observability, deployment, commercial gates | `docs/WEB_PRODUCTIZATION_ROADMAP.md` |
 | Evidence layer | Implemented behavior, PRs, logs, releases | GitHub issues, PRs, CI, decision logs |
 
 Project memory guides intent. GitHub evidence proves implementation.
@@ -52,6 +66,9 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 - `README.md` states the repository mission, truth boundary, benchmark doctrine, roadmap, and tool doctrine.
 - `AGENTS.md` defines repo-wide agent behavior, safety rules, testing expectations, report format, and stop rules.
 - `docs/AI_DEVELOPMENT_OS.md` explains this full operating system.
+- `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md` defines the active source triad and how future development must use it.
+- `docs/WEB_PRODUCTIZATION_ROADMAP.md` defines the path from internal RAG/API/UI to web app and commercialization gates.
+- `docs/CODEX_NEXT_PROMPT_WEB_PRODUCTIZATION.md` provides the next Codex-ready prompt for this workstream.
 - `docs/WORKFLOW.md` defines the standard human + Codex loop.
 - `docs/QUALITY_GATES.md` defines checks that must pass before work is called done.
 - `docs/AOS_SOURCE_POLICY.md` defines source priority, disclosure, evidence labels, and do-not-confuse boundaries.
@@ -64,7 +81,7 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 ## Default Operating Loop
 
 1. Define the outcome and success criteria.
-2. Read `AGENTS.md`, relevant docs, and relevant skills.
+2. Read `AGENTS.md`, relevant docs, the Top Source Triad baseline, and relevant skills.
 3. Inspect existing files before editing.
 4. Choose the smallest safe change.
 5. Run the smallest sufficient checks.
@@ -87,6 +104,22 @@ Every task should name risk level, changed surface, verification scope, skipped 
 Cheap QA means re-reading edited files, checking headings/paths/code fences, inspecting the diff, and running `git diff --check`. Targeted verification means running the smallest command set that protects the changed surface. Full suites, broad retrieval evals, release gates, or expanded GitHub Actions coverage are reserved for high-risk work, release/main work, CI/config changes, core RAG/eval/compliance/security changes, or behavior-changing source code.
 
 Metrics must be labeled as `Fresh Run`, `Historical`, or `Not Run`. GitHub Actions disconnections, cancellations, and timeouts are validation-scope evidence, not product failures unless required gates remain unclear, fail, or cannot be rerun.
+
+## Web Productization Discipline
+
+Internal RAG/API/UI is not commercial readiness. Web productization must be gated:
+
+```text
+internal source-grounded RAG core
+-> verifier/compliance/eval hardening
+-> internal API/UI
+-> backend/API/provider/auth/observability contract
+-> authenticated web app MVP
+-> production readiness gate
+-> commercial product pathway
+```
+
+The web product must keep the LLM provider replaceable. Asperitas's proprietary layer is the source registry, biological metadata, retrieval/evidence pipeline, verifier, compliance gate, eval suite, DBTL/failure records, IP/product decision workflow, and proprietary biological dataset path.
 
 ## Performance Doctrine
 
@@ -118,6 +151,7 @@ Default roles:
 | Semgrep / gitleaks / Dependabot / Trivy | Security, secret, dependency, and supply-chain checks |
 | Qdrant / Chroma / Neo4j | Vector DB and KG candidates after governance stabilizes |
 | BioPython / RDKit / ESM / AlphaFold-class tools | Biology ML/DL stage after source/compliance controls |
+| FastAPI / Next.js / Vercel / Render / AWS / GCP | Web productization candidates only after MVP-011 scope lock and security review |
 
 Do not add frameworks or services without a Scout -> License -> Security -> Benchmark -> Adapt -> Test ledger.
 
@@ -131,5 +165,6 @@ To reuse this system:
 4. Add agent-specific skills only when repeated work needs a dedicated checklist.
 5. Keep every skill tied to inputs, commands, quality gates, and failure conditions.
 6. Add CI only after commands are stable enough to run repeatedly.
+7. Add web-productization layers only after internal source-grounded behavior is stable and testable.
 
-Do not treat this OS as static. Update it when repeated mistakes, new risks, new pipelines, or new stages appear.
+Do not treat this OS as static. Update it when repeated mistakes, new risks, new pipelines, new stages, or web-productization gates appear.

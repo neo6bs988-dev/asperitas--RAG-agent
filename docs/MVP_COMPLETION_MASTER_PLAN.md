@@ -1,8 +1,18 @@
 # MVP Completion Master Plan
 
-Purpose: define the complete execution path from the current MVP-004/MVP-005 transition to a usable internal Asperitas RAG Agent.
+Purpose: define the complete execution path from the current MVP-004/MVP-005 transition to a usable internal Asperitas RAG Agent, then to web-productized commercial-readiness gates.
 
 This plan does not claim that future MVPs are already implemented. It defines the required sequence, acceptance criteria, quality gates, and non-regression rules so Codex can execute the remaining work safely.
+
+## Source Baseline
+
+The Top Source Triad is the active development baseline:
+
+1. `ASPERITAS_PROJECT_SOURCE_CONSTITUTION_v11_0_KR.pdf`
+2. `Asperitas_AI_Lead_Expert_GPT_Training_Source_v1_0_KR.pdf`
+3. `딥리서치를 통해 GPT 채팅 학습용 자료.pdf`
+
+These files define doctrine and development control-plane behavior. They are not evidence that production RAG, vector DB, KG, eval suite, legal review, wet-lab validation, regulatory approval, autonomous lab execution, or foundation-model capability is complete.
 
 ## Current Status
 
@@ -19,6 +29,9 @@ This plan does not claim that future MVPs are already implemented. It defines th
 | MVP-008 Source-Grounded Answer Generation | Planned | Generate cited answers only from retrieved evidence. |
 | MVP-009 Compliance Guardrails | Planned | Add biosafety/compliance, uncertainty, and escalation behavior. |
 | MVP-010 Internal UI/API | Planned | Provide internal interface/API for testing and operation. |
+| MVP-011 Web Productization Foundation | Planned | Add production-shaped backend/API/provider/auth/observability/deployment contracts. |
+| MVP-012 Web App MVP | Planned | Authenticated web UI for source-grounded answers, verifier status, and compliance review. |
+| MVP-013 Production Readiness Gate | Planned | Commercialization blocker gate for security, privacy, license, compliance, latency, cost, and rollback evidence. |
 
 ## Master Execution Order
 
@@ -33,7 +46,10 @@ This plan does not claim that future MVPs are already implemented. It defines th
 9. Implement MVP-008 source-grounded answer generation.
 10. Implement MVP-009 compliance guardrails.
 11. Implement MVP-010 internal UI/API.
-12. Add release notes and final operating guide.
+12. Add internal release notes and final internal operating guide.
+13. Implement MVP-011 web productization foundation.
+14. Implement MVP-012 authenticated web app MVP.
+15. Run MVP-013 production readiness and commercialization gate.
 
 ## Non-Negotiable Invariants
 
@@ -45,6 +61,8 @@ This plan does not claim that future MVPs are already implemented. It defines th
 - Compliance-sensitive outputs escalate rather than fabricate certainty.
 - Tests remain offline unless explicitly approved.
 - No API keys, credentials, secrets, local binary indexes, or confidential raw data are committed.
+- LLM providers remain replaceable; the moat is the Asperitas control plane, data governance, verifier, eval, compliance, DBTL/IP workflow, and proprietary biological dataset path.
+- Internal UI/API is not public SaaS or commercial readiness.
 
 ## MVP-004 Exit Criteria
 
@@ -119,10 +137,48 @@ MVP-010 can close only if:
 - system can be operated internally without editing code;
 - CI passes.
 
+## MVP-011 Exit Criteria
+
+MVP-011 can close only if:
+
+- backend/API contract is documented and testable;
+- LLM provider adapter interface exists or is specified with replaceability requirements;
+- auth and role model are defined;
+- secrets and environment policy are defined;
+- observability fields are defined: request ID, trace ID, retrieval IDs, citation/verifier status, compliance status, latency, token/cost metrics;
+- deployment target and rollback path are documented;
+- commercial readiness remains explicitly out of scope.
+
+## MVP-012 Exit Criteria
+
+MVP-012 can close only if:
+
+- authenticated web UI exists;
+- users can submit queries through the web interface;
+- retrieved evidence, citations, verifier status, confidence/uncertainty, and compliance warnings are visible;
+- high-risk or unsupported outputs are blocked, labeled, or escalated;
+- operator review workflow exists;
+- smoke tests or equivalent validation are recorded.
+
+## MVP-013 Exit Criteria
+
+MVP-013 can close only if:
+
+- security review is recorded;
+- privacy/PII handling is reviewed;
+- source license/confidentiality boundary is reviewed;
+- CITES/Nagoya/LMO/biosafety/IP/legal gates are reviewed where relevant;
+- public/investor claims have evidence and approval;
+- cost and latency budgets are recorded;
+- rollback and incident response plan exists;
+- release note distinguishes implemented capability, unverified gaps, and blocked claims.
+
 ## Final Agent Completion Definition
 
-The first Asperitas RAG Agent is complete when it can ingest sources, preserve structure, retrieve evidence, compare retrieval modes, generate source-grounded answers, enforce compliance guardrails, and expose an internal API/UI with reproducible CI and eval outputs.
+The first internal Asperitas RAG Agent is complete when it can ingest approved sources, preserve structure, retrieve evidence, compare retrieval modes, generate source-grounded answers, enforce compliance guardrails, and expose an internal API/UI with reproducible CI and eval outputs.
+
+The first web-productized Asperitas AI platform is complete only when MVP-011 through MVP-013 have evidence-backed gates. Internal RAG completion is necessary but not sufficient for commercialization.
 
 ## Recommended Immediate Action
 
-Execute Issue #1. Do not start MVP-005 implementation until MVP-004 gate output is known.
+Execute Issue #1. Do not start MVP-005 implementation until MVP-004 gate output is known. Do not start MVP-011 implementation until MVP-010 internal UI/API evidence exists and a separate web-productization scope lock is approved.

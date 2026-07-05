@@ -1,10 +1,18 @@
 # Roadmap
 
-This roadmap is the execution map for the first Asperitas RAG Agent. It must stay aligned with `docs/MVP_COMPLETION_MASTER_PLAN.md`, `docs/PERFORMANCE_IMPROVEMENT_STRATEGY.md`, GitHub Issues, and the active quality gates.
+This roadmap is the execution map for the Asperitas RAG Agent and its path toward a web-productized commercial AI platform. It must stay aligned with `docs/MVP_COMPLETION_MASTER_PLAN.md`, `docs/PERFORMANCE_IMPROVEMENT_STRATEGY.md`, `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md`, `docs/WEB_PRODUCTIZATION_ROADMAP.md`, GitHub Issues, and the active quality gates.
 
 ## Current Rule
 
 Do not mark an MVP as complete unless the relevant acceptance criteria, tests, evals, source-grounding review, compliance review, and release decision are recorded.
+
+The Top Source Triad is the active operating baseline for future development. It is doctrine, not implementation proof.
+
+```text
+ASPERITAS_PROJECT_SOURCE_CONSTITUTION_v11_0_KR.pdf
++ Asperitas_AI_Lead_Expert_GPT_Training_Source_v1_0_KR.pdf
++ 딥리서치를 통해 GPT 채팅 학습용 자료.pdf
+```
 
 ## V1 Internal Release Preparation
 
@@ -29,7 +37,7 @@ V1.1 handoff items:
 - V1.1C real RAG answer provider integration
 - V1.1D retrieval/answer baseline
 
-Allowed status after the V1 Performance Closure Matrix passes its checks: ready to evaluate whether P0/P1 Gap Fix Only is needed. This is not final RC readiness, internal dry-run readiness, or internal release readiness.
+Allowed status after the V1 Performance Closure Matrix passes its checks: ready to evaluate whether P0/P1 Gap Fix Only is needed. This is not final RC readiness, internal dry-run readiness, public web-product readiness, or commercial readiness.
 
 ## V1.5 Gap Closure And Performance Hardening
 
@@ -41,7 +49,7 @@ Required V1.5A operating loop:
 Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
 ```
 
-V1.5A is governance and verification-policy work only. It does not implement V2 vector DB/KG, V3 modular agents, V4 ML/DL, production RAG, production KG, production vector DB, answer behavior changes, retrieval scoring changes, source ingestion, generated indexes, legal approval, regulatory approval, wet-lab validation, customer traction, or production readiness.
+V1.5A is governance and verification-policy work only. It does not implement V2 vector DB/KG, V3 modular agents, V4 ML/DL, production RAG, production KG, production vector DB, answer behavior changes, retrieval scoring changes, source ingestion, generated indexes, legal approval, regulatory approval, wet-lab validation, customer traction, public SaaS, or production readiness.
 
 ## MVP Status Table
 
@@ -58,6 +66,9 @@ V1.5A is governance and verification-policy work only. It does not implement V2 
 | MVP-008 | Source-Grounded Answer Generation | Planned | #14, #15 | generated answers cite retrieved evidence and handle insufficient evidence safely |
 | MVP-009 | Compliance Guardrails | Planned | #16, #17 | high-risk biological/compliance outputs block or escalate |
 | MVP-010 | Internal UI/API | Planned | #18, #19, #20 | internal interface/API operates the agent with evidence and compliance visibility |
+| MVP-011 | Web Productization Foundation | Planned | TBD | backend/API, LLM adapter, auth boundary, observability, deployment, and secrets policy are defined and testable |
+| MVP-012 | Web App MVP | Planned | TBD | authenticated web UI supports queries, evidence, citations, verifier status, compliance warnings, and operator review |
+| MVP-013 | Production Readiness Gate | Planned | TBD | security, privacy, source-license, compliance, cost, latency, rollback, and public-claim gates pass with evidence |
 
 ## MVP-001 Foundation
 
@@ -193,12 +204,76 @@ Exit criteria:
 - final release note and operating guide exist;
 - CI passes.
 
+## MVP-011 Web Productization Foundation
+
+Convert the internal AI system into a production-shaped web architecture without claiming commercial readiness.
+
+Required scope:
+
+- backend API contract;
+- LLM provider adapter interface;
+- authentication and role boundary;
+- secrets and environment policy;
+- observability, audit, cost, and latency schema;
+- deployment target and rollback plan;
+- public/private source boundary.
+
+Exit criteria:
+
+- backend/API contract is documented and testable;
+- provider adapter is replaceable and does not hard-code one LLM as the product moat;
+- auth model distinguishes admin/operator/reviewer/user roles;
+- secrets and environment variables are not committed;
+- tracing/logging preserves source IDs, request IDs, verifier status, and compliance warnings;
+- deployment plan includes rollback and human approval gate.
+
+## MVP-012 Web App MVP
+
+Build a minimal authenticated web application for operating Asperitas AI workflows.
+
+Required scope:
+
+- login-protected web UI;
+- query workflow;
+- retrieved evidence and citation panel;
+- answer contract display;
+- verifier status display;
+- compliance warning/escalation display;
+- operator review path;
+- basic cost/latency visibility.
+
+Exit criteria:
+
+- web app runs against the internal API;
+- citations and evidence spans are visible to operators;
+- unsupported or high-risk outputs are blocked, labeled, or escalated;
+- no confidential source text leaks into public/non-authorized UI paths;
+- smoke tests or equivalent validation exist.
+
+## MVP-013 Production Readiness Gate
+
+Block public commercialization claims until production readiness evidence exists.
+
+Exit criteria:
+
+- security review recorded;
+- privacy and PII handling reviewed;
+- source license and confidentiality boundary reviewed;
+- CITES/Nagoya/LMO/biosafety/IP/legal gates reviewed where relevant;
+- cost and latency budget recorded;
+- rollback and incident response plan exists;
+- public/investor claims have source support and human approval;
+- release note states exactly what is implemented and what remains unverified.
+
 ## Supporting Engineering Issues
 
 - Issue #7: dependency/security review before external libraries.
 - Issue #8: later RAGAS/DSPy-style answer evaluation.
 - Issue #9: later LangGraph-style orchestration.
+- Future issue: MVP-011 backend/API/provider/auth/observability contract.
+- Future issue: MVP-012 authenticated web UI with evidence/compliance panel.
+- Future issue: MVP-013 production readiness and commercialization gate.
 
 ## Default Next Command
 
-Start with Issue #1. Do not start MVP-005 implementation until MVP-004 quality gate output is known.
+Start with Issue #1. Do not start MVP-005 implementation until MVP-004 quality gate output is known. Do not start MVP-011 implementation until MVP-010 internal UI/API evidence exists and a separate web-productization scope lock is approved.
