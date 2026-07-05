@@ -31,6 +31,9 @@ jobs:
             python -m pip install -r requirements.txt
           fi
 
+      - name: Validate V11.1 source registry contract
+        run: PYTHONPATH=src python -m asperitas_agent.cli validate-registry-contract
+
       - name: Run pytest when tests exist
         run: |
           if [ -d tests ]; then
