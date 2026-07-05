@@ -19,6 +19,7 @@ V1 is not:
 
 - public SaaS
 - production customer deployment
+- web-productized commercial platform
 - autonomous wet-lab execution
 - MCP or external connector automation
 - default vector DB, reranker, or embedding replacement
@@ -53,3 +54,26 @@ Record:
 - whether the failure was security, workflow, eval, artifact, or operator setup
 
 Do not treat a passing smoke test as production readiness.
+
+## Web Productization Boundary
+
+A successful V1 internal deploy only proves the local/internal wrapper. It does not prove web-product readiness.
+
+Before any web-product or commercial claim, require the separate MVP-011 to MVP-013 path:
+
+```text
+MVP-011 Web Productization Foundation
+-> MVP-012 Web App MVP
+-> MVP-013 Production Readiness Gate
+```
+
+Required additional evidence includes:
+
+- backend/API contract;
+- LLM provider adapter and fallback policy;
+- authentication and role model;
+- secrets/environment policy;
+- deployment target and rollback path;
+- observability for request ID, trace ID, retrieval IDs, verifier status, compliance status, latency, token/cost metrics;
+- security/privacy/source-license/compliance review;
+- human approval for public, investor, regulatory, legal, or biological performance claims.
