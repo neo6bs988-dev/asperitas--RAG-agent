@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+from dataclasses import replace
 
 from asperitas_agent.answer_verification_integration import (
     ANSWER_VERIFICATION_METADATA_KEY,
@@ -129,7 +130,39 @@ def test_build_metadata_surfaces_aggregate_summary_fields():
     assert metadata["status_counts"]["supported"] == 1
     assert metadata["claim_ids"] == ["C1"]
     assert metadata["summary"]["total_claims"] == 1
+    assert metadata["runtime_readiness"]["readiness_classification"] == "not_scored"
+    assert metadata["runtime_readiness"]["reason_codes"] == ["runtime_diagnostics_missing"]
+    assert metadata["runtime_readiness"]["production_verification_claim"] is False
+    assert metadata["runtime_readiness"]["metadata_interpretation_only"] is True
 
+
+def test_build_metadata_attaches_runtime_readiness_from_runtime_diagnostics():
+    summary = summary_for(report_for_status("C1", "supported"))
+    summary = replace(
+        summary,
+        metrics={
+            **summary.metrics,
+            "diagnostics": ["runtime_verification_completed"],
+            "runtime_verifier_enabled": True,
+            "runtime_verification_attempted": True,
+            "runtime_verification_skipped_reason": "",
+            "metadata_only_fallback_used": False,
+            "verifier_input_claim_count": 1,
+            "verifier_output_claim_count": 1,
+            "verifier_failure_modes": [],
+            "verifier_schema_version": summary.schema_version,
+            "runtime_evidence_metadata": [{"source_id": "SRC-1"}],
+        },
+    )
+
+    metadata = build_answer_verification_metadata(summary)
+
+    readiness = metadata["runtime_readiness"]
+    assert readiness["readiness_classification"] == "verified_metadata_present"
+    assert readiness["reason_codes"] == ["runtime_verification_completed"]
+    assert readiness["production_verification_claim"] is False
+    assert readiness["metadata_interpretation_only"] is True
+    assert json.loads(json.dumps(readiness, sort_keys=True, separators=(",", ":"))) == readiness
 
 def test_attach_uses_existing_metadata_hook_without_rewriting_answer_text():
     summary = summary_for(report_for_status("C1", "supported"))

@@ -233,6 +233,8 @@ def test_runtime_answer_verification_metadata_is_passively_attached_when_summary
     assert verification["status_counts"]["compliance_blocked"] == 1
     assert verification["compliance_tags"] == ["biosafety"]
     assert "compliance_flag:biosafety" in verification["warnings"]
+    assert verification["runtime_readiness"]["readiness_classification"] == "not_scored"
+    assert verification["runtime_readiness"]["production_verification_claim"] is False
 
 
 def test_runtime_verifier_metadata_absent_when_summary_absent_and_empty_summary_is_safe():
@@ -250,6 +252,7 @@ def test_runtime_verifier_metadata_absent_when_summary_absent_and_empty_summary_
     assert ANSWER_VERIFICATION_METADATA_KEY not in absent["metadata"]
     assert empty["answer"] == absent["answer"]
     assert empty["metadata"][ANSWER_VERIFICATION_METADATA_KEY]["answer_faithfulness_status"] == "not_scored"
+    assert empty["metadata"][ANSWER_VERIFICATION_METADATA_KEY]["runtime_readiness"]["readiness_classification"] == "not_scored"
     assert json.loads(json.dumps(empty, sort_keys=True, separators=(",", ":"))) == empty
 
 
@@ -278,6 +281,9 @@ def test_runtime_verifier_enabled_attaches_metadata_without_changing_answer_payl
     assert verification["runtime_verification_attempted"] is True
     assert "metadata_only_fallback_used" in verification
     assert "verifier_schema_version" in verification
+    assert "runtime_readiness" in verification
+    assert verification["runtime_readiness"]["production_verification_claim"] is False
+    assert verification["runtime_readiness"]["metadata_interpretation_only"] is True
     assert json.loads(json.dumps(enriched, sort_keys=True, separators=(",", ":"))) == enriched
 
 
@@ -316,6 +322,7 @@ def test_runtime_metadata_attachment_does_not_mutate_inputs_or_call_runtime_pipe
         "deterministic": True,
     }
     assert metadata[ANSWER_VERIFICATION_METADATA_KEY]["diagnostics"] == ["span_signal:contradiction"]
+    assert metadata[ANSWER_VERIFICATION_METADATA_KEY]["runtime_readiness"]["reason_codes"] == ["runtime_diagnostics_missing"]
     assert metadata["answer_generation"] == {"generator_name": "fixture-generator", "generator_version": "test", "deterministic": True}
 
 
