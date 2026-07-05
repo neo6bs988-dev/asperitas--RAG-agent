@@ -134,6 +134,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,parsers]"
 
+      - name: Validate V11.1 source registry contract
+        if: steps.surface.outputs.docs_only != 'true'
+        run: python -m asperitas_agent.cli validate-registry-contract
+
       - name: Run unit tests
         if: steps.surface.outputs.docs_only != 'true'
         run: python -m pytest
