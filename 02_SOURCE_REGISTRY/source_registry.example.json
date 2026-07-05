@@ -1,0 +1,65 @@
+{
+  "schema_version": "v11.1",
+  "registry_name": "asperitas_source_registry_example_non_production",
+  "generated_at": "2026-07-06T00:00:00Z",
+  "entries": [
+    {
+      "source_id": "P0_V11_1_SUPERGAP_DOCTRINE",
+      "title": "V11.1 Supergap Agent Build Leader Doctrine",
+      "path_or_url": "docs/V11_1_SUPERGAP_AGENT_BUILD_LEADER.md",
+      "priority": "P0_ACTIVE_CONSTITUTION",
+      "source_type": "prompt_constitution",
+      "confidentiality": "internal",
+      "license_status": "approved_internal_use",
+      "collection_status": "collected",
+      "verification_status": "source_checked",
+      "registry_status": "approved",
+      "owner": "Asperitas AI Lead",
+      "updated_at": "2026-07-06",
+      "allowed_use": [
+        "governance_reference",
+        "eval_fixture"
+      ],
+      "compliance_tags": [
+        "confidential_business"
+      ],
+      "evidence_span_policy": "required_section_span",
+      "decision_implication": "May guide repository governance and Codex prompts; must not be used as proof that production RAG, vector DB, KG, eval suite, agent runtime, legal review, wet-lab validation, or foundation-model capability is implemented.",
+      "ingestion_allowed": true,
+      "embedding_allowed": false,
+      "kg_allowed": false,
+      "external_output_allowed": false,
+      "evidence": {
+        "decision_log_ref": "docs/REPO_PERFORMANCE_UPGRADE_LOG_2026_07_06_V11_1.md"
+      },
+      "notes": "Example only. The production registry may use CSV or JSON but must preserve equivalent fields."
+    },
+    {
+      "source_id": "P6_EXTERNAL_AGENT_BENCHMARK_CANDIDATE",
+      "title": "External Agent Framework Benchmark Candidate",
+      "path_or_url": "https://example.invalid/benchmark-source",
+      "priority": "P6_BENCHMARK_DOCTRINE",
+      "source_type": "benchmark_doctrine",
+      "confidentiality": "public",
+      "license_status": "pending_review",
+      "collection_status": "not_collected",
+      "verification_status": "unverified",
+      "registry_status": "candidate",
+      "owner": "Asperitas AI Lead",
+      "updated_at": "2026-07-06",
+      "allowed_use": [
+        "benchmark_analogy"
+      ],
+      "compliance_tags": [
+        "none"
+      ],
+      "evidence_span_policy": "metadata_only",
+      "decision_implication": "Candidate benchmark source may inspire operating questions only after review; it must not enter retrieval, embedding, KG, training, public claims, or internal fact claims before approval.",
+      "ingestion_allowed": false,
+      "embedding_allowed": false,
+      "kg_allowed": false,
+      "external_output_allowed": false,
+      "notes": "Synthetic placeholder demonstrating candidate-state restrictions."
+    }
+  ]
+}

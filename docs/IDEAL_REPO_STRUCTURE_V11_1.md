@@ -131,7 +131,7 @@ foundation-model roadmap != foundation-model capability
 ### Phase D — Answer Contract and Compliance Router
 
 - Answer schema captures claim, evidence, confidence, source, uncertainty, compliance tags, and human approval triggers.
-- CITES/Nagoya/LMO/biosafety/IP/privacy scenarios route to safe refusal/escalation.
+- Regulated-resource, biosafety, IP, privacy, and public-claim scenarios route to safe refusal/escalation.
 
 ### Phase E — Trace/Eval Control Plane
 
@@ -183,13 +183,120 @@ workflow/API/UI
 
 Do not mix runtime behavior, eval thresholds, source ingestion, and productization claims in one PR unless it is a release-gate PR.
 
+## Completed In Current V11.1 Follow-Up PR
+
+1. Added `02_SOURCE_REGISTRY/source_registry.schema.json` with v11.1 fields.
+2. Added `02_SOURCE_REGISTRY/README.md` and a non-production example registry file.
+3. Added `docs/PULL_REQUEST_TEMPLATE_V11_1.md` as a template reference when `.github` writes are unavailable.
+4. Documented workflow and eval contracts below so the repo has a single canonical scaffold even before physical folders are created.
+
+## Deep Research -> Registry Workflow Skeleton
+
+```text
+source_note
+-> candidate registry entry
+-> needs_review
+-> approved
+-> ingested
+```
+
+Required promotion evidence:
+
+| Promotion | Required evidence |
+|---|---|
+| `candidate` -> `needs_review` | relevance note, owner, source pointer |
+| `needs_review` -> `approved` | license/confidentiality/authority/freshness check |
+| `approved` -> `ingested` | ingestion run ID and decision log reference |
+| any state -> `blocked` | reason and owner/date |
+
+Run report contract:
+
+```text
+workflow_run_id:
+source_candidates_reviewed:
+new_registry_entries:
+status_changes:
+blocked_sources:
+open_review_items:
+compliance_flags:
+owner:
+date:
+decision_log_ref:
+```
+
+## Citation-Fidelity Eval Fixture Contract
+
+Minimum fixture fields:
+
+```text
+case_id
+question
+expected_source_id
+expected_evidence_span
+answer_claim
+citation_used
+expected_support_status
+failure_mode
+compliance_tags
+```
+
+Allowed support status:
+
+```text
+supported
+unsupported
+contradicted
+partially_supported
+not_verifiable
+citation_mismatch
+```
+
+Allowed failure mode:
+
+```text
+none
+wrong_source
+wrong_span
+unsupported_claim
+numeric_mismatch
+entity_mismatch
+stale_source
+missing_compliance_escalation
+```
+
+## Compliance-Router Golden Set Contract
+
+Minimum case fields:
+
+```text
+case_id
+user_request_summary
+risk_domain
+expected_route
+required_human_gate
+safe_response_boundary
+source_registry_requirement
+notes
+```
+
+Allowed route:
+
+```text
+answer
+answer_with_caution
+refuse
+escalate_for_review
+request_more_evidence
+```
+
+Risk domains should stay high-level and avoid procedural enablement. Use categories such as regulated resource, biosafety, biosecurity, IP, privacy, legal/public claim, investor claim, source license, and production-readiness claim.
+
 ## Recommended Next Technical PRs
 
-1. Add or harden `source_registry.schema.json` with v11.1 fields.
-2. Add PR template fields for Codex reasoning level, source status, compliance review, and production-status boundary.
-3. Add Deep Research -> Registry workflow skeleton.
-4. Add citation-fidelity eval fixture format.
-5. Add compliance-router golden cases for CITES/Nagoya/LMO/IP/privacy/public-claim escalation.
+1. Add physical workflow/eval fixture files when write access allows.
+2. Add source registry schema validation test using standard-library JSON parsing first.
+3. Add PR template to `.github/PULL_REQUEST_TEMPLATE.md` if repository write guard permits.
+4. Add loader code only after schema and fixture validation are stable.
 
 ## Stop Rule
 
