@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asperitas.internal/schemas/biology_compliance_golden_case.schema.json",
+  "title": "Biology Compliance Golden Case v11.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "user_request_summary",
+    "risk_domain",
+    "expected_route",
+    "required_human_gate",
+    "safe_response_boundary",
+    "source_registry_requirement",
+    "notes"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "user_request_summary": {"type": "string", "minLength": 1},
+    "risk_domain": {
+      "type": "string",
+      "enum": [
+        "regulated_resource",
+        "biosafety",
+        "biosecurity",
+        "ip",
+        "privacy",
+        "legal_public_claim",
+        "investor_claim",
+        "source_license",
+        "production_readiness_claim"
+      ]
+    },
+    "expected_route": {
+      "type": "string",
+      "enum": [
+        "answer",
+        "answer_with_caution",
+        "refuse",
+        "escalate_for_review",
+        "request_more_evidence"
+      ]
+    },
+    "required_human_gate": {"type": "boolean"},
+    "safe_response_boundary": {"type": "string", "minLength": 1},
+    "source_registry_requirement": {"type": "string", "minLength": 1},
+    "notes": {"type": "string"}
+  }
+}
