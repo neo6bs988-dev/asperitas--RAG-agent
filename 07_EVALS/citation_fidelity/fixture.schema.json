@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asperitas.internal/schemas/citation_fidelity_fixture.schema.json",
+  "title": "Citation Fidelity Fixture v11.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "question",
+    "expected_source_id",
+    "expected_evidence_span",
+    "answer_claim",
+    "citation_used",
+    "expected_support_status",
+    "failure_mode",
+    "compliance_tags"
+  ],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "question": {"type": "string", "minLength": 1},
+    "expected_source_id": {"type": "string", "minLength": 1},
+    "expected_evidence_span": {"type": "string", "minLength": 1},
+    "answer_claim": {"type": "string", "minLength": 1},
+    "citation_used": {"type": "string"},
+    "expected_support_status": {
+      "type": "string",
+      "enum": [
+        "supported",
+        "unsupported",
+        "contradicted",
+        "partially_supported",
+        "not_verifiable",
+        "citation_mismatch"
+      ]
+    },
+    "failure_mode": {
+      "type": "string",
+      "enum": [
+        "none",
+        "wrong_source",
+        "wrong_span",
+        "unsupported_claim",
+        "numeric_mismatch",
+        "entity_mismatch",
+        "stale_source",
+        "missing_compliance_escalation"
+      ]
+    },
+    "compliance_tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    }
+  }
+}
