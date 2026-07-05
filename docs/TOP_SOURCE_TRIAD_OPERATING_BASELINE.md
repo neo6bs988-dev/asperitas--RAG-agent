@@ -1,14 +1,21 @@
-# Top Source Triad Operating Baseline
+# Top Source Triad + V11.1 Supergap Operating Baseline
 
 ## Executive Bottom Line
 
-This repository must now treat the Top Source Triad as the active development baseline for Asperitas AI-agent/RAG work:
+This repository must treat the Top Source Triad as the active development baseline for Asperitas AI-agent/RAG work, with the V11.1 Supergap Agent Build Leader layer added as the latest performance and repo-structure hardening layer.
+
+Top Source Triad:
 
 1. `ASPERITAS_PROJECT_SOURCE_CONSTITUTION_v11_0_KR.pdf`
 2. `Asperitas_AI_Lead_Expert_GPT_Training_Source_v1_0_KR.pdf`
 3. `딥리서치를 통해 GPT 채팅 학습용 자료.pdf`
 
-The triad defines how development should proceed. It does not prove implementation status.
+V11.1 add-on sources:
+
+4. `슈퍼갭 GPT 채팅 모델용 고임팩트 PDF 트레이닝 패키지 설계 보고서.pdf`
+5. `초고성능 독자 AI 에이전트 구축과 최종 업그레이드 트레이닝 PDF 설계 보고서.pdf`
+
+The triad and v11.1 layer define how development should proceed. They do not prove implementation status.
 
 ## Truth Boundary
 
@@ -17,16 +24,19 @@ Do not convert doctrine into implementation claims.
 | Doctrine artifact | Must not be claimed as |
 |---|---|
 | Top Source Triad attached | Production RAG complete |
+| V11.1 Supergap doctrine added | Proprietary agent stack implemented |
 | Source map or source registry plan | Licensed production database |
 | Roadmap or architecture ladder | Deployed AI product |
 | Eval plan | Passing eval suite |
+| Tracing/observability plan | Production trace coverage |
 | Compliance gate design | Legal/regulatory approval |
 | DBTL workflow plan | Wet-lab validation |
+| Agent runtime roadmap | Autonomous agent safely deployed |
 | Foundation-model direction | Foundation model capability |
 
 Only claim production status when there is merged code, configuration, logs, eval output, release note, and human approval evidence.
 
-## How Codex Should Use The Triad
+## How Codex Should Use The Baseline
 
 Before any major PR, Codex or another coding agent should classify the task using this sequence:
 
@@ -57,19 +67,40 @@ deterministic helper
 
 Do not introduce LangGraph, Agents SDK, CrewAI, AutoGen, Semantic Kernel, ADK, MCP, or autonomous execution unless a simpler layer fails and there is a documented quality gain, cost/latency/security analysis, rollback path, and eval requirement.
 
+## V11.1 Agent-Stack Doctrine
+
+The near-term strategic target is not from-scratch frontier pretraining. The realistic and fundable target is a proprietary agent stack over frontier models:
+
+```text
+proprietary source registry and biological data
+-> retrieval/reranking/citation control
+-> structured answer contracts
+-> tool and workflow interfaces
+-> offline/online evals
+-> red-team and regression gates
+-> tracing and observability
+-> compliance/security/human approval layer
+-> DBTL learning records
+-> proprietary dataset flywheel
+```
+
+This layer becomes a moat only when GitHub evidence proves measurable improvements in retrieval quality, citation fidelity, unsupported-claim blocking, biology/compliance routing, latency/cost, traceability, and DBTL learning-record quality.
+
 ## Development Priority Stack
 
 | Priority | Workstream | Definition of done |
 |---|---|---|
-| P0 | Source Registry / approved-only ingestion | unapproved sources cannot enter index |
-| P0 | Retrieval eval + citation fidelity | expected source hit and citation regression report exist |
-| P0 | Grounded answer contract | unsupported claims are blocked or labeled |
-| P1 | Deep Research -> Registry pipeline | candidate/review/approved/ingested/blocked states separated |
-| P1 | Literature / Benchmark Agent | evidence-backed action item generated |
-| P2 | Hypothesis / Experiment Design Agent | falsifiable hypothesis + approval gate |
-| P2 | Biosafety / Compliance Router | risk route, refusal, escalation verified |
-| P3 | DBTL Planner + Failure Analysis | failure taxonomy and next-cycle recommendation |
-| P4 | Active Learning + Proprietary Dataset | information-value ranking and dataset versioning |
+| P0 | Source Registry / approved-only ingestion | Unapproved sources cannot enter index |
+| P0 | Retrieval eval + citation fidelity | Expected source hit and citation regression report exist |
+| P0 | Grounded answer contract | Unsupported claims are blocked or labeled |
+| P0 | Compliance/security guardrails | CITES/Nagoya/LMO/biosafety/IP/privacy triggers tested |
+| P1 | Deep Research -> Registry pipeline | Candidate/review/approved/ingested/blocked states separated |
+| P1 | Literature / Benchmark Agent | Evidence-backed action item generated |
+| P1 | Trace/eval control plane | Workflow spans, eval artifacts, and regression history recorded |
+| P2 | Hypothesis / Experiment Design Agent | Falsifiable hypothesis + approval gate |
+| P2 | Biosafety / Compliance Router | Risk route, refusal, escalation verified |
+| P3 | DBTL Planner + Failure Analysis | Failure taxonomy and next-cycle recommendation |
+| P4 | Active Learning + Proprietary Dataset | Information-value ranking and dataset versioning |
 
 ## Commercial End State
 
@@ -92,13 +123,18 @@ biodiversity access
 Every relevant PR should report:
 
 ```text
-Top Source Triad alignment:
+Top Source Triad + V11.1 alignment:
+Codex reasoning level: 매우높음 / 높음 / 중간 / 낮음
 MVP / phase affected:
 Changed files:
+Complexity level used:
+Why simpler pattern is enough or insufficient:
 Verification:
 Retrieval/citation impact:
+Eval/trace impact:
 Compliance/source-grounding review:
 Web-productization impact:
+Production-status boundary:
 Skipped checks and rationale:
 Residual risks:
 Next action:
