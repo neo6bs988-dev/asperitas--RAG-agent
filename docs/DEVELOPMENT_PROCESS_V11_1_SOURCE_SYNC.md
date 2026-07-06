@@ -87,13 +87,13 @@ Do not confuse planning artifacts with implemented infrastructure.
 | Artifact | Safe claim | Forbidden claim |
 | --- | --- | --- |
 | Source map | Source candidate or registry planning exists. | Production corpus is fully ingested. |
-| Docs | Operating doctrine or consumer contract exists. | Runtime behavior is changed. |
-| PR | A reviewable change exists. | Production deployment or legal approval is complete. |
+| Docs | Operating doctrine or consumer contract exists. | Do not claim runtime behavior is changed. |
+| PR | A reviewable change exists. | Do not claim production deployment or legal approval is complete. |
 | Eval design | Proposed evaluation method exists. | Eval suite is passing in production. |
 | Roadmap | Future direction exists. | Capability has been implemented. |
 | Vector DB/KG sketch | Architecture is planned. | Vector DB or KG is complete. |
 
-Production DB, vector DB, KG, eval suite, compliance guardrail, legal review, wet-lab validation, or autonomous lab execution can be claimed only after implementation, logs, tests, and approval records exist.
+Boundary rule: Production DB, vector DB, KG, eval suite, compliance guardrail, legal review, wet-lab validation, or autonomous lab execution can be claimed only after implementation, logs, tests, and approval records exist.
 
 ## Biology / Compliance Hard Gates
 
