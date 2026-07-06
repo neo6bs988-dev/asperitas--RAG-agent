@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from .claim_verifier_schema import AnswerVerificationSummary
+from .runtime_verifier_readiness import interpret_runtime_verifier_readiness
 from .schemas import GroundedAnswer
 
 
@@ -52,6 +53,7 @@ def build_answer_verification_metadata(summary: AnswerVerificationSummary) -> di
     for key in RUNTIME_DIAGNOSTIC_KEYS:
         if key in metrics:
             payload[key] = metrics[key]
+    payload["runtime_readiness"] = interpret_runtime_verifier_readiness(payload)
     return _json_safe(payload)
 
 
