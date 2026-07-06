@@ -7,11 +7,12 @@
 - [ ] Unrelated files are excluded.
 - [ ] Truth boundary is explicit.
 
-## V1.5A Preflight
+## Scope Lock
 
-- Risk level: [ ] Low [ ] Medium [ ] High
-- Affected surface: [ ] Docs [ ] Templates [ ] CI/config [ ] Source code [ ] Retrieval/chunking/metadata [ ] Embeddings/vector DB [ ] Reranking [ ] Answer generation/citation [ ] Compliance/security [ ] Evals/fixtures
-- Compliance gate: [ ] Not applicable [ ] Reviewed [ ] Requires human approval
+- Codex reasoning level: [ ] 낮음 [ ] 중간 [ ] 높음 [ ] 매우높음
+- Risk class: [ ] Low [ ] Medium [ ] High [ ] Block
+- Changed surface: [ ] Docs [ ] Templates [ ] CI/config [ ] Source code [ ] Retrieval/chunking/metadata [ ] Embeddings/vector DB [ ] Reranking [ ] Answer generation/citation [ ] Compliance/security [ ] Evals/fixtures [ ] Trace/logging [ ] Schema
+- Minimal sufficient architecture level: [ ] Deterministic helper [ ] Single LLM/RAG/tool call [ ] Fixed workflow [ ] Stateful workflow [ ] Agent [ ] Multi-agent/graph
 - Verification scope:
 - Skipped-test/eval rationale:
 - Residual risk:
@@ -28,6 +29,7 @@
 - [ ] Compliance / biosafety / security
 - [ ] Token / cost / latency metrics
 - [ ] CI / workflow / release
+- [ ] Codex config / agent instructions
 
 ## Scope Safety
 
@@ -36,22 +38,37 @@
 - [ ] No unrelated refactor included.
 - [ ] No generated artifact churn included unless intentional and explained.
 - [ ] No secrets, credentials, endpoints, model binaries, generated indexes, or cloud resources added unexpectedly.
+- [ ] No local-only paths, user-level config, runtime cache paths, or machine-specific plugin paths added.
 
 ## Truth Boundary
 
 This PR does not claim completion unless verified by evidence:
 
+- [ ] production RAG
 - [ ] production vector DB
 - [ ] production KG
 - [ ] full source ingestion
+- [ ] deployed eval suite
+- [ ] deployed tracing
 - [ ] legal/regulatory approval
+- [ ] biosafety approval
 - [ ] wet-lab validation
 - [ ] deployed autonomous agent
+- [ ] proprietary agent-stack implementation
 - [ ] proprietary biological foundation model
 - [ ] customer/investor commitment
 - [ ] product-market fit
 
 Notes:
+
+## P0+ AI Lead Operating Layer Impact
+
+- [ ] Goal / Scope / Evidence / Constraints / Output / Verification / Stop Rules considered.
+- [ ] Prompt -> Workflow -> Evaluation -> Governance -> Organizational Learning impact considered.
+- [ ] Reusable asset added or updated where appropriate.
+- [ ] Failure taxonomy / SOP / checklist / playbook / eval case impact considered.
+- [ ] Digital Devil's Advocate review completed for Scalability, Moat, Governance, Cost, Evaluation, and Failure Modes.
+- [ ] Human approval gate preserved or added where needed.
 
 ## Required Checks
 
@@ -61,7 +78,7 @@ Notes:
 - [ ] Markdown/headings/links/paths are sane.
 - [ ] No false implementation status introduced.
 - [ ] No confidential or personal data exposed.
-- [ ] Not applicable.
+- [ ] Not applicable; reason:
 
 ### Source Code
 
@@ -101,6 +118,14 @@ Notes:
 - [ ] Human approval need stated.
 - [ ] Not applicable; reason:
 
+### Config / Agent Instructions
+
+- [ ] Root `AGENTS.md` impact reviewed if touched.
+- [ ] `.codex/config.toml` impact reviewed if touched.
+- [ ] No user-level `~/.codex/config.toml` or local machine settings committed.
+- [ ] No duplicated case-variant paths introduced.
+- [ ] Not applicable; reason:
+
 ## Metrics
 
 Report only measured metrics. Do not infer wins.
@@ -136,6 +161,8 @@ Deferred work:
 
 Human approval needed:
 
+## Rollback Plan
+
 ## Merge Decision
 
 - [ ] Ready
@@ -143,3 +170,5 @@ Human approval needed:
 - [ ] Blocked
 
 Reason:
+
+## Next Action
