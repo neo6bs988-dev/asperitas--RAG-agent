@@ -1,0 +1,262 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asperitas.local/eval/v1_7c_biology_compliance_labels.schema.json",
+  "title": "V1.7C Biology Compliance Golden-Set Fixture Contract",
+  "description": "Static diagnostic fixture and label contract for future biology/compliance evaluation. This schema is not an evaluator, approval mechanism, runtime gate, regression gate, or production-readiness claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "case_category",
+    "claim_type",
+    "query",
+    "source_priority_expected",
+    "source_context",
+    "expected_answer_status",
+    "expected_labels",
+    "required_evidence_conditions",
+    "forbidden_answer_patterns",
+    "required_human_review_reason",
+    "notes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^v1_7c_[a-z0-9_]+$"
+    },
+    "case_category": {
+      "type": "string",
+      "enum": [
+        "source-grounding failure",
+        "citation mismatch",
+        "unsupported biological activity claim",
+        "species/provenance missing",
+        "Nagoya/CITES/LMO/biosafety/biosecurity/IP/licensing flag",
+        "investor-facing overclaim",
+        "human-review-required case"
+      ]
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "biological",
+        "biodiversity",
+        "compliance",
+        "IP/licensing",
+        "investor-facing",
+        "mixed"
+      ]
+    },
+    "query": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_priority_expected": {
+      "type": "string",
+      "enum": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5"
+      ]
+    },
+    "source_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_kind",
+        "source_status",
+        "summary"
+      ],
+      "properties": {
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "synthetic_peer_review_summary",
+            "synthetic_regulatory_summary",
+            "synthetic_internal_review_summary",
+            "synthetic_investor_claim_summary"
+          ]
+        },
+        "source_status": {
+          "type": "string",
+          "enum": [
+            "synthetic_approved_safe"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "expected_answer_status": {
+      "$ref": "#/$defs/expected_answer_status"
+    },
+    "expected_labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_answer_status",
+        "evidence_sufficiency",
+        "citation_fidelity",
+        "compliance_risk_class",
+        "biological_claim_risk",
+        "human_review_required",
+        "allowed_consumer_action",
+        "forbidden_consumer_action"
+      ],
+      "properties": {
+        "expected_answer_status": {
+          "$ref": "#/$defs/expected_answer_status"
+        },
+        "evidence_sufficiency": {
+          "$ref": "#/$defs/evidence_sufficiency"
+        },
+        "citation_fidelity": {
+          "$ref": "#/$defs/citation_fidelity"
+        },
+        "compliance_risk_class": {
+          "$ref": "#/$defs/compliance_risk_class"
+        },
+        "biological_claim_risk": {
+          "$ref": "#/$defs/biological_claim_risk"
+        },
+        "human_review_required": {
+          "type": "boolean",
+          "enum": [
+            true,
+            false
+          ]
+        },
+        "allowed_consumer_action": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/allowed_consumer_action"
+          }
+        },
+        "forbidden_consumer_action": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/forbidden_consumer_action"
+          }
+        }
+      }
+    },
+    "required_evidence_conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_priority_match_required",
+        "citation_must_support_exact_claim",
+        "evidence_span_must_include_limits",
+        "provenance_or_review_status_required"
+      ],
+      "properties": {
+        "source_priority_match_required": {
+          "type": "boolean"
+        },
+        "citation_must_support_exact_claim": {
+          "type": "boolean"
+        },
+        "evidence_span_must_include_limits": {
+          "type": "boolean"
+        },
+        "provenance_or_review_status_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "forbidden_answer_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "required_human_review_reason": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "expected_answer_status": {
+      "type": "string",
+      "enum": [
+        "answered_with_limits",
+        "caution",
+        "abstained",
+        "review_required"
+      ]
+    },
+    "evidence_sufficiency": {
+      "type": "string",
+      "enum": [
+        "sufficient",
+        "insufficient",
+        "missing",
+        "conflicting"
+      ]
+    },
+    "citation_fidelity": {
+      "type": "string",
+      "enum": [
+        "faithful",
+        "mismatch",
+        "missing",
+        "overbroad"
+      ]
+    },
+    "compliance_risk_class": {
+      "type": "string",
+      "enum": [
+        "none_identified",
+        "needs_review",
+        "restricted_or_unknown",
+        "not_approved"
+      ]
+    },
+    "biological_claim_risk": {
+      "type": "string",
+      "enum": [
+        "low",
+        "unsupported_activity_claim",
+        "provenance_gap",
+        "biosafety_or_biosecurity_sensitive",
+        "not_wet_lab_validated"
+      ]
+    },
+    "allowed_consumer_action": {
+      "type": "string",
+      "enum": [
+        "display_diagnostic",
+        "route_to_human_review",
+        "record_eval_result",
+        "do_not_upgrade_claim"
+      ]
+    },
+    "forbidden_consumer_action": {
+      "type": "string",
+      "enum": [
+        "runtime_blocking",
+        "compliance_approval",
+        "biosafety_approval",
+        "legal_approval",
+        "ip_approval",
+        "wet_lab_validation_claim",
+        "retrieval_generation_improvement_claim",
+        "vector_db_kg_completion_claim",
+        "production_readiness_claim"
+      ]
+    }
+  }
+}
