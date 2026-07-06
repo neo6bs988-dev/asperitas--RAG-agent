@@ -1,145 +1,70 @@
-# Pull Request Review
+## Executive Bottom Line
 
-## Objective
+## Scope Lock
 
-- [ ] Objective is stated clearly.
-- [ ] Change matches requested scope.
-- [ ] Unrelated files are excluded.
-- [ ] Truth boundary is explicit.
+- Codex reasoning level:
+- Risk class:
+- Changed surface:
+- Minimal sufficient architecture level:
 
-## V1.5A Preflight
+## Changed Files
 
-- Risk level: [ ] Low [ ] Medium [ ] High
-- Affected surface: [ ] Docs [ ] Templates [ ] CI/config [ ] Source code [ ] Retrieval/chunking/metadata [ ] Embeddings/vector DB [ ] Reranking [ ] Answer generation/citation [ ] Compliance/security [ ] Evals/fixtures
-- Compliance gate: [ ] Not applicable [ ] Reviewed [ ] Requires human approval
-- Verification scope:
-- Skipped-test/eval rationale:
-- Residual risk:
-- Metric provenance: [ ] Fresh Run [ ] Historical [ ] Not Run / N/A
+## Source Registry Impact
 
-## Change Type
+- Registry status touched:
+- New source IDs added:
+- License/confidentiality status reviewed:
+- Ingestion permission changed:
+- Embedding/KG/external-output permission changed:
 
-- [ ] Docs/governance only
-- [ ] Source code
-- [ ] Tests
-- [ ] Source registry / metadata / chunks
-- [ ] Retrieval / ranking / scoring
-- [ ] Answer generation / citation / truth router
-- [ ] Compliance / biosafety / security
-- [ ] Token / cost / latency metrics
-- [ ] CI / workflow / release
+## Retrieval / Citation Impact
 
-## Scope Safety
+- Retrieval behavior changed:
+- Citation packaging changed:
+- Eval fixtures changed:
+- Unsupported-claim handling changed:
 
-- [ ] No direct `main` edit unless explicitly approved.
-- [ ] Branch scope is narrow and reviewable.
-- [ ] No unrelated refactor included.
-- [ ] No generated artifact churn included unless intentional and explained.
-- [ ] No secrets, credentials, endpoints, model binaries, generated indexes, or cloud resources added unexpectedly.
+## Eval / Trace Impact
 
-## Truth Boundary
+- Tests added or updated:
+- Eval fixtures added or updated:
+- Trace/run metadata changed:
+- Metrics affected:
 
-This PR does not claim completion unless verified by evidence:
+## P0+ AI Lead Operating Layer Impact
 
-- [ ] production vector DB
-- [ ] production KG
-- [ ] full source ingestion
-- [ ] legal/regulatory approval
-- [ ] wet-lab validation
-- [ ] deployed autonomous agent
-- [ ] proprietary biological foundation model
-- [ ] customer/investor commitment
-- [ ] product-market fit
+- Goal / Scope / Evidence / Constraints / Output / Verification / Stop Rules considered:
+- Prompt -> Workflow -> Evaluation -> Governance -> Organizational Learning impact:
+- Reusable asset added or updated:
+- Failure taxonomy / SOP / checklist / playbook / eval case impact:
+- Digital Devil's Advocate review completed:
 
-Notes:
+## Compliance / IP / Privacy Review
 
-## Required Checks
+- [ ] Human review gate preserved or added where needed.
+- [ ] No confidential raw source text or personal data added.
+- [ ] No autonomous legal, regulatory, financial, or public commitment added.
 
-### Docs/Governance
+## Verification
 
-- [ ] Edited docs were re-read from branch.
-- [ ] Markdown/headings/links/paths are sane.
-- [ ] No false implementation status introduced.
-- [ ] No confidential or personal data exposed.
-- [ ] Not applicable.
+Commands actually run:
 
-### Source Code
+```bash
+# paste commands and result summary
+```
 
-- [ ] Targeted tests run:
-- [ ] `python -m pytest`
-- [ ] Lint/type/schema check if relevant:
-- [ ] Not applicable; reason:
+Skipped checks:
 
-### Artifact / Registry / Chunking
+```text
+Skipped checks:
+Rationale:
+Residual risk:
+```
 
-- [ ] `python scripts/verify_artifacts.py`
-- [ ] `python scripts/audit_chunk_sections.py --json`
-- [ ] Not applicable; reason:
+## Production-Status Boundary
 
-### Retrieval / Ranking / Scoring
+This PR does not claim completion of production RAG, vector DB, KG, eval suite, legal review, regulatory approval, hosted product, commercial readiness, proprietary agent-stack implementation, deployed AI Lead operating system, organizational adoption completion, or foundation-model capability unless explicit evidence is linked.
 
-- [ ] `python scripts/run_retrieval_eval.py --retriever baseline --limit 5`
-- [ ] `python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5`
-- [ ] `python scripts/run_retrieval_eval.py --retriever vector --limit 5`
-- [ ] `python scripts/run_retrieval_eval.py --retriever hybrid --limit 5`
-- [ ] `--enforce-thresholds` run where required.
-- [ ] Not applicable; reason:
+## Rollback Plan
 
-### Answer / Citation / Truth Router
-
-- [ ] Answer contract check run where available.
-- [ ] Truth/compliance router check run where available.
-- [ ] Source IDs, priorities, evidence labels, paths, and confidence preserved.
-- [ ] Unsupported claims are removed or labeled.
-- [ ] Not applicable; reason:
-
-### Compliance / Security
-
-- [ ] CITES/Nagoya/LMO/biosafety/biosecurity reviewed if relevant.
-- [ ] Privacy/security/IP/legal/investor/public-claim risk reviewed if relevant.
-- [ ] Prompt injection, source poisoning, leakage, and excessive agency considered if relevant.
-- [ ] Human approval need stated.
-- [ ] Not applicable; reason:
-
-## Metrics
-
-Report only measured metrics. Do not infer wins.
-
-| Metric | Before | After | Delta | Evidence |
-|---|---:|---:|---:|---|
-| Retrieved-context tokens | | | | |
-| Answer tokens | | | | |
-| Runtime / p50 / p95 | | | | |
-| Retrieval pass rate | | | | |
-| Expected-source hit rate | | | | |
-| Citation/claim support rate | | | | |
-| Refusal/escalation pass rate | | | | |
-
-## Source-Grounding Review
-
-- [ ] Source IDs preserved.
-- [ ] Source priority preserved.
-- [ ] Source paths/provenance preserved.
-- [ ] Evidence labels preserved.
-- [ ] Missing evidence is labeled.
-- [ ] P6 benchmark doctrine is not treated as Asperitas internal fact.
-
-## Risk Summary
-
-Known risks:
-
-Skipped checks and rationale:
-
-GitHub Actions disconnections/timeouts, if any:
-
-Deferred work:
-
-Human approval needed:
-
-## Merge Decision
-
-- [ ] Ready
-- [ ] Conditional
-- [ ] Blocked
-
-Reason:
+## Next Action
