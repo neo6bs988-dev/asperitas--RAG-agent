@@ -31,6 +31,7 @@ Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR
 
 Read the narrowest relevant context:
 
+- Treat ChatGPT / Asperitas Project Chat as the command tower that distilled Deep Research, PDFs, AOS/PRIME doctrine, benchmark doctrine, user memory, and strategy into the current task prompt.
 - `README.md` for mission, truth boundary, benchmark doctrine, roadmap, and tool doctrine.
 - `AGENTS.md` for agent behavior, stop rules, testing rules, and report format.
 - `docs/AI_DEVELOPMENT_OS.md` for the operating model.
@@ -38,6 +39,8 @@ Read the narrowest relevant context:
 - `docs/AOS_SOURCE_POLICY.md` for source hierarchy and claim rules.
 - `docs/V1_5_PERFORMANCE_ROADMAP.md` for current performance priorities.
 - Relevant `.agents/skills/*/SKILL.md` for specialized workflows.
+
+Do not request all PDFs or Deep Research files by default. Ask only for exact missing source text when source ingestion, source registry status, citation-level evidence, or PDF-derived content is directly required.
 
 If multiple rules apply, use the stricter gate.
 

@@ -2,7 +2,7 @@
 
 The Asperitas AI Development OS is the operating model for building a source-grounded, eval-driven, compliance-native, biology-specific AI agent infrastructure with Codex, GitHub, tests, evals, reusable skills, and executable quality gates.
 
-This document is an operating layer, not evidence that production RAG, vector DB, KG, legal review, wet-lab validation, autonomous lab operation, commercial deployment, or a biological foundation model is complete.
+This document is an operating layer. Do not use it as proof that any database, retrieval system, graph system, evaluation system, tracing system, approval process, lab result, autonomous execution, commercial deployment, or biological foundation capability exists.
 
 ## Current Operating State
 
@@ -23,6 +23,14 @@ Future development uses the Top Source Triad as operating doctrine:
 3. `딥리서치를 통해 GPT 채팅 학습용 자료.pdf`
 
 The triad is not implementation evidence. It defines how work should proceed: outcome-first, source-grounded, MVP-gated, audit-ready, compliance-aware, token-efficient, and Digital Devil's Advocate reviewed.
+
+## Command Tower And Repo Engine
+
+ChatGPT / Asperitas Project Chat is the command tower for synthesizing Deep Research, PDFs, AOS/PRIME doctrine, benchmark doctrine, user memory, and strategy into task-specific Codex prompts and strategic GO/NO-GO review.
+
+Codex is the repo-aware implementation engine. It uses the distilled prompt plus `AGENTS.md`, `README.md`, repo docs, tests, evals, GitHub history, and CI evidence to implement, validate, package, and report changes. Codex should not request broad PDF uploads by default; request exact missing source text only when source ingestion, source registry status, citation-level evidence, or PDF-derived content is directly required.
+
+PDF and Deep Research sources remain upstream operating doctrine. They guide work but do not certify implementation, deployment, approval, validation, readiness, or biological foundation capability.
 
 ## System Layers
 
