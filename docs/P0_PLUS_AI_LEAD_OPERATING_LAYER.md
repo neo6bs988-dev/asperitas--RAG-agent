@@ -79,6 +79,19 @@ The P0+ layer should create or harden these repo assets over time:
 | Failure taxonomies | Turn defects into systematic learning | Logged failures mapped to fixes and tests |
 | Governance assets | Preserve source status, approval gates, and truth boundaries | CI/quality gates and decision logs |
 | Training packages | Teach future agents and operators the same operating layer | Versioned docs and acceptance checks |
+| Coding performance assets | Improve Codex implementation speed, CI efficiency, static checks, and review quality | Baseline timing, tool-adoption ledger, targeted checks, and rollback evidence |
+
+## Coding Performance Max Link
+
+The P0+ layer includes a coding-process optimization track documented in `docs/CODEX_CODING_PERFORMANCE_MAX_LAYER.md`.
+
+This track may use open-source tool patterns as candidates, but must not install or enforce tools by default. Candidate tools such as Ruff, uv, pre-commit, pytest-xdist, and mypy require:
+
+```text
+Scout -> License -> Security -> Benchmark -> Adapt -> Test
+```
+
+before adoption. Speed is not allowed to weaken source registry, truth-boundary, compliance, security, eval, or non-overclaim gates.
 
 ## Decision Filters
 
@@ -104,6 +117,7 @@ Do not claim any of the following from this doctrine alone:
 - deployed AI Lead organization
 - proprietary agent stack implementation
 - foundation-model capability
+- approved or active open-source coding toolchain unless a merged adoption PR proves it
 
 Upgrade a claim only with merged code, test/eval logs, trace artifacts, decision logs, release notes, and human approval where required.
 
@@ -119,6 +133,7 @@ source registry contract
 -> eval fixture expansion
 -> trace/eval evidence log
 -> workflow playbooks
+-> coding performance candidate registry
 -> agent modules only after shared core is stable
 ```
 
