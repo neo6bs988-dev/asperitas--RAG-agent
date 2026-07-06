@@ -42,20 +42,20 @@
 
 ## Truth Boundary
 
-Boundary checklist: this PR does not certify any completion status unless separate evidence is listed below.
+This PR does not claim completion unless verified by evidence:
 
-- [ ] retrieval system status
-- [ ] vector database status
-- [ ] knowledge graph status
-- [ ] source ingestion status
-- [ ] evaluation-suite status
-- [ ] tracing status
-- [ ] legal/regulatory review status
-- [ ] biosafety review status
-- [ ] lab-result status
-- [ ] autonomous-agent status
-- [ ] proprietary agent-stack status
-- [ ] biological foundation capability status
+- [ ] production RAG
+- [ ] production vector DB
+- [ ] production KG
+- [ ] full source ingestion
+- [ ] deployed eval suite
+- [ ] deployed tracing
+- [ ] legal/regulatory approval
+- [ ] biosafety approval
+- [ ] wet-lab validation
+- [ ] deployed autonomous agent
+- [ ] proprietary agent-stack implementation
+- [ ] proprietary biological foundation model
 - [ ] customer/investor commitment
 - [ ] product-market fit
 
@@ -65,8 +65,6 @@ Notes:
 
 - [ ] Goal / Scope / Evidence / Constraints / Output / Verification / Stop Rules considered.
 - [ ] Prompt -> Workflow -> Evaluation -> Governance -> Organizational Learning impact considered.
-- [ ] `PROMPT_EVOLUTION` reported for significant work: `prompt_version`, reasoning level, expected improvement, metrics to watch, and next prompt delta.
-- [ ] PDF / Deep Research material treated as upstream operating doctrine, not implementation proof or a mandatory broad-upload requirement.
 - [ ] Reusable asset added or updated where appropriate.
 - [ ] Failure taxonomy / SOP / checklist / playbook / eval case impact considered.
 - [ ] Digital Devil's Advocate review completed for Scalability, Moat, Governance, Cost, Evaluation, and Failure Modes.
@@ -138,3 +136,39 @@ Report only measured metrics. Do not infer wins.
 | Answer tokens | | | | |
 | Runtime / p50 / p95 | | | | |
 | Retrieval pass rate | | | | |
+| Expected-source hit rate | | | | |
+| Citation/claim support rate | | | | |
+| Refusal/escalation pass rate | | | | |
+
+## Source-Grounding Review
+
+- [ ] Source IDs preserved.
+- [ ] Source priority preserved.
+- [ ] Source paths/provenance preserved.
+- [ ] Evidence labels preserved.
+- [ ] Missing evidence is labeled.
+- [ ] P6 benchmark doctrine is not treated as Asperitas internal fact.
+
+## Risk Summary
+
+Known risks:
+
+Skipped checks and rationale:
+
+GitHub Actions disconnections/timeouts, if any:
+
+Deferred work:
+
+Human approval needed:
+
+## Rollback Plan
+
+## Merge Decision
+
+- [ ] Ready
+- [ ] Conditional
+- [ ] Blocked
+
+Reason:
+
+## Next Action
