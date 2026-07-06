@@ -1,8 +1,8 @@
-# Top Source Triad + V11.1 Supergap Operating Baseline
+# Top Source Triad + V11.1 + P0+ AI Lead Operating Baseline
 
 ## Executive Bottom Line
 
-This repository must treat the Top Source Triad as the active development baseline for Asperitas AI-agent/RAG work, with the V11.1 Supergap Agent Build Leader layer added as the latest performance and repo-structure hardening layer.
+This repository must treat the Top Source Triad as the active development baseline for Asperitas AI-agent/RAG work, with the V11.1 Supergap Agent Build Leader layer and the P0+ AI Lead Operating Layer as the latest performance, governance, and organizational-learning hardening layers.
 
 Top Source Triad:
 
@@ -15,7 +15,50 @@ V11.1 add-on sources:
 4. `슈퍼갭 GPT 채팅 모델용 고임팩트 PDF 트레이닝 패키지 설계 보고서.pdf`
 5. `초고성능 독자 AI 에이전트 구축과 최종 업그레이드 트레이닝 PDF 설계 보고서.pdf`
 
-The triad and v11.1 layer define how development should proceed. They do not prove implementation status.
+P0+ AI Lead Operating Layer sources:
+
+6. `글로벌 AI 리더·기업·엔지니어 종합 보고서.pdf`
+7. `프로젝트 내 AI 리드 내재화 실행계획 보고서.pdf`
+
+The triad, v11.1 layer, and P0+ AI Lead layer define how development should proceed. They do not prove implementation status.
+
+## P0+ AI Lead Operating Layer
+
+The P0+ layer upgrades the repository's operating model from prompt improvement alone to system improvement in this order:
+
+```text
+Prompt
+-> Workflow
+-> Evaluation
+-> Governance
+-> Organizational Learning
+```
+
+Codex and other development agents should act as an AI Lead / CTO-level workflow architect, evaluation owner, governance owner, adoption coach, and Digital Devil's Advocate. The practical output of this layer is not longer prose. It is reusable organizational machinery:
+
+- playbooks
+- SOPs
+- checklists
+- PR templates
+- workflow contracts
+- evaluation datasets
+- failure taxonomies
+- governance assets
+- training packages
+- decision logs
+- adoption rituals
+
+For significant work, use this compact operating contract when useful:
+
+```text
+Goal:
+Scope:
+Evidence:
+Constraints:
+Output:
+Verification:
+Stop Rules:
+```
 
 ## Truth Boundary
 
@@ -25,6 +68,7 @@ Do not convert doctrine into implementation claims.
 |---|---|
 | Top Source Triad attached | Production RAG complete |
 | V11.1 Supergap doctrine added | Proprietary agent stack implemented |
+| P0+ AI Lead reports attached | AI Lead organization, eval system, governance OS, or adoption system implemented |
 | Source map or source registry plan | Licensed production database |
 | Roadmap or architecture ladder | Deployed AI product |
 | Eval plan | Passing eval suite |
@@ -51,6 +95,8 @@ Scope Lock
 -> Merge & Evidence Log
 -> Learn Back
 ```
+
+The P0+ layer adds an explicit learn-back step: whenever a repeated failure, ambiguity, review bottleneck, or verification gap is found, convert it into a durable repo asset rather than a one-off chat correction.
 
 ## Architecture Ladder
 
@@ -94,6 +140,7 @@ This layer becomes a moat only when GitHub evidence proves measurable improvemen
 | P0 | Retrieval eval + citation fidelity | Expected source hit and citation regression report exist |
 | P0 | Grounded answer contract | Unsupported claims are blocked or labeled |
 | P0 | Compliance/security guardrails | CITES/Nagoya/LMO/biosafety/IP/privacy triggers tested |
+| P0+ | AI Lead operating layer | Playbooks, SOPs, eval ownership, governance gates, and learn-back assets are represented in repo artifacts |
 | P1 | Deep Research -> Registry pipeline | Candidate/review/approved/ingested/blocked states separated |
 | P1 | Literature / Benchmark Agent | Evidence-backed action item generated |
 | P1 | Trace/eval control plane | Workflow spans, eval artifacts, and regression history recorded |
@@ -123,7 +170,7 @@ biodiversity access
 Every relevant PR should report:
 
 ```text
-Top Source Triad + V11.1 alignment:
+Top Source Triad + V11.1 + P0+ AI Lead alignment:
 Codex reasoning level: 매우높음 / 높음 / 중간 / 낮음
 MVP / phase affected:
 Changed files:
@@ -133,6 +180,7 @@ Verification:
 Retrieval/citation impact:
 Eval/trace impact:
 Compliance/source-grounding review:
+Governance/organizational-learning impact:
 Web-productization impact:
 Production-status boundary:
 Skipped checks and rationale:
