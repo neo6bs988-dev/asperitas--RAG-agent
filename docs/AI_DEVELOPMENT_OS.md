@@ -24,6 +24,14 @@ Future development uses the Top Source Triad as operating doctrine:
 
 The triad is not implementation evidence. It defines how work should proceed: outcome-first, source-grounded, MVP-gated, audit-ready, compliance-aware, token-efficient, and Digital Devil's Advocate reviewed.
 
+## Command Tower And Repo Engine
+
+ChatGPT / Asperitas Project Chat is the command tower for synthesizing Deep Research, PDFs, AOS/PRIME doctrine, benchmark doctrine, user memory, and strategy into task-specific Codex prompts and strategic GO/NO-GO review.
+
+Codex is the repo-aware implementation engine. It uses the distilled prompt plus `AGENTS.md`, `README.md`, repo docs, tests, evals, GitHub history, and CI evidence to implement, validate, package, and report changes. Codex should not request broad PDF uploads by default; request exact missing source text only when source ingestion, source registry status, citation-level evidence, or PDF-derived content is directly required.
+
+PDF and Deep Research sources remain upstream operating doctrine. They do not prove production DB, RAG, KG, eval suite, tracing, legal review, wet-lab validation, autonomous-lab execution, or foundation-model capability.
+
 ## System Layers
 
 | Layer | Purpose | Source of Truth |

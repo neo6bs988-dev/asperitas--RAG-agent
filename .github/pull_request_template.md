@@ -65,6 +65,8 @@ Notes:
 
 - [ ] Goal / Scope / Evidence / Constraints / Output / Verification / Stop Rules considered.
 - [ ] Prompt -> Workflow -> Evaluation -> Governance -> Organizational Learning impact considered.
+- [ ] `PROMPT_EVOLUTION` reported for significant work: `prompt_version`, reasoning level, expected improvement, metrics to watch, and next prompt delta.
+- [ ] PDF / Deep Research material treated as upstream operating doctrine, not implementation proof or a mandatory broad-upload requirement.
 - [ ] Reusable asset added or updated where appropriate.
 - [ ] Failure taxonomy / SOP / checklist / playbook / eval case impact considered.
 - [ ] Digital Devil's Advocate review completed for Scalability, Moat, Governance, Cost, Evaluation, and Failure Modes.
