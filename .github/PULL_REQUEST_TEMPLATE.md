@@ -31,6 +31,14 @@
 - Trace/run metadata changed:
 - Metrics affected:
 
+## P0+ AI Lead Operating Layer Impact
+
+- Goal / Scope / Evidence / Constraints / Output / Verification / Stop Rules considered:
+- Prompt -> Workflow -> Evaluation -> Governance -> Organizational Learning impact:
+- Reusable asset added or updated:
+- Failure taxonomy / SOP / checklist / playbook / eval case impact:
+- Digital Devil's Advocate review completed:
+
 ## Compliance / IP / Privacy Review
 
 - [ ] Human review gate preserved or added where needed.
@@ -55,7 +63,7 @@ Residual risk:
 
 ## Production-Status Boundary
 
-This PR does not claim completion of production RAG, vector DB, KG, eval suite, legal review, regulatory approval, hosted product, commercial readiness, proprietary agent-stack implementation, or foundation-model capability unless explicit evidence is linked.
+This PR does not claim completion of production RAG, vector DB, KG, eval suite, legal review, regulatory approval, hosted product, commercial readiness, proprietary agent-stack implementation, deployed AI Lead operating system, organizational adoption completion, or foundation-model capability unless explicit evidence is linked.
 
 ## Rollback Plan
 
