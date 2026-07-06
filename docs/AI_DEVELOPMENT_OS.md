@@ -78,3 +78,101 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 - `docs/WEB_PRODUCTIZATION_ROADMAP.md` defines the path from internal RAG/API/UI to web app and commercialization gates.
 - `docs/CODEX_NEXT_PROMPT_WEB_PRODUCTIZATION.md` provides the next Codex-ready prompt for this workstream.
 - `docs/WORKFLOW.md` defines the standard human + Codex loop.
+- `docs/QUALITY_GATES.md` defines checks that must pass before work is called done.
+- `docs/AOS_SOURCE_POLICY.md` defines source priority, disclosure, evidence labels, and do-not-confuse boundaries.
+- `docs/V1_5_PERFORMANCE_ROADMAP.md` defines the current performance-hardening path.
+- `.github/pull_request_template.md` makes scope, tests, metrics, source grounding, and compliance explicit.
+- GitHub Actions run executable CI gates when configured.
+- Tests and evals prove behavior.
+- Decision logs preserve why choices were made.
+
+## Default Operating Loop
+
+1. Define the outcome and success criteria.
+2. Read `AGENTS.md`, relevant docs, the Top Source Triad baseline, and relevant skills.
+3. Inspect existing files before editing.
+4. Choose the smallest safe change.
+5. Run the smallest sufficient checks.
+6. Report changed files, verification, metrics, risks, skipped checks, and next step.
+7. Open a PR with truth boundary and validation notes.
+8. Use GitHub Actions and review to decide merge readiness.
+9. Merge only when scope and pass/fail evidence are clear.
+10. Update the next Codex prompt based on gaps found.
+
+## V1.5A Harness-First Discipline
+
+V1.5A makes the default development loop harness-first, cost-aware, and regression-safe:
+
+```text
+Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
+```
+
+Every task should name risk level, changed surface, verification scope, skipped checks, residual risk, and metric provenance before merge readiness is claimed.
+
+Cheap QA means re-reading edited files, checking headings/paths/code fences, inspecting the diff, and running `git diff --check`. Targeted verification means running the smallest command set that protects the changed surface. Full suites, broad retrieval evals, release gates, or expanded GitHub Actions coverage are reserved for high-risk work, release/main work, CI/config changes, core RAG/eval/compliance/security changes, or behavior-changing source code.
+
+Metrics must be labeled as `Fresh Run`, `Historical`, or `Not Run`. GitHub Actions disconnections, cancellations, and timeouts are validation-scope evidence, not product failures unless required gates remain unclear, fail, or cannot be rerun.
+
+## Web Productization Discipline
+
+Internal RAG/API/UI is not commercial readiness. Web productization must be gated:
+
+```text
+internal source-grounded RAG core
+-> verifier/compliance/eval hardening
+-> internal API/UI
+-> backend/API/provider/auth/observability contract
+-> authenticated web app MVP
+-> production readiness gate
+-> commercial product pathway
+```
+
+The web product must keep the LLM provider replaceable. Asperitas's proprietary layer is the source registry, biological metadata, retrieval/evidence pipeline, verifier, compliance gate, eval suite, DBTL/failure records, IP/product decision workflow, and proprietary biological dataset path.
+
+## Performance Doctrine
+
+Token minimization must never reduce reasoning quality. Reduce useless context, not critical evidence.
+
+Performance claims require evidence:
+
+- token reduction requires before/after token or context metrics;
+- latency improvement requires net runtime improvement, not only cache hits;
+- retrieval improvement requires before/after retrieval metrics;
+- answer improvement requires faithfulness/citation/unsupported-claim evidence;
+- compliance improvement requires refusal/escalation/adversarial evidence.
+
+## Tooling Doctrine
+
+Use additional tools when they materially improve quality, speed, reproducibility, or safety more than they increase complexity or risk.
+
+Default roles:
+
+| Tool | Role |
+|---|---|
+| ChatGPT | Strategy, architecture, prompt design, review, GO/NO-GO |
+| Codex | Implementation, tests, branch work, PR packaging |
+| GitHub | Issues, PRs, CI, audit trail, release evidence |
+| GitHub Actions | PR/main validation gates |
+| VS Code / terminal | Local debugging and manual inspection |
+| Claude Code / Cursor / Copilot | Review/refactor/alternative analysis; avoid concurrent same-branch edits |
+| Ragas / DeepEval / ARES-style evals | RAG/agent quality measurement when appropriate |
+| Semgrep / gitleaks / Dependabot / Trivy | Security, secret, dependency, and supply-chain checks |
+| Qdrant / Chroma / Neo4j | Vector DB and KG candidates after governance stabilizes |
+| BioPython / RDKit / ESM / AlphaFold-class tools | Biology ML/DL stage after source/compliance controls |
+| FastAPI / Next.js / Vercel / Render / AWS / GCP | Web productization candidates only after MVP-011 scope lock and security review |
+
+Do not add frameworks or services without a Scout -> License -> Security -> Benchmark -> Adapt -> Test ledger.
+
+## Reuse For Future Asperitas Agents
+
+To reuse this system:
+
+1. Copy `README.md`, `AGENTS.md`, `docs/AI_DEVELOPMENT_OS.md`, `docs/WORKFLOW.md`, `docs/QUALITY_GATES.md`, `docs/AOS_SOURCE_POLICY.md`, and relevant `.agents/skills`.
+2. Replace project mission, source hierarchy, compliance domains, and roadmap.
+3. Keep the gate pattern: inspect, plan, implement, test/eval, review, report.
+4. Add agent-specific skills only when repeated work needs a dedicated checklist.
+5. Keep every skill tied to inputs, commands, quality gates, and failure conditions.
+6. Add CI only after commands are stable enough to run repeatedly.
+7. Add web-productization layers only after internal source-grounded behavior is stable and testable.
+
+Do not treat this OS as static. Update it when repeated mistakes, new risks, new pipelines, new stages, or web-productization gates appear.
