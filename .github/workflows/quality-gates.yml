@@ -54,6 +54,7 @@ jobs:
               "AGENTS.md",
               "docs/*.md",
               "docs/**/*.md",
+              ".github/PULL_REQUEST_TEMPLATE.md",
               ".github/pull_request_template.md",
               ".github/ISSUE_TEMPLATE/*.yml",
               ".github/ISSUE_TEMPLATE/*.yaml",
@@ -85,7 +86,7 @@ jobs:
               ".github/ISSUE_TEMPLATE/",
               "09_LOGS/decision_logs/",
           )
-          allowed_exact = {"README.md", "AGENTS.md", ".github/pull_request_template.md"}
+          allowed_exact = {"README.md", "AGENTS.md", ".github/PULL_REQUEST_TEMPLATE.md", ".github/pull_request_template.md"}
 
           unexpected = [
               path for path in changed
