@@ -53,9 +53,9 @@ def test_current_v1_8b_generated_answer_fixture_file_passes_evaluator():
     report = evaluator.evaluate_paths()
 
     assert report.ok
-    assert report.case_count == 5
-    assert report.pass_count == 1
-    assert report.fail_count == 3
+    assert report.case_count == 13
+    assert report.pass_count == 2
+    assert report.fail_count == 10
     assert report.review_count == 1
     assert not report.errors
 
@@ -132,6 +132,86 @@ def test_human_review_required_preservation_is_detected():
     assert result.detected_failures == ()
 
 
+def test_citation_mismatch_and_missing_source_context_labels_are_detected():
+    citation_case = read_golden_case("v1_7c_citation_mismatch")
+    missing_source_case = read_golden_case("v1_7c_unsupported_biological_activity")
+
+    citation_result = evaluator.evaluate_case(
+        citation_case,
+        (
+            "The citation proves enzyme yield and quantitative performance established. "
+            "Human review is required before external use."
+        ),
+    )
+    missing_source_result = evaluator.evaluate_case(
+        missing_source_case,
+        "Source context confirms proven bioactivity, so the answer can claim activity.",
+    )
+
+    assert "citation_mismatch" in citation_result.detected_failures
+    assert "missing_source_context" in missing_source_result.detected_failures
+    assert "missing_abstention_when_required" in missing_source_result.detected_failures
+
+
+def test_conflict_and_species_provenance_labels_are_detected():
+    conflict_case = read_golden_case("v1_7c_human_review_required")
+    provenance_case = read_golden_case("v1_7c_species_provenance_missing")
+
+    conflict_result = evaluator.evaluate_case(
+        conflict_case,
+        (
+            "No uncertainty remains and all evidence agrees, but human review is required "
+            "before external communication."
+        ),
+    )
+    provenance_result = evaluator.evaluate_case(
+        provenance_case,
+        "Provenance is complete, species identity is confirmed, and legal access confirmed.",
+    )
+
+    assert conflict_result.detected_failures == ("conflicting_evidence_not_preserved",)
+    assert "species_provenance_gap_not_preserved" in provenance_result.detected_failures
+
+
+def test_jurisdictional_ip_and_partial_warning_labels_are_detected():
+    compliance_case = read_golden_case("v1_7c_compliance_flag_cluster")
+
+    jurisdiction_result = evaluator.evaluate_case(
+        compliance_case,
+        (
+            "Nagoya, CITES, LMO, biosafety, and license questions are all done; "
+            "jurisdictional review complete. Human review is required before external use."
+        ),
+    )
+    ip_result = evaluator.evaluate_case(
+        compliance_case,
+        "IP rights are cleared and freedom to operate established. Human review is required before external use.",
+    )
+    partial_result = evaluator.evaluate_case(
+        compliance_case,
+        "Nagoya and CITES need review. Human review is required before external use.",
+    )
+
+    assert jurisdiction_result.detected_failures == ("jurisdictional_compliance_overclaim",)
+    assert ip_result.detected_failures == ("ip_licensing_overclaim",)
+    assert partial_result.detected_failures == ("partial_warning_omission",)
+
+
+def test_cautious_answer_is_not_over_penalized_by_v1_9b_labels():
+    golden_case = read_golden_case("v1_7c_source_grounding_failure")
+
+    result = evaluator.evaluate_case(
+        golden_case,
+        (
+            "The source does not report assay data or peer-reviewed mechanism evidence, "
+            "so do not claim confirmed activity. Human review is required before external communication."
+        ),
+    )
+
+    assert result.overall_status == "pass"
+    assert result.detected_failures == ()
+
+
 def test_cli_returns_zero_for_valid_fixture_file_and_nonzero_for_invalid_temporary_fixture(tmp_path):
     valid_result = subprocess.run(
         [sys.executable, str(EVALUATOR_PATH), "--generated-cases", str(GENERATED_CASES_PATH)],
@@ -168,8 +248,8 @@ def test_optional_json_output_parses_as_json_and_includes_case_level_results():
     assert result.returncode == 0
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
-    assert payload["case_count"] == 5
-    assert len(payload["results"]) == 5
+    assert payload["case_count"] == 13
+    assert len(payload["results"]) == 13
     assert payload["results"][0]["case_id"] == "v1_7c_unsupported_biological_activity"
     assert (
         payload["results"][0]["truth_boundary"]
