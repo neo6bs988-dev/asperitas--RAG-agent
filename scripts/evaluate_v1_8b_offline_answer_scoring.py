@@ -39,6 +39,7 @@ ALLOWED_FAILURE_LABELS = frozenset(
     }
 )
 REQUIRED_GENERATED_FIELDS = (
+    "sample_case_id",
     "case_id",
     "generated_answer",
     "expected_overall_status",
@@ -46,6 +47,7 @@ REQUIRED_GENERATED_FIELDS = (
     "notes",
 )
 ALLOWED_GENERATED_FIELDS = frozenset(REQUIRED_GENERATED_FIELDS)
+SAMPLE_CASE_ID_PATTERN = re.compile(r"^v1_8b_[a-z0-9_]+_[0-9]{3}$")
 
 APPROVAL_OR_CLEARANCE_PHRASES = (
     "approved for external use",
@@ -176,6 +178,7 @@ HUMAN_REVIEW_PRESERVATION_PHRASES = (
 
 @dataclass(frozen=True)
 class CaseResult:
+    sample_case_id: str | None
     case_id: str
     overall_status: str
     detected_failures: tuple[str, ...]
@@ -185,6 +188,7 @@ class CaseResult:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "sample_case_id": self.sample_case_id,
             "case_id": self.case_id,
             "overall_status": self.overall_status,
             "detected_failures": list(self.detected_failures),
@@ -287,7 +291,12 @@ def _has_abstention_preservation(normalized_answer: str) -> bool:
     return bool(_contains_any(normalized_answer, ABSTENTION_PRESERVATION_PHRASES))
 
 
-def evaluate_case(golden_record: dict[str, Any], generated_answer: str) -> CaseResult:
+def evaluate_case(
+    golden_record: dict[str, Any],
+    generated_answer: str,
+    *,
+    sample_case_id: str | None = None,
+) -> CaseResult:
     case_id = str(golden_record["id"])
     normalized_answer = normalize_text(generated_answer)
     failures: set[str] = set()
@@ -407,6 +416,7 @@ def evaluate_case(golden_record: dict[str, Any], generated_answer: str) -> CaseR
         notes.append("No deterministic V1.8B failure labels detected.")
 
     return CaseResult(
+        sample_case_id=sample_case_id,
         case_id=case_id,
         overall_status=overall_status,
         detected_failures=tuple(sorted(failures)),
@@ -415,8 +425,9 @@ def evaluate_case(golden_record: dict[str, Any], generated_answer: str) -> CaseR
     )
 
 
-def _input_error_result(case_id: str, message: str) -> CaseResult:
+def _input_error_result(case_id: str, message: str, sample_case_id: str | None = None) -> CaseResult:
     return CaseResult(
+        sample_case_id=sample_case_id,
         case_id=case_id,
         overall_status="fail",
         detected_failures=("input_contract_error",),
@@ -434,12 +445,24 @@ def _validate_generated_record(
     errors: list[str] = []
     missing = [field for field in REQUIRED_GENERATED_FIELDS if field not in record]
     unknown = sorted(set(record) - ALLOWED_GENERATED_FIELDS)
+    sample_case_id = (
+        record.get("sample_case_id")
+        if isinstance(record.get("sample_case_id"), str)
+        else f"line_{line_number}"
+    )
     case_id = record.get("case_id") if isinstance(record.get("case_id"), str) else f"line_{line_number}"
 
     if missing:
         errors.append(f"generated_cases line {line_number}: missing required field(s): {', '.join(missing)}")
     if unknown:
         errors.append(f"generated_cases line {line_number}: unknown field(s): {', '.join(unknown)}")
+    if not isinstance(record.get("sample_case_id"), str) or not record.get("sample_case_id", "").strip():
+        errors.append(f"generated_cases line {line_number}: sample_case_id must be a non-empty string")
+    elif SAMPLE_CASE_ID_PATTERN.fullmatch(str(record["sample_case_id"])) is None:
+        errors.append(
+            f"generated_cases line {line_number}: sample_case_id must match "
+            "'v1_8b_<descriptive_slug>_<three_digit_sequence>'"
+        )
     if not isinstance(record.get("case_id"), str) or not record.get("case_id", "").strip():
         errors.append(f"generated_cases line {line_number}: case_id must be a non-empty string")
     if not isinstance(record.get("generated_answer"), str) or not record.get("generated_answer", "").strip():
@@ -473,15 +496,19 @@ def _validate_generated_record(
         errors.append(f"generated_cases line {line_number}: notes must be a non-empty string")
 
     if errors:
-        return _input_error_result(str(case_id), "; ".join(errors)), errors
+        return _input_error_result(str(case_id), "; ".join(errors), str(sample_case_id)), errors
 
     case_id = str(record["case_id"])
     golden_record = golden_by_id.get(case_id)
     if golden_record is None:
         message = f"generated_cases line {line_number}: unknown V1.7C case_id {case_id!r}"
-        return _input_error_result(case_id, message), [message]
+        return _input_error_result(case_id, message, str(record["sample_case_id"])), [message]
 
-    result = evaluate_case(golden_record, str(record["generated_answer"]))
+    result = evaluate_case(
+        golden_record,
+        str(record["generated_answer"]),
+        sample_case_id=str(record["sample_case_id"]),
+    )
     expected_status = str(record["expected_overall_status"])
     expected_detected = tuple(sorted(str(item) for item in record["expected_detected_failures"]))
 
@@ -507,6 +534,17 @@ def evaluate_paths(
     golden_by_id, errors = load_golden_set(golden_set_path)
     generated_records, generated_errors = load_jsonl(generated_cases_path, "generated_cases")
     errors.extend(generated_errors)
+
+    sample_case_ids = [
+        str(record["sample_case_id"])
+        for _, record in generated_records
+        if isinstance(record.get("sample_case_id"), str) and record["sample_case_id"].strip()
+    ]
+    duplicate_sample_case_ids = sorted(
+        {sample_case_id for sample_case_id in sample_case_ids if sample_case_ids.count(sample_case_id) > 1}
+    )
+    for sample_case_id in duplicate_sample_case_ids:
+        errors.append(f"generated_cases: duplicate sample_case_id {sample_case_id!r}")
 
     results: list[CaseResult] = []
     if not errors:
@@ -552,7 +590,10 @@ def print_human_report(report: EvaluationReport, golden_set_path: Path, generate
     print(f"result: {'PASS' if report.ok else 'FAIL'}")
     for result in report.results:
         failures = ", ".join(result.detected_failures) if result.detected_failures else "(none)"
-        print(f"- {result.case_id}: {result.overall_status}; failures: {failures}")
+        print(
+            f"- {result.sample_case_id} ({result.case_id}): "
+            f"{result.overall_status}; failures: {failures}"
+        )
     if report.errors:
         print("errors:")
         for error in report.errors:

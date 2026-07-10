@@ -60,6 +60,37 @@ def test_current_v1_8b_generated_answer_fixture_file_passes_evaluator():
     assert not report.errors
 
 
+def test_generated_answer_fixture_sample_case_ids_are_non_empty_unique_and_stable_format():
+    records = read_generated_cases()
+    sample_case_ids = [record["sample_case_id"] for record in records]
+
+    assert all(isinstance(sample_case_id, str) and sample_case_id for sample_case_id in sample_case_ids)
+    assert len(sample_case_ids) == len(set(sample_case_ids))
+    assert all(evaluator.SAMPLE_CASE_ID_PATTERN.fullmatch(sample_case_id) for sample_case_id in sample_case_ids)
+
+
+def test_duplicate_generated_answer_sample_case_id_fails(tmp_path):
+    records = read_generated_cases()
+    records[1]["sample_case_id"] = records[0]["sample_case_id"]
+    broken_path = write_jsonl(tmp_path / "duplicate_sample_case_id.jsonl", records)
+
+    report = report_for(broken_path)
+
+    assert not report.ok
+    assert any("duplicate sample_case_id" in error for error in report.errors)
+
+
+def test_missing_generated_answer_sample_case_id_fails(tmp_path):
+    records = read_generated_cases()
+    del records[0]["sample_case_id"]
+    broken_path = write_jsonl(tmp_path / "missing_sample_case_id.jsonl", records)
+
+    report = report_for(broken_path)
+
+    assert not report.ok
+    assert any("missing required field(s): sample_case_id" in error for error in report.errors)
+
+
 def test_malformed_generated_answer_jsonl_fails(tmp_path):
     broken_path = tmp_path / "broken.jsonl"
     broken_path.write_text('{"case_id": ', encoding="utf-8")
@@ -250,6 +281,7 @@ def test_optional_json_output_parses_as_json_and_includes_case_level_results():
     assert payload["ok"] is True
     assert payload["case_count"] == 13
     assert len(payload["results"]) == 13
+    assert payload["results"][0]["sample_case_id"] == "v1_8b_unsupported_biological_activity_001"
     assert payload["results"][0]["case_id"] == "v1_7c_unsupported_biological_activity"
     assert (
         payload["results"][0]["truth_boundary"]

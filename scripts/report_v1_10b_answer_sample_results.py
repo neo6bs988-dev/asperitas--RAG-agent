@@ -4,7 +4,7 @@ import argparse
 import json
 import subprocess
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +24,7 @@ REQUIRED_MANIFEST_FIELDS = frozenset(
     {
         "sample_id",
         "evaluator_case_id",
+        "evaluator_sample_case_id",
         "sample_class",
         "prompt_id",
         "answer_text_source",
@@ -114,7 +115,7 @@ def load_manifest(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
     records, errors = load_jsonl(path, "manifest")
     manifest: list[dict[str, Any]] = []
     sample_ids: Counter[str] = Counter()
-    evaluator_ids: defaultdict[str, list[dict[str, Any]]] = defaultdict(list)
+    evaluator_sample_ids: Counter[str] = Counter()
 
     for line_number, record in records:
         missing = sorted(REQUIRED_MANIFEST_FIELDS - set(record))
@@ -126,14 +127,17 @@ def load_manifest(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
 
         sample_id = record.get("sample_id")
         evaluator_case_id = record.get("evaluator_case_id")
+        evaluator_sample_case_id = record.get("evaluator_sample_case_id")
         if not isinstance(sample_id, str) or not sample_id.strip():
             errors.append(f"manifest line {line_number}: sample_id must be a non-empty string")
         else:
             sample_ids[sample_id] += 1
         if not isinstance(evaluator_case_id, str) or not evaluator_case_id.strip():
             errors.append(f"manifest line {line_number}: evaluator_case_id must be a non-empty string")
+        if not isinstance(evaluator_sample_case_id, str) or not evaluator_sample_case_id.strip():
+            errors.append(f"manifest line {line_number}: evaluator_sample_case_id must be a non-empty string")
         else:
-            evaluator_ids[evaluator_case_id].append(record)
+            evaluator_sample_ids[evaluator_sample_case_id] += 1
 
         if record.get("sample_class") not in ALLOWED_SAMPLE_CLASSES:
             errors.append(f"manifest line {line_number}: sample_class is not allowed")
@@ -172,9 +176,9 @@ def load_manifest(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
     for sample_id, count in sample_ids.items():
         if count > 1:
             errors.append(f"manifest: duplicate sample_id {sample_id!r}")
-    for evaluator_case_id, duplicates in evaluator_ids.items():
-        if len(duplicates) > 1 and not all("duplicate evaluator_case_id justified" in str(row.get("notes", "")).casefold() for row in duplicates):
-            errors.append(f"manifest: duplicate evaluator_case_id {evaluator_case_id!r} lacks notes justification")
+    for evaluator_sample_case_id, count in evaluator_sample_ids.items():
+        if count > 1:
+            errors.append(f"manifest: duplicate evaluator_sample_case_id {evaluator_sample_case_id!r}")
 
     return manifest, errors
 
@@ -223,13 +227,19 @@ def validate_evaluator_payload(payload: dict[str, Any]) -> tuple[list[dict[str, 
     if not isinstance(results, list):
         return [], ["evaluator payload missing results list"]
     normalized_results: list[dict[str, Any]] = []
+    sample_case_ids: Counter[str] = Counter()
     for index, result in enumerate(results, start=1):
         if not isinstance(result, dict):
             errors.append(f"evaluator result {index}: must be an object")
             continue
         case_id = result.get("case_id")
+        sample_case_id = result.get("sample_case_id")
         status = result.get("overall_status")
         failures = result.get("detected_failures")
+        if not isinstance(sample_case_id, str) or not sample_case_id.strip():
+            errors.append(f"evaluator result {index}: sample_case_id must be a non-empty string")
+        else:
+            sample_case_ids[sample_case_id] += 1
         if not isinstance(case_id, str) or not case_id.strip():
             errors.append(f"evaluator result {index}: case_id must be a non-empty string")
         if status not in ALLOWED_OUTCOMES:
@@ -239,11 +249,18 @@ def validate_evaluator_payload(payload: dict[str, Any]) -> tuple[list[dict[str, 
         if not isinstance(result.get("required_human_review"), bool):
             errors.append(f"evaluator result {index}: required_human_review must be a boolean")
         normalized_results.append(result)
+    for sample_case_id, count in sample_case_ids.items():
+        if count > 1:
+            errors.append(f"evaluator payload: duplicate sample_case_id {sample_case_id!r}")
     return normalized_results, errors
 
 
-def _count_by_case_id(results: list[dict[str, Any]]) -> Counter[str]:
-    return Counter(str(result["case_id"]) for result in results if isinstance(result.get("case_id"), str))
+def _count_by_sample_case_id(results: list[dict[str, Any]]) -> Counter[str]:
+    return Counter(
+        str(result["sample_case_id"])
+        for result in results
+        if isinstance(result.get("sample_case_id"), str)
+    )
 
 
 def build_report(manifest_path: Path, evaluator_json_path: Path | None = None) -> tuple[dict[str, Any] | None, list[str]]:
@@ -255,25 +272,45 @@ def build_report(manifest_path: Path, evaluator_json_path: Path | None = None) -
 
     evaluator_results, evaluator_result_errors = validate_evaluator_payload(evaluator_payload)
     errors.extend(evaluator_result_errors)
-    evaluator_counts = _count_by_case_id(evaluator_results)
-    evaluator_by_case_id = {str(result["case_id"]): result for result in evaluator_results if evaluator_counts[str(result["case_id"])] == 1}
+    evaluator_counts = _count_by_sample_case_id(evaluator_results)
+    evaluator_by_sample_case_id = {
+        str(result["sample_case_id"]): result
+        for result in evaluator_results
+        if isinstance(result.get("sample_case_id"), str)
+        and evaluator_counts[str(result["sample_case_id"])] == 1
+    }
 
     matched_results: list[tuple[dict[str, Any], dict[str, Any]]] = []
     unmatched_manifest_samples: list[dict[str, Any]] = []
     for sample in manifest:
         evaluator_case_id = str(sample.get("evaluator_case_id", ""))
-        if evaluator_case_id not in evaluator_counts:
-            unmatched_manifest_samples.append({"sample_id": sample.get("sample_id"), "evaluator_case_id": evaluator_case_id})
-            errors.append(f"manifest sample {sample.get('sample_id')!r}: unknown evaluator_case_id {evaluator_case_id!r}")
-            continue
-        if evaluator_counts[evaluator_case_id] != 1:
+        evaluator_sample_case_id = str(sample.get("evaluator_sample_case_id", ""))
+        if evaluator_sample_case_id not in evaluator_counts:
+            unmatched_manifest_samples.append(
+                {
+                    "sample_id": sample.get("sample_id"),
+                    "evaluator_case_id": evaluator_case_id,
+                    "evaluator_sample_case_id": evaluator_sample_case_id,
+                }
+            )
             errors.append(
-                f"manifest sample {sample.get('sample_id')!r}: evaluator_case_id {evaluator_case_id!r} "
-                f"appears {evaluator_counts[evaluator_case_id]} times in evaluator output; "
-                "V1.10B does not infer row indexes"
+                f"manifest sample {sample.get('sample_id')!r}: unknown evaluator_sample_case_id "
+                f"{evaluator_sample_case_id!r}"
             )
             continue
-        result = evaluator_by_case_id[evaluator_case_id]
+        if evaluator_counts[evaluator_sample_case_id] != 1:
+            errors.append(
+                f"manifest sample {sample.get('sample_id')!r}: evaluator_sample_case_id "
+                f"{evaluator_sample_case_id!r} appears {evaluator_counts[evaluator_sample_case_id]} "
+                "times in evaluator output"
+            )
+            continue
+        result = evaluator_by_sample_case_id[evaluator_sample_case_id]
+        if evaluator_case_id != result.get("case_id"):
+            errors.append(
+                f"manifest sample {sample.get('sample_id')!r}: evaluator_case_id "
+                f"{evaluator_case_id!r} conflicts with evaluator row case_id {result.get('case_id')!r}"
+            )
         if sample.get("expected_outcome") != result.get("overall_status"):
             errors.append(
                 f"manifest sample {sample.get('sample_id')!r}: expected_outcome {sample.get('expected_outcome')!r} "
@@ -288,11 +325,18 @@ def build_report(manifest_path: Path, evaluator_json_path: Path | None = None) -
             )
         matched_results.append((sample, result))
 
-    manifest_case_ids = {str(sample.get("evaluator_case_id", "")) for sample in manifest}
+    manifest_sample_case_ids = {
+        str(sample.get("evaluator_sample_case_id", ""))
+        for sample in manifest
+    }
     unmatched_evaluator_cases = [
-        {"evaluator_case_id": case_id, "count": count}
-        for case_id, count in sorted(evaluator_counts.items())
-        if case_id not in manifest_case_ids
+        {
+            "evaluator_sample_case_id": sample_case_id,
+            "evaluator_case_id": result.get("case_id"),
+            "count": evaluator_counts[sample_case_id],
+        }
+        for sample_case_id, result in sorted(evaluator_by_sample_case_id.items())
+        if sample_case_id not in manifest_sample_case_ids
     ]
 
     if errors:
@@ -312,6 +356,7 @@ def build_report(manifest_path: Path, evaluator_json_path: Path | None = None) -
         sample_ref = {
             "sample_id": sample["sample_id"],
             "evaluator_case_id": sample["evaluator_case_id"],
+            "evaluator_sample_case_id": sample["evaluator_sample_case_id"],
             "risk_domain": sample["risk_domain"],
             "overall_status": result["overall_status"],
             "detected_failures": failures,
