@@ -1,0 +1,2 @@
+source_id,title,path,priority,disclosure,source_type,version,status,use_rule
+P0-AOS-V10-4,Asperitas Ultimate Prompt Command v10.4,01_RAW_SOURCES/P0_ACTIVE_PROMPT/Asperitas_Ultimate_Prompt_Command_v10_4_20260628.pdf,P0,Internal Confidential,prompt_constitution,v10.4,active,Use as active Codex/ChatGPT/RAG prompt control-plane; not evidence of production DB/KG/vector/eval/legal/wet-lab completion

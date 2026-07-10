@@ -1,0 +1,13 @@
+Read the active repo instructions and prompt policy files. Do not edit files.
+
+Report:
+1. Which AGENTS.md and policy files did you load?
+2. What is the active P0 operating constitution?
+3. What are the required prompt slots?
+4. What are the production-state non-confusion rules?
+5. What are the MVP type and risk class rules?
+6. What KPI_REPORT fields must be included?
+7. What stop rules apply before editing files?
+8. What verification commands are available in this repo?
+
+Return concise but complete.
