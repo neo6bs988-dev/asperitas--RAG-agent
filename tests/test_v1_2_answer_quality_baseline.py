@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 from scripts.check_v1_2_answer_quality_baseline import (
     EXPECTED_DIMENSIONS,
@@ -13,6 +15,56 @@ from scripts.check_v1_2_answer_quality_baseline import (
     validate_baseline,
     validate_fixture,
 )
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+PROTECTED_PREFIXES = (
+    "00_ADMIN/source_registry",
+    "01_RAW_SOURCES/",
+    "03_PROCESSED_KB/chunks/",
+    "04_VECTOR_DB/",
+    "data/chunks.jsonl",
+    "data/source_registry",
+    "eval/",
+)
+ALLOWED_PROTECTED_CHANGES = frozenset(
+    {"eval/expected_sources.jsonl", "eval/retrieval_questions.jsonl"}
+)
+
+
+def _protected_state_snapshot() -> tuple[tuple[str, str], ...]:
+    tracked = subprocess.run(
+        ["git", "diff", "--name-only", "HEAD"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    protected_paths = sorted(
+        {
+            path
+            for raw_path in (*tracked.stdout.splitlines(), *untracked.stdout.splitlines())
+            if (path := raw_path.strip().replace("\\", "/"))
+            and path not in ALLOWED_PROTECTED_CHANGES
+            and path.startswith(PROTECTED_PREFIXES)
+        }
+    )
+    return tuple(
+        (
+            path,
+            hashlib.sha256((REPO_ROOT / path).read_bytes()).hexdigest()
+            if (REPO_ROOT / path).is_file()
+            else "<missing>",
+        )
+        for path in protected_paths
+    )
 
 
 def test_v1_2_baseline_validator_passes():
@@ -106,17 +158,15 @@ def test_validator_does_not_import_runtime_answer_or_retrieval_modules():
 
 
 def test_no_source_chunk_registry_or_existing_eval_fixture_files_modified():
-    result = subprocess.run(["git", "diff", "--name-only"], check=True, capture_output=True, text=True)
-    protected_prefixes = (
-        "00_ADMIN/source_registry",
-        "01_RAW_SOURCES/",
-        "03_PROCESSED_KB/chunks/",
-        "04_VECTOR_DB/",
-        "data/chunks.jsonl",
-        "data/source_registry",
-        "eval/",
-    )
-    changed = tuple(line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip())
-    allowed_v1_3e_calibration = {"eval/expected_sources.jsonl", "eval/retrieval_questions.jsonl"}
+    before = _protected_state_snapshot()
 
-    assert not [path for path in changed if path not in allowed_v1_3e_calibration and path.startswith(protected_prefixes)]
+    result = subprocess.run(
+        [sys.executable, "scripts/check_v1_2_answer_quality_baseline.py"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    after = _protected_state_snapshot()
+
+    assert result.returncode == 0, result.stderr
+    assert after == before

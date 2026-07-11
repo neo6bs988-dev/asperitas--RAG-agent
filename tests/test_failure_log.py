@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -16,6 +18,57 @@ from asperitas_agent.failure_log import (
     redact_failure_payload,
     write_failure_jsonl,
 )
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+PROTECTED_PREFIXES = (
+    "00_ADMIN/source_registry",
+    "01_RAW_SOURCES/",
+    "03_PROCESSED_KB/chunks/",
+    "04_VECTOR_DB/",
+    "data/chunks.jsonl",
+    "data/source_registry",
+    "eval/",
+    "tests/fixtures/",
+)
+ALLOWED_PROTECTED_CHANGES = frozenset(
+    {"eval/expected_sources.jsonl", "eval/retrieval_questions.jsonl"}
+)
+
+
+def _protected_state_snapshot() -> tuple[tuple[str, str], ...]:
+    tracked = subprocess.run(
+        ["git", "diff", "--name-only", "HEAD"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard"],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    protected_paths = sorted(
+        {
+            path
+            for raw_path in (*tracked.stdout.splitlines(), *untracked.stdout.splitlines())
+            if (path := raw_path.strip().replace("\\", "/"))
+            and path not in ALLOWED_PROTECTED_CHANGES
+            and path.startswith(PROTECTED_PREFIXES)
+        }
+    )
+    return tuple(
+        (
+            path,
+            hashlib.sha256((REPO_ROOT / path).read_bytes()).hexdigest()
+            if (REPO_ROOT / path).is_file()
+            else "<missing>",
+        )
+        for path in protected_paths
+    )
 
 
 def test_build_valid_failure_record_with_deterministic_id():
@@ -203,19 +256,34 @@ def test_no_retrieval_vector_reranker_answer_or_default_runtime_imports_or_execu
     assert probe.returncode == 0, probe.stdout
 
 
-def test_no_source_chunk_registry_or_eval_fixture_files_modified():
-    result = subprocess.run(["git", "diff", "--name-only"], check=True, capture_output=True, text=True)
-    protected_prefixes = (
-        "00_ADMIN/source_registry",
-        "01_RAW_SOURCES/",
-        "03_PROCESSED_KB/chunks/",
-        "04_VECTOR_DB/",
-        "data/chunks.jsonl",
-        "data/source_registry",
-        "eval/",
-        "tests/fixtures/",
-    )
-    changed = tuple(line.strip().replace("\\", "/") for line in result.stdout.splitlines() if line.strip())
-    allowed_v1_3e_calibration = {"eval/expected_sources.jsonl", "eval/retrieval_questions.jsonl"}
+def test_no_source_chunk_registry_or_eval_fixture_files_modified(tmp_path):
+    before = _protected_state_snapshot()
+    output = tmp_path / "guard_probe" / "failure.jsonl"
 
-    assert not [path for path in changed if path not in allowed_v1_3e_calibration and path.startswith(protected_prefixes)]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/record_failure_log.py",
+            "--query",
+            "guard probe",
+            "--expected-behavior",
+            "write only to the explicit temporary output",
+            "--actual-behavior",
+            "diagnostic probe",
+            "--category",
+            "other",
+            "--severity",
+            "low",
+            "--output",
+            str(output),
+            "--create-dirs",
+            "--json",
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    after = _protected_state_snapshot()
+
+    assert result.returncode == 0, result.stderr
+    assert after == before
