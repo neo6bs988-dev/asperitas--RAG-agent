@@ -106,7 +106,7 @@ Do not convert doctrine into implementation claims.
 | Compliance gate design | Legal/regulatory approval |
 | DBTL workflow plan | Wet-lab validation |
 | Agent runtime roadmap | Autonomous agent safely deployed |
-| Foundation-model direction | Foundation model capability |
+| Foundation-model direction | Not proof of foundation-model capability |
 
 Only claim production status when there is merged code, configuration, logs, eval output, release note, and human approval evidence.
 
