@@ -1,5 +1,35 @@
 # Asperitas AI RAG Agent
 
+## Current Execution Authority (2026-07-11)
+
+Use [`docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane. For files already inside `docs/`, the path refers to `CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md` in the same directory.
+
+Latest confirmed baseline before this documentation sync:
+
+- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
+- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
+- V1.10B diagnostic answer-sample reporting: merged;
+- V1.10C preflight: merged;
+- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
+
+If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
+
+Current mandatory sequence:
+
+```text
+V1.10C publication
+-> V1.10 closure
+-> representative biology/compliance eval reset
+-> retrieval and reranker hardening
+-> real grounded answer path and diagnostic verifier
+-> compliance/security adversarial gates
+-> trace, latency, token, and cost control plane
+-> internal dogfood
+-> approved data flywheel
+-> web productization and production-readiness gates
+```
+
+
 ## Executive Bottom Line
 
 This repository is the execution base for the Asperitas Biological Intelligence OS: a source-grounded, auditable, compliance-aware AI agent infrastructure for converting biodiversity access into structured biological data, AI-bio workflows, DBTL validation, IP, products, compliance trust, and platform advantage.
@@ -17,7 +47,7 @@ This repository is the Phase-0 core for Asperitas internal RAG and agent develop
 | Chunk files or fixtures | Production vector database |
 | Benchmark doctrine | Asperitas internal fact |
 | Retrieval/eval scaffold | Full RAG/KG/eval production system |
-| Agent-stack roadmap | Proprietary agent stack implemented |
+| Agent-stack roadmap | Not proof that a proprietary agent stack is implemented |
 | Model output or hypothesis | Wet-lab validation |
 | Compliance checklist | Legal or regulatory approval |
 | Investor or market signal | Committed capital or product-market fit |

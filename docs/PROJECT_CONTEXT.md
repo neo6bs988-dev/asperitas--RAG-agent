@@ -1,5 +1,35 @@
 # Project Context
 
+## Current Execution Authority (2026-07-11)
+
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane.
+
+Latest confirmed baseline before this documentation sync:
+
+- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
+- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
+- V1.10B diagnostic answer-sample reporting: merged;
+- V1.10C preflight: merged;
+- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
+
+If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
+
+Current mandatory sequence:
+
+```text
+V1.10C publication
+-> V1.10 closure
+-> representative biology/compliance eval reset
+-> retrieval and reranker hardening
+-> real grounded answer path and diagnostic verifier
+-> compliance/security adversarial gates
+-> trace, latency, token, and cost control plane
+-> internal dogfood
+-> approved data flywheel
+-> web productization and production-readiness gates
+```
+
+
 Asperitas is building a source-grounded biological intelligence system that starts as an internal RAG/agent control plane and must ultimately become a web-productized, commercially deployable AI platform.
 
 The active GitHub repository is `neo6bs988-dev/asperitas--RAG-agent`.

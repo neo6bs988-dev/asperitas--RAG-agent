@@ -1,5 +1,35 @@
 # AGENTS.md - ASPERITAS PRIME v2.0 + V11.1 Agent Constitution
 
+## Current Execution Authority (2026-07-11)
+
+Use [`docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane. For files already inside `docs/`, the path refers to `CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md` in the same directory.
+
+Latest confirmed baseline before this documentation sync:
+
+- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
+- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
+- V1.10B diagnostic answer-sample reporting: merged;
+- V1.10C preflight: merged;
+- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
+
+If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
+
+Current mandatory sequence:
+
+```text
+V1.10C publication
+-> V1.10 closure
+-> representative biology/compliance eval reset
+-> retrieval and reranker hardening
+-> real grounded answer path and diagnostic verifier
+-> compliance/security adversarial gates
+-> trace, latency, token, and cost control plane
+-> internal dogfood
+-> approved data flywheel
+-> web productization and production-readiness gates
+```
+
+
 Reasoning Strength: Very High
 Codex Reasoning Level: 매우높음 for repo-wide governance, RAG/eval/compliance/security/schema/runtime-verifier, high-blast-radius, release-gate, or production-readiness work. Use 높음 for normal multi-file implementation, 중간 for bounded docs/tests/refactors, and 낮음 only for trivial formatting or typo fixes.
 
