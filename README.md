@@ -47,7 +47,7 @@ This repository is the Phase-0 core for Asperitas internal RAG and agent develop
 | Chunk files or fixtures | Production vector database |
 | Benchmark doctrine | Asperitas internal fact |
 | Retrieval/eval scaffold | Full RAG/KG/eval production system |
-| Agent-stack roadmap | Proprietary agent stack implemented |
+| Agent-stack roadmap | Not proof that a proprietary agent stack is implemented |
 | Model output or hypothesis | Wet-lab validation |
 | Compliance checklist | Legal or regulatory approval |
 | Investor or market signal | Committed capital or product-market fit |
