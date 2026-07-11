@@ -28,14 +28,14 @@ These sources define operating doctrine and future direction. They do not prove 
 
 As of 2026-07-11:
 
-- latest confirmed `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
+- latest confirmed `main`: `d37ecdbaf367ff7554a59723888288f97bf253e0`;
 - PR #166 was squash-merged after CI #250 and Quality Gates #381 succeeded;
 - PR #166 changed exactly four protected-state guard test files;
 - the merged guard hardening makes protected-state checks independent of Git index staging state;
 - V1.10B answer-sample diagnostic reporting is merged;
 - V1.10C docs-only preflight is merged;
-- the V1.10C six-file implementation is reported as preserved in a separate local worktree but is not yet committed, pushed, reviewed, or merged;
-- therefore V1.10C implementation is not on `main`.
+- PR #168 V1.10C six-file implementation is squash-merged after CI #256 and Quality Gates #387 succeeded;
+- V1.10 is closed as a CI-gated deterministic offline answer-sample diagnostic reporting and stable sample-identity phase.
 
 PR #166 improves test integrity only. It does not improve runtime retrieval, generation, biological decision quality, compliance approval, or production readiness.
 
@@ -54,7 +54,7 @@ PR #166 improves test integrity only. It does not improve runtime retrieval, gen
 | Security, audit, failure-log, readiness, and internal dry-run layers | Repository controls exist | Not external customer deployment or approval authority |
 | Biology/compliance golden-set validator and offline evaluator | Deterministic diagnostic infrastructure exists | Synthetic/offline evidence only |
 | V1.10B answer-sample report | Merged diagnostic report | No runtime capture, blocking, or approval |
-| V1.10C stable evaluator sample IDs | Local implementation reported; publication pending | Not on `main` until separate PR passes and merges |
+| V1.10C stable evaluator sample IDs | Merged CI-gated deterministic implementation | Synthetic/offline diagnostic evidence only; no runtime or approval authority |
 | Internal UI/API and web product | Planned/partially scaffolded depending on component | Not authenticated commercial SaaS |
 | Production vector DB and KG | Not confirmed | Requires implementation, data, eval, security, and release evidence |
 | Proprietary foundation model for biology | Strategic direction only | Requires proprietary validated data and DBTL feedback at scale |
@@ -73,14 +73,13 @@ The main bottlenecks are:
 6. insufficient online/internal-dogfood traces for latency, cost, failure, and operator-review learning;
 7. the proprietary biological data and DBTL learning flywheel remains a future moat, not a completed asset.
 
-After V1.10C closes, development must shift from evaluator/report scaffolding toward representative data, holdout evaluation, real grounded answers, measurable retrieval/reranking improvements, compliance routing, and internal dogfood.
+With V1.10 closed, development must shift from evaluator/report scaffolding toward representative data, holdout evaluation, real grounded answers, measurable retrieval/reranking improvements, compliance routing, and internal dogfood.
 
 ## Mandatory Development Order
 
 ```text
 test-integrity closure
--> V1.10C stable sample identity
--> V1.10 final closure
+-> V1.10 stable sample identity and final closure
 -> representative biology/compliance eval reset
 -> retrieval and reranker hardening
 -> real source-grounded answer path
@@ -96,21 +95,23 @@ test-integrity closure
 
 Do not reorder this sequence merely to add fashionable frameworks.
 
-## Phase 0 — V1.10C Publication
+## Phase 0 — V1.10 Publication (Completed)
 
-Required sequence:
+V1.10C stable evaluator sample identity and deterministic answer-sample reporting are merged in PR #168 at `d37ecdbaf367ff7554a59723888288f97bf253e0`.
 
-1. update the preserved local V1.10C worktree onto the merged guard-hardening `main`;
-2. preserve exactly the approved six-file V1.10C implementation scope;
-3. rerun V1.10C targeted evaluator/report checks;
-4. verify 13/13 deterministic stable-ID joins with zero unmatched rows;
-5. preserve the existing 13-case outcome distribution unless an independently scoped scoring change is approved;
-6. run artifact verification and `git diff --check`;
-7. run the full suite once under the hardened guards;
-8. commit, push, and open a separate Draft PR;
-9. require GitHub Actions and human review before merge.
+Recorded evidence:
 
-V1.10C must remain deterministic, stdlib-only, diagnostic-only, and independent of runtime behavior.
+- exact six-file implementation scope;
+- CI #256 and Quality Gates #387 succeeded;
+- V1.7C validator PASS;
+- evaluator: 13 cases, 2 pass, 10 fail, 1 review, no errors;
+- report: 13/13 matched with zero unmatched rows;
+- targeted tests: 31 passed;
+- artifact verification and compile check PASS;
+- full suite: 831 passed in 2167.56s;
+- diff check PASS.
+
+V1.10 remains deterministic, stdlib-only, diagnostic-only, and independent of runtime behavior. It does not grant approval authority or replace human review.
 
 ## Phase 1 — Evaluation Reset
 
@@ -351,5 +352,5 @@ Stop and split scope if:
 
 Do not begin a broad new performance feature.
 
-First publish and close the preserved V1.10C six-file implementation on top of `1e437c4515cc664f6acdb6e5bb197aaf576d34af`. Then perform a separate V1.10 final closure and start the representative evaluation-reset preflight.
+V1.10 is closed. Start a separate preflight for the Representative Biology/Compliance Evaluation Reset, including versioned development/holdout data, stable task/sample IDs, provenance and evidence spans, high-risk human-reviewed labels, refusal/escalation cases, adversarial/security cases, and no expected-answer leakage into runtime retrieval.
 
