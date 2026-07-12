@@ -2,13 +2,13 @@
 
 ## Current Execution Authority
 
-Live implementation status is not duplicated in this document. Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence.
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-This document is an operating-doctrine baseline. Older phase names, commit SHAs, and next-step wording found in historical documents must not override the canonical current-state roadmap. Doctrine, plans, scaffolds, synthetic fixtures, and diagnostic reports are not proof of runtime quality, production readiness, compliance approval, biological validation, production vector DB/KG completion, or foundation-model capability.
+This document defines stable operating doctrine. It must not duplicate mutable phase names, commit SHAs, or next-step claims. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 ## Executive Bottom Line
 
-This repository must treat the Top Source Triad as the active development baseline for Asperitas AI-agent/RAG work, with the V11.1 Supergap Agent Build Leader layer and the P0+ AI Lead Operating Layer as performance, governance, and organizational-learning hardening layers.
+This repository must treat the Top Source Triad as the active development baseline for Asperitas AI-agent/RAG work, with the V11.1 Supergap Agent Build Leader layer and the P0+ AI Lead Operating Layer as the latest performance, governance, and organizational-learning hardening layers.
 
 Top Source Triad:
 
@@ -26,7 +26,7 @@ P0+ AI Lead Operating Layer sources:
 6. `글로벌 AI 리더·기업·엔지니어 종합 보고서.pdf`
 7. `프로젝트 내 AI 리드 내재화 실행계획 보고서.pdf`
 
-These sources define how development should proceed. They do not prove implementation status.
+The triad, v11.1 layer, and P0+ AI Lead layer define how development should proceed. They do not prove implementation status.
 
 ## P0+ AI Lead Operating Layer
 
@@ -54,15 +54,144 @@ Codex and other development agents should act as an AI Lead / CTO-level workflow
 - decision logs
 - adoption rituals
 
-## Durable Operating Rules
+For significant work, use this compact operating contract when useful:
 
-- Outcome first: define the decision, success criteria, constraints, evidence, output, verification, and stop rules before implementation.
-- Source grounded: preserve source IDs, evidence spans, confidence, uncertainty, registry status, and compliance tags.
-- MVP gated: use the smallest sufficient architecture and require measurable justification before adding frameworks, services, agents, or graph orchestration.
-- Audit ready: preserve tests, evals, logs, trace IDs, decision records, rejected alternatives, owners, dates, and rollback paths.
-- Compliance aware: require human approval for protected data, high-risk biological outputs, legal/compliance decisions, source promotion, and wet-lab execution.
-- Non-overclaim: separate implemented, inferred, unverified, and evidence-required claims.
+```text
+Goal:
+Scope:
+Evidence:
+Constraints:
+Output:
+Verification:
+Stop Rules:
+```
 
-## Status Routing Rule
+## Truth Boundary
 
-For active execution status, phase ordering, completion claims, and the immediate next action, always route to the canonical current-state roadmap and live GitHub evidence. This file must remain stable doctrine rather than a second mutable roadmap.
+Do not convert doctrine into implementation claims.
+
+| Doctrine artifact | Must not be claimed as |
+|---|---|
+| Top Source Triad attached | Production RAG complete |
+| V11.1 Supergap doctrine added | Proprietary agent stack implemented |
+| P0+ AI Lead reports attached | AI Lead organization, eval system, governance OS, or adoption system implemented |
+| Source map or source registry plan | Licensed production database |
+| Roadmap or architecture ladder | Deployed AI product |
+| Eval plan | Passing eval suite |
+| Tracing/observability plan | Production trace coverage |
+| Compliance gate design | Legal/regulatory approval |
+| DBTL workflow plan | Wet-lab validation |
+| Agent runtime roadmap | Autonomous agent safely deployed |
+| Foundation-model direction | Not proof of foundation-model capability |
+
+Only claim production status when there is merged code, configuration, logs, eval output, release note, and human approval evidence.
+
+## How Codex Should Use The Baseline
+
+Before any major PR, Codex or another coding agent should classify the task using this sequence:
+
+```text
+Scope Lock
+-> Source & Risk Preflight
+-> Contract Design
+-> Minimal Implementation
+-> Eval Harness
+-> Dry Run & Regression
+-> Human Gate
+-> Merge & Evidence Log
+-> Learn Back
+```
+
+The P0+ layer adds an explicit learn-back step: whenever a repeated failure, ambiguity, review bottleneck, or verification gap is found, convert it into a durable repo asset rather than a one-off chat correction.
+
+## Architecture Ladder
+
+Use the smallest sufficient design:
+
+```text
+deterministic helper
+-> single LLM/RAG/tool call
+-> fixed workflow
+-> stateful workflow
+-> agent
+-> multi-agent/graph
+```
+
+Do not introduce LangGraph, Agents SDK, CrewAI, AutoGen, Semantic Kernel, ADK, MCP, or autonomous execution unless a simpler layer fails and there is a documented quality gain, cost/latency/security analysis, rollback path, and eval requirement.
+
+## V11.1 Agent-Stack Doctrine
+
+The near-term strategic target is not from-scratch frontier pretraining. The realistic and fundable target is a proprietary agent stack over frontier models:
+
+```text
+proprietary source registry and biological data
+-> retrieval/reranking/citation control
+-> structured answer contracts
+-> tool and workflow interfaces
+-> offline/online evals
+-> red-team and regression gates
+-> tracing and observability
+-> compliance/security/human approval layer
+-> DBTL learning records
+-> proprietary dataset flywheel
+```
+
+This layer becomes a moat only when GitHub evidence proves measurable improvements in retrieval quality, citation fidelity, unsupported-claim blocking, biology/compliance routing, latency/cost, traceability, and DBTL learning-record quality.
+
+## Development Priority Stack
+
+| Priority | Workstream | Definition of done |
+|---|---|---|
+| P0 | Source Registry / approved-only ingestion | Unapproved sources cannot enter index |
+| P0 | Retrieval eval + citation fidelity | Expected source hit and citation regression report exist |
+| P0 | Grounded answer contract | Unsupported claims are blocked or labeled |
+| P0 | Compliance/security guardrails | CITES/Nagoya/LMO/biosafety/IP/privacy triggers tested |
+| P0+ | AI Lead operating layer | Playbooks, SOPs, eval ownership, governance gates, and learn-back assets are represented in repo artifacts |
+| P1 | Deep Research -> Registry pipeline | Candidate/review/approved/ingested/blocked states separated |
+| P1 | Literature / Benchmark Agent | Evidence-backed action item generated |
+| P1 | Trace/eval control plane | Workflow spans, eval artifacts, and regression history recorded |
+| P2 | Hypothesis / Experiment Design Agent | Falsifiable hypothesis + approval gate |
+| P2 | Biosafety / Compliance Router | Risk route, refusal, escalation verified |
+| P3 | DBTL Planner + Failure Analysis | Failure taxonomy and next-cycle recommendation |
+| P4 | Active Learning + Proprietary Dataset | Information-value ranking and dataset versioning |
+
+The exact active phase and immediate next action come from the canonical current-state roadmap and live GitHub evidence.
+
+## Commercial End State
+
+The end state is not an internal chatbot. The intended commercial path is:
+
+```text
+biodiversity access
+-> proprietary biological data
+-> source-grounded RAG/KG/eval control plane
+-> AI-bio decision workflows
+-> DBTL validation records
+-> IP/compliance trust layer
+-> web-productized internal/external platform
+-> products/licensing
+-> global biological infrastructure
+```
+
+## Required Report Block For Future PRs
+
+Every relevant PR should report:
+
+```text
+Top Source Triad + V11.1 + P0+ AI Lead alignment:
+Codex reasoning level: 매우높음 / 높음 / 중간 / 낮음
+MVP / phase affected:
+Changed files:
+Complexity level used:
+Why simpler pattern is enough or insufficient:
+Verification:
+Retrieval/citation impact:
+Eval/trace impact:
+Compliance/source-grounding review:
+Governance/organizational-learning impact:
+Web-productization impact:
+Production-status boundary:
+Skipped checks and rationale:
+Residual risks:
+Next action:
+```
