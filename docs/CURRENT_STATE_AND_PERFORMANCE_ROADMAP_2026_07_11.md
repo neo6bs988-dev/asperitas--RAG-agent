@@ -26,16 +26,18 @@ These sources define operating doctrine and future direction. They do not prove 
 
 ## Latest Confirmed GitHub Baseline
 
-As of 2026-07-11:
+As of 2026-07-12:
 
-- latest confirmed `main`: `d37ecdbaf367ff7554a59723888288f97bf253e0`;
+- latest confirmed `main`: `84809ddd2f18d14ea25c2ecb0d43b2d7b01e5691`;
 - PR #166 was squash-merged after CI #250 and Quality Gates #381 succeeded;
 - PR #166 changed exactly four protected-state guard test files;
 - the merged guard hardening makes protected-state checks independent of Git index staging state;
 - V1.10B answer-sample diagnostic reporting is merged;
 - V1.10C docs-only preflight is merged;
 - PR #168 V1.10C six-file implementation is squash-merged after CI #256 and Quality Gates #387 succeeded;
-- V1.10 is closed as a CI-gated deterministic offline answer-sample diagnostic reporting and stable sample-identity phase.
+- PR #169 V1.10 final closure is squash-merged after GitHub checks succeeded;
+- V1.10 is closed as a CI-gated deterministic offline answer-sample diagnostic reporting and stable sample-identity phase;
+- the active next phase is the Representative Biology / Compliance Evaluation Reset, beginning with a docs-only V1.11A preflight.
 
 PR #166 improves test integrity only. It does not improve runtime retrieval, generation, biological decision quality, compliance approval, or production readiness.
 
@@ -113,7 +115,9 @@ Recorded evidence:
 
 V1.10 remains deterministic, stdlib-only, diagnostic-only, and independent of runtime behavior. It does not grant approval authority or replace human review.
 
-## Phase 1 — Evaluation Reset
+## Phase 1 — Representative Biology / Compliance Evaluation Reset (Active Preflight)
+
+V1.11A defines the benchmark contract only. It does not implement a dataset, protected holdout, schema, fixtures, evaluator, retrieval or generation changes, runtime behavior, or approval authority. Any implementation remains a separate reviewed PR after this preflight.
 
 Build a versioned representative benchmark that separates development and holdout data.
 
@@ -352,5 +356,5 @@ Stop and split scope if:
 
 Do not begin a broad new performance feature.
 
-V1.10 is closed. Start a separate preflight for the Representative Biology/Compliance Evaluation Reset, including versioned development/holdout data, stable task/sample IDs, provenance and evidence spans, high-risk human-reviewed labels, refusal/escalation cases, adversarial/security cases, and no expected-answer leakage into runtime retrieval.
+Complete the docs-only V1.11A Representative Biology / Compliance Evaluation Reset preflight. Review the proposed versioning, development/protected-holdout split, source eligibility, human gold-label ownership, public/private storage boundary, leakage controls, metrics, and separate implementation acceptance criteria before any dataset or schema is created.
 
