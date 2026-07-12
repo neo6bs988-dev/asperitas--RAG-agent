@@ -4,7 +4,7 @@
 
 Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-This file defines durable project context. It must not duplicate mutable phase names, commit SHAs, or next-step claims. Any older status wording in historical documents is subordinate to the canonical roadmap.
+This file preserves durable project context and must not duplicate mutable phase names, commit SHAs, or next-step claims. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 Asperitas is building a source-grounded biological intelligence system that starts as an internal RAG/agent control plane and must ultimately become a web-productized, commercially deployable AI platform.
 
@@ -22,37 +22,20 @@ These sources are operating doctrine. They are not evidence that production vect
 
 ## Current Repository Stage
 
-The repository remains in a staged internal-development path. Live phase status must be read from the canonical current-state roadmap.
+The repository remains in a staged internal-development path. The exact active phase, completed milestones, bottlenecks, and immediate next action are controlled by the canonical current-state roadmap and live GitHub evidence.
 
-Confirmed durable state:
+## Completed Baseline Milestones
 
-- repository foundation and deterministic test harness exist;
-- source registry, processed artifacts, validators, retrieval modes, answer contracts, evaluator assets, governance docs, and internal scaffolds exist at different maturity levels;
-- deterministic `mvp003` retrieval is a protected reference mode;
-- vector and hybrid retrieval exist as comparison modes rather than selected production defaults;
-- reranker plumbing exists, but existing test reranker evidence does not establish quality improvement;
-- biology/compliance evaluation evidence remains synthetic/public-safe unless a separately approved holdout record proves otherwise;
-- real production answer quality, production vector DB/KG, legal approval, wet-lab validation, autonomous execution, and proprietary foundation-model capability remain unproven.
+- MVP-001 Foundation.
+- MVP-002 Retrieval structure.
+- MVP-002.5 Evaluation baseline.
+- MVP-003 Metadata-aware retrieval.
 
-## Durable Development Order
+Later capability status, including structure-aware chunking, vector/hybrid retrieval, reranking, answer generation, compliance controls, internal UI/API, and web productization, must be read from the canonical current-state roadmap rather than inferred from this context file.
 
-The canonical roadmap controls exact phase names and active status. The enduring order is:
+## Active Technical Focus
 
-```text
-representative evaluation controls
--> retrieval and reranker hardening
--> real source-grounded answer path
--> claim-to-citation verification
--> compliance/security adversarial gates
--> tracing, latency, token, and cost controls
--> internal dogfood
--> approved data flywheel
--> authenticated web productization
--> production-readiness gate
--> evidence-driven KG, DBTL, active learning, and foundation-model readiness
-```
-
-Do not reorder this sequence merely to add fashionable frameworks.
+Use the canonical roadmap's `Current Bottleneck`, `Mandatory Development Order`, and `Immediate Next Action`. Do not revive historical issue numbers or phase labels from older documents as active work.
 
 ## Commercialization Direction
 
@@ -68,12 +51,11 @@ internal source-grounded RAG core
 -> commercial AI product pathway
 ```
 
-A UI, roadmap, source registry, synthetic benchmark, or agent scaffold is not production readiness by itself.
-
-## Current Bottleneck Rule
-
-Do not infer the active bottleneck from this context file. Read the canonical roadmap and latest merged evidence. In general, prioritize measured retrieval/answer quality, source-grounding, compliance safety, traceability, latency/cost, and legally usable proprietary-data flywheel progress over adding orchestration complexity.
-
 ## Next Work
 
-Use the canonical roadmap's `Immediate Next Action` and latest merged GitHub evidence. Preserve Top Source Triad alignment in README, AGENTS, workflow, roadmap, tests, evals, and Codex prompts without duplicating live status across multiple documents.
+- Preserve Top Source Triad alignment in README, AGENTS, roadmap, and Codex prompts.
+- Keep deterministic retrieval and metadata-preservation baselines comparable while adding vector/hybrid/reranker layers.
+- Add source-grounded answer generation only after retrieval/evidence packaging is reliable.
+- Add compliance guardrails before public or investor-facing outputs.
+- Add backend API, LLM adapter, auth, observability, deployment, cost/latency gates, and user-role boundaries before web-product claims.
+- Resolve the exact next work item from the canonical roadmap and live GitHub evidence.
