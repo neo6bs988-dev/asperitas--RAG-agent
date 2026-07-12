@@ -115,9 +115,9 @@ Recorded evidence:
 
 V1.10 remains deterministic, stdlib-only, diagnostic-only, and independent of runtime behavior. It does not grant approval authority or replace human review.
 
-## Phase 1 — Representative Biology / Compliance Evaluation Reset (Active Preflight)
+## Phase 1 — Representative Biology / Compliance Evaluation Reset (V1.11 Public-Safe Development Track)
 
-V1.11A defines the benchmark contract only. It does not implement a dataset, protected holdout, schema, fixtures, evaluator, retrieval or generation changes, runtime behavior, or approval authority. Any implementation remains a separate reviewed PR after this preflight.
+V1.11A preflight and V1.11B public-safe development evaluation pack are merged. V1.11C is the CI/Quality Gates and final-closure PR; mark the track closed only after its exact-head checks and merge evidence are confirmed. The public-safe development track does not implement protected-holdout operations, qualified human gold labels, retrieval or generation changes, runtime behavior, or approval authority.
 
 Build a versioned representative benchmark that separates development and holdout data.
 
@@ -131,14 +131,14 @@ Required task families:
 - insufficient-evidence, contradiction, citation mismatch, refusal, and escalation;
 - prompt injection, malicious retrieved text, source poisoning, secret leakage, and excessive agency.
 
-Required controls:
+Controls represented by the merged public-safe development pack:
 
 - stable task and sample IDs;
 - explicit source and evidence-span labels;
-- development/holdout separation;
+- development-only fixture separation; protected holdout remains pending human-approved operations;
 - multi-valid-source handling separated from strict match metrics;
 - no expected-answer fields exposed to the runtime retrieval path;
-- human-reviewed gold labels for high-risk tasks;
+- no human-reviewed gold labels; qualified review and adjudication remain pending;
 - dataset/version provenance and change log;
 - failure taxonomy connected to regression tests.
 
@@ -354,7 +354,7 @@ Stop and split scope if:
 
 ## Immediate Next Action
 
-Do not begin a broad new performance feature.
+Do not begin a broad new performance feature until V1.11C CI/Quality Gates and merge evidence are confirmed.
 
-Complete the docs-only V1.11A Representative Biology / Compliance Evaluation Reset preflight. Review the proposed versioning, development/protected-holdout split, source eligibility, human gold-label ownership, public/private storage boundary, leakage controls, metrics, and separate implementation acceptance criteria before any dataset or schema is created.
+After V1.11C closes the public-safe development track, begin a separately scoped V1.12 retrieval/reranker hardening preflight. Protected holdout, reviewer assignment, adjudication, and generalization claims remain human-gated and are not implied by V1.11.
 
