@@ -1,4 +1,6 @@
-# Current State and Performance Roadmap — 2026-07-11
+# Current State and Performance Roadmap
+
+Last updated: 2026-07-13. The canonical filename is retained to preserve existing links.
 
 ## Authority
 
@@ -26,20 +28,19 @@ These sources define operating doctrine and future direction. They do not prove 
 
 ## Latest Confirmed GitHub Baseline
 
-As of 2026-07-12:
+As of 2026-07-13:
 
-- latest confirmed `main`: `84809ddd2f18d14ea25c2ecb0d43b2d7b01e5691`;
-- PR #166 was squash-merged after CI #250 and Quality Gates #381 succeeded;
-- PR #166 changed exactly four protected-state guard test files;
-- the merged guard hardening makes protected-state checks independent of Git index staging state;
-- V1.10B answer-sample diagnostic reporting is merged;
-- V1.10C docs-only preflight is merged;
-- PR #168 V1.10C six-file implementation is squash-merged after CI #256 and Quality Gates #387 succeeded;
-- PR #169 V1.10 final closure is squash-merged after GitHub checks succeeded;
-- V1.10 is closed as a CI-gated deterministic offline answer-sample diagnostic reporting and stable sample-identity phase;
-- the active next phase is the Representative Biology / Compliance Evaluation Reset, beginning with a docs-only V1.11A preflight.
+- latest confirmed `main`: `1df252783a57ea488354838c1ce1ed482d88bcd2`;
+- PR #170 V1.11A representative biology/compliance evaluation-reset preflight is squash-merged;
+- PR #171 V1.11B public-safe development evaluation pack is squash-merged;
+- PR #171 exact-head CI #262 and Quality Gates #393 succeeded;
+- V1.11B adds exactly 20 synthetic public-safe development records, a strict schema and manifest, a deterministic standard-library validator, focused tests, and source/review/leakage controls;
+- V1.11B local full-suite completion remains explicitly unverified after a baseline/environment V1.4C stall reproduced on both exact-main and branch probes; this is not V1.11B failure evidence and does not become a PASS claim;
+- PR #172 is the active V1.11C CI/Quality Gates and final-closure PR at head `d6bf22b0323bd39c657014d1eec1b1f0323d5bfe`; it is not merged evidence until exact-head checks and merge are confirmed;
+- the active next action is to complete V1.11C and close only the CI-gated public-safe development evaluation track;
+- V1.12 retrieval/reranker hardening begins only after V1.11C merge and post-merge verification.
 
-PR #166 improves test integrity only. It does not improve runtime retrieval, generation, biological decision quality, compliance approval, or production readiness.
+PR #171 improves public-safe development evaluation infrastructure only. It does not improve runtime retrieval, generation, biological decision quality, compliance approval, protected-holdout generalization, or production readiness.
 
 ## Reconciled Capability State
 
@@ -57,6 +58,8 @@ PR #166 improves test integrity only. It does not improve runtime retrieval, gen
 | Biology/compliance golden-set validator and offline evaluator | Deterministic diagnostic infrastructure exists | Synthetic/offline evidence only |
 | V1.10B answer-sample report | Merged diagnostic report | No runtime capture, blocking, or approval |
 | V1.10C stable evaluator sample IDs | Merged CI-gated deterministic implementation | Synthetic/offline diagnostic evidence only; no runtime or approval authority |
+| V1.11B public-safe development evaluation pack | Merged CI-gated deterministic implementation | 20 synthetic public-safe development records only; no protected holdout, qualified gold labels, or generalization claim |
+| V1.11C Quality Gates and final closure | Active Draft PR #172 | Not closed until exact-head CI, Quality Gates, review, merge, and post-merge evidence succeed |
 | Internal UI/API and web product | Planned/partially scaffolded depending on component | Not authenticated commercial SaaS |
 | Production vector DB and KG | Not confirmed | Requires implementation, data, eval, security, and release evidence |
 | Proprietary foundation model for biology | Strategic direction only | Requires proprietary validated data and DBTL feedback at scale |
@@ -68,21 +71,23 @@ The next performance gap is not lack of another agent framework.
 The main bottlenecks are:
 
 1. small and partially synthetic evaluation fixtures;
-2. retrieval results that can saturate current fixtures without proving holdout generalization;
-3. fixture-specific expected-section information in the accepted hybrid evaluation path;
-4. a deterministic test reranker that validates plumbing but lowers source@3;
-5. real answer-provider integration and claim-to-citation verification not yet proven as a production-shaped path;
-6. insufficient online/internal-dogfood traces for latency, cost, failure, and operator-review learning;
-7. the proprietary biological data and DBTL learning flywheel remains a future moat, not a completed asset.
+2. no approved protected holdout or qualified human-reviewed generalization evidence;
+3. retrieval results that can saturate current fixtures without proving holdout generalization;
+4. fixture-specific expected-section information in the accepted hybrid evaluation path;
+5. a deterministic test reranker that validates plumbing but lowers source@3;
+6. real answer-provider integration and claim-to-citation verification not yet proven as a production-shaped path;
+7. insufficient online/internal-dogfood traces for latency, cost, failure, and operator-review learning;
+8. the proprietary biological data and DBTL learning flywheel remains a future moat, not a completed asset.
 
-With V1.10 closed, development must shift from evaluator/report scaffolding toward representative data, holdout evaluation, real grounded answers, measurable retrieval/reranking improvements, compliance routing, and internal dogfood.
+With V1.11B merged, development must first close V1.11C CI enforcement and evidence synchronization, then shift to measurable retrieval/reranking improvements, real grounded answers, compliance routing, observability, and internal dogfood. Protected holdout operations remain a separate human-approved governance track.
 
 ## Mandatory Development Order
 
 ```text
-test-integrity closure
--> V1.10 stable sample identity and final closure
--> representative biology/compliance eval reset
+V1.10 stable sample identity and final closure
+-> V1.11A representative biology/compliance eval-reset preflight
+-> V1.11B public-safe development evaluation pack
+-> V1.11C CI/Quality Gates and final closure
 -> retrieval and reranker hardening
 -> real source-grounded answer path
 -> claim-to-citation verifier in diagnostic/shadow mode
@@ -119,7 +124,7 @@ V1.10 remains deterministic, stdlib-only, diagnostic-only, and independent of ru
 
 V1.11A preflight and V1.11B public-safe development evaluation pack are merged. V1.11C is the CI/Quality Gates and final-closure PR; mark the track closed only after its exact-head checks and merge evidence are confirmed. The public-safe development track does not implement protected-holdout operations, qualified human gold labels, retrieval or generation changes, runtime behavior, or approval authority.
 
-Build a versioned representative benchmark that separates development and holdout data.
+Future representative benchmark work must separate development and protected holdout data under an approved private-storage, access-control, source-clearance, reviewer, and adjudication policy.
 
 Required task families:
 
@@ -146,7 +151,9 @@ Controls represented by the merged public-safe development pack:
 
 The protected deterministic reference remains available.
 
-Hybrid or reranker promotion requires fresh holdout evidence:
+Hybrid or reranker promotion requires fresh evidence that is independent of runtime answer-key fields. Protected-holdout claims additionally require approved private operations and qualified review.
+
+Required gates:
 
 - source@5, source priority, evidence label, section, and path-context non-regression;
 - source@3, MRR, or nDCG improvement;
@@ -357,4 +364,3 @@ Stop and split scope if:
 Do not begin a broad new performance feature until V1.11C CI/Quality Gates and merge evidence are confirmed.
 
 After V1.11C closes the public-safe development track, begin a separately scoped V1.12 retrieval/reranker hardening preflight. Protected holdout, reviewer assignment, adjudication, and generalization claims remain human-gated and are not implied by V1.11.
-
