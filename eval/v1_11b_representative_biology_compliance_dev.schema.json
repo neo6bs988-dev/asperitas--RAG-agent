@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asperitas.local/eval/v1_11b_representative_biology_compliance_dev.schema.json",
+  "title": "V1.11B Public-Safe Representative Biology/Compliance Development Fixture",
+  "description": "Strict contract for synthetic public-safe development fixtures only. It is not a protected holdout, human-approved gold set, runtime gate, approval mechanism, or production-readiness claim.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dataset_id",
+    "dataset_version",
+    "task_id",
+    "sample_id",
+    "split",
+    "task_family",
+    "subdomain",
+    "language",
+    "query",
+    "source_refs",
+    "expected_support_status",
+    "expected_response_disposition",
+    "risk_class",
+    "compliance_tags",
+    "human_review_required",
+    "review_status",
+    "review_role",
+    "reviewer_id_or_placeholder",
+    "reviewed_at",
+    "dataset_provenance",
+    "change_reason",
+    "adversarial_tags",
+    "notes"
+  ],
+  "properties": {
+    "dataset_id": {
+      "type": "string",
+      "const": "asperitas_representative_biology_compliance_eval"
+    },
+    "dataset_version": {
+      "type": "string",
+      "const": "0.1.0-dev"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^v1_11_task_[a-z0-9_]+$"
+    },
+    "sample_id": {
+      "type": "string",
+      "pattern": "^v1_11_sample_[a-z0-9_]+_[0-9]{3}$"
+    },
+    "split": {
+      "type": "string",
+      "const": "development"
+    },
+    "task_family": {
+      "type": "string",
+      "enum": [
+        "biodiversity_species_provenance",
+        "compliance_cites_nagoya_lmo_biosafety",
+        "genome_protein_pathway_biological_claims",
+        "dbtl_planning_validation_honesty",
+        "ip_licensing_commercial_investor_claims",
+        "source_grounding_citation_contradiction_reasoning",
+        "security_adversarial_prompt_injection_source_poisoning"
+      ]
+    },
+    "subdomain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "language": {
+      "type": "string",
+      "enum": ["ko", "en", "ko_en"]
+    },
+    "query": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 1000
+    },
+    "source_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/source_ref"
+      }
+    },
+    "expected_support_status": {
+      "type": "string",
+      "enum": [
+        "supported",
+        "unsupported",
+        "contradicted",
+        "insufficient",
+        "conflicting",
+        "not_applicable"
+      ]
+    },
+    "expected_response_disposition": {
+      "type": "string",
+      "enum": ["answer", "answer_with_limits", "abstain", "refuse", "escalate"]
+    },
+    "risk_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "compliance_tags": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "human_review_required": {
+      "type": "boolean"
+    },
+    "review_status": {
+      "type": "string",
+      "const": "draft_unreviewed"
+    },
+    "review_role": {
+      "type": "string",
+      "enum": [
+        "Biology Reviewer",
+        "Biodiversity / Provenance Reviewer",
+        "Compliance / Legal Reviewer",
+        "Biosafety / Biosecurity Reviewer",
+        "Security / Adversarial Reviewer",
+        "Dataset Steward",
+        "AI Lead Benchmark Approver"
+      ]
+    },
+    "reviewer_id_or_placeholder": {
+      "type": "string",
+      "const": "unassigned_role_placeholder"
+    },
+    "reviewed_at": {
+      "type": "null"
+    },
+    "dataset_provenance": {
+      "type": "string",
+      "const": "synthetic_public_safe_v1_11b_design"
+    },
+    "change_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adversarial_tags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_kind",
+        "source_status",
+        "verification_status",
+        "license_status",
+        "allowed_use",
+        "evidence_locator",
+        "evidence_summary",
+        "evidence_limitations"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^v1_11_synth_source_[a-z0-9_]+$"
+        },
+        "source_kind": {
+          "type": "string",
+          "const": "synthetic_public_eval_summary"
+        },
+        "source_status": {
+          "type": "string",
+          "const": "synthetic_public_safe"
+        },
+        "verification_status": {
+          "type": "string",
+          "const": "synthetic_fixture_verified"
+        },
+        "license_status": {
+          "type": "string",
+          "const": "synthetic_fixture_public_use"
+        },
+        "allowed_use": {
+          "type": "string",
+          "const": "public_test_fixture_only"
+        },
+        "evidence_locator": {
+          "type": "string",
+          "pattern": "^synthetic://v1_11b/[a-z0-9_/-]+#[a-z0-9_-]+$"
+        },
+        "evidence_summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "evidence_limitations": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    }
+  }
+}
