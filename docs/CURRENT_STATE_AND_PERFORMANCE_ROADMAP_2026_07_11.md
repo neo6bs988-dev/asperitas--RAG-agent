@@ -36,7 +36,7 @@ As of 2026-07-13:
 - PR #171 exact-head CI #262 and Quality Gates #393 succeeded;
 - V1.11B adds exactly 20 synthetic public-safe development records, a strict schema and manifest, a deterministic standard-library validator, focused tests, and source/review/leakage controls;
 - V1.11B local full-suite completion remains explicitly unverified after a baseline/environment V1.4C stall reproduced on both exact-main and branch probes; this is not V1.11B failure evidence and does not become a PASS claim;
-- PR #172 is the active V1.11C CI/Quality Gates and final-closure PR at head `d6bf22b0323bd39c657014d1eec1b1f0323d5bfe`; it is not merged evidence until exact-head checks and merge are confirmed;
+- PR #172 is the active V1.11C CI/Quality Gates and final-closure PR; its current head and check state are authoritative only in live GitHub PR metadata, and it is not merged evidence until exact-head checks and merge are confirmed;
 - the active next action is to complete V1.11C and close only the CI-gated public-safe development evaluation track;
 - V1.12 retrieval/reranker hardening begins only after V1.11C merge and post-merge verification.
 
