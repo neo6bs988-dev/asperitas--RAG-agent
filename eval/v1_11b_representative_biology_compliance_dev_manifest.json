@@ -1,0 +1,40 @@
+{
+  "dataset_id": "asperitas_representative_biology_compliance_eval",
+  "dataset_version": "0.1.0-dev",
+  "status": "draft_public_safe_development_only",
+  "public_safe_development_only": true,
+  "protected_holdout_present": false,
+  "expected_record_count": 20,
+  "actual_record_count": 20,
+  "expected_family_distribution": {
+    "biodiversity_species_provenance": 2,
+    "compliance_cites_nagoya_lmo_biosafety": 4,
+    "genome_protein_pathway_biological_claims": 3,
+    "dbtl_planning_validation_honesty": 2,
+    "ip_licensing_commercial_investor_claims": 2,
+    "source_grounding_citation_contradiction_reasoning": 4,
+    "security_adversarial_prompt_injection_source_poisoning": 3
+  },
+  "language_requirements": {
+    "allowed_values": ["ko", "en", "ko_en"],
+    "minimum_ko": 8,
+    "minimum_en": 8,
+    "minimum_multi_sample_task_groups": 3
+  },
+  "support_status_values": [
+    "supported",
+    "unsupported",
+    "contradicted",
+    "insufficient",
+    "conflicting",
+    "not_applicable"
+  ],
+  "response_disposition_values": ["answer", "answer_with_limits", "abstain", "refuse", "escalate"],
+  "schema_path": "eval/v1_11b_representative_biology_compliance_dev.schema.json",
+  "fixture_path": "eval/v1_11b_representative_biology_compliance_dev.jsonl",
+  "source_policy": "Only compact synthetic public-safe source summaries with public_test_fixture_only use are eligible; repository presence does not confer eligibility.",
+  "review_policy": "Every record is draft_unreviewed with an unassigned role placeholder; validator output grants no human, legal, compliance, biosafety, publication, or release approval.",
+  "truth_boundary": "Deterministic public-safe development fixture and validation scaffold only; not protected-holdout evidence, human-approved gold, runtime behavior, or production approval.",
+  "generated_at_or_version_date": "2026-07-12",
+  "notes": "Manifest expectations are independently checked against all 20 JSONL records. No protected query hash or private storage identifier is included."
+}
