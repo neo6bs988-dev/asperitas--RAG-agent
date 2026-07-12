@@ -30,17 +30,17 @@ These sources define operating doctrine and future direction. They do not prove 
 
 As of 2026-07-13:
 
-- latest confirmed `main`: `1df252783a57ea488354838c1ce1ed482d88bcd2`;
+- V1.11C base `main`: `1df252783a57ea488354838c1ce1ed482d88bcd2`;
 - PR #170 V1.11A representative biology/compliance evaluation-reset preflight is squash-merged;
 - PR #171 V1.11B public-safe development evaluation pack is squash-merged;
 - PR #171 exact-head CI #262 and Quality Gates #393 succeeded;
 - V1.11B adds exactly 20 synthetic public-safe development records, a strict schema and manifest, a deterministic standard-library validator, focused tests, and source/review/leakage controls;
 - V1.11B local full-suite completion remains explicitly unverified after a baseline/environment V1.4C stall reproduced on both exact-main and branch probes; this is not V1.11B failure evidence and does not become a PASS claim;
-- PR #172 is the active V1.11C CI/Quality Gates and final-closure PR; its current head and check state are authoritative only in live GitHub PR metadata, and it is not merged evidence until exact-head checks and merge are confirmed;
-- the active next action is to complete V1.11C and close only the CI-gated public-safe development evaluation track;
-- V1.12 retrieval/reranker hardening begins only after V1.11C merge and post-merge verification.
+- PR #172 is the V1.11C CI/Quality Gates and final-closure change. Live GitHub PR and commit metadata are authoritative for its exact head, checks, merge result, and resulting `main` SHA;
+- when this document is present on `main` through a successful PR #172 merge, V1.11 is closed only as a CI-gated public-safe development evaluation infrastructure phase;
+- the next software phase is a separately scoped V1.12 retrieval/reranker hardening preflight.
 
-PR #171 improves public-safe development evaluation infrastructure only. It does not improve runtime retrieval, generation, biological decision quality, compliance approval, protected-holdout generalization, or production readiness.
+PR #171 and PR #172 improve public-safe development evaluation infrastructure only. They do not improve runtime retrieval, generation, biological decision quality, compliance approval, protected-holdout generalization, or production readiness.
 
 ## Reconciled Capability State
 
@@ -59,7 +59,7 @@ PR #171 improves public-safe development evaluation infrastructure only. It does
 | V1.10B answer-sample report | Merged diagnostic report | No runtime capture, blocking, or approval |
 | V1.10C stable evaluator sample IDs | Merged CI-gated deterministic implementation | Synthetic/offline diagnostic evidence only; no runtime or approval authority |
 | V1.11B public-safe development evaluation pack | Merged CI-gated deterministic implementation | 20 synthetic public-safe development records only; no protected holdout, qualified gold labels, or generalization claim |
-| V1.11C Quality Gates and final closure | Active Draft PR #172 | Not closed until exact-head CI, Quality Gates, review, merge, and post-merge evidence succeed |
+| V1.11C Quality Gates and final closure | Closed by PR #172 when this document is present on `main` after green exact-head checks | CI-gated public-safe development evaluation only; live GitHub metadata is the merge evidence |
 | Internal UI/API and web product | Planned/partially scaffolded depending on component | Not authenticated commercial SaaS |
 | Production vector DB and KG | Not confirmed | Requires implementation, data, eval, security, and release evidence |
 | Proprietary foundation model for biology | Strategic direction only | Requires proprietary validated data and DBTL feedback at scale |
@@ -79,7 +79,7 @@ The main bottlenecks are:
 7. insufficient online/internal-dogfood traces for latency, cost, failure, and operator-review learning;
 8. the proprietary biological data and DBTL learning flywheel remains a future moat, not a completed asset.
 
-With V1.11B merged, development must first close V1.11C CI enforcement and evidence synchronization, then shift to measurable retrieval/reranking improvements, real grounded answers, compliance routing, observability, and internal dogfood. Protected holdout operations remain a separate human-approved governance track.
+After PR #172 closes V1.11 on `main`, development may shift to measurable retrieval/reranking improvements, real grounded answers, compliance routing, observability, and internal dogfood. Protected holdout operations remain a separate human-approved governance track.
 
 ## Mandatory Development Order
 
@@ -122,7 +122,7 @@ V1.10 remains deterministic, stdlib-only, diagnostic-only, and independent of ru
 
 ## Phase 1 — Representative Biology / Compliance Evaluation Reset (V1.11 Public-Safe Development Track)
 
-V1.11A preflight and V1.11B public-safe development evaluation pack are merged. V1.11C is the CI/Quality Gates and final-closure PR; mark the track closed only after its exact-head checks and merge evidence are confirmed. The public-safe development track does not implement protected-holdout operations, qualified human gold labels, retrieval or generation changes, runtime behavior, or approval authority.
+V1.11A preflight and V1.11B public-safe development evaluation pack are merged. PR #172 closes V1.11C by wiring the V1.11B validator and focused tests into Quality Gates and adding final closure evidence. Treat V1.11 as closed only when PR #172 is merged and this document is present on `main`. The public-safe development track does not implement protected-holdout operations, qualified human gold labels, retrieval or generation changes, runtime behavior, or approval authority.
 
 Future representative benchmark work must separate development and protected holdout data under an approved private-storage, access-control, source-clearance, reviewer, and adjudication policy.
 
@@ -361,6 +361,6 @@ Stop and split scope if:
 
 ## Immediate Next Action
 
-Do not begin a broad new performance feature until V1.11C CI/Quality Gates and merge evidence are confirmed.
+Confirm PR #172 exact-head CI, Quality Gates, review, and merge evidence. Once this document is on `main` through that merge, begin a separately scoped V1.12 retrieval/reranker hardening preflight.
 
-After V1.11C closes the public-safe development track, begin a separately scoped V1.12 retrieval/reranker hardening preflight. Protected holdout, reviewer assignment, adjudication, and generalization claims remain human-gated and are not implied by V1.11.
+Protected holdout, reviewer assignment, adjudication, and generalization claims remain human-gated and are not implied by V1.11.
