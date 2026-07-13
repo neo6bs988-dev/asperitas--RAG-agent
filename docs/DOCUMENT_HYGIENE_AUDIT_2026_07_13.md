@@ -18,9 +18,10 @@ The audit found active guidance documents duplicating mutable state such as:
 - V1.10C publication as a future step after it had merged;
 - V1.5 or MVP-004 as the active focus after later phases had advanced;
 - historical issue numbers presented as current execution commands;
-- duplicated mandatory sequences that could drift from the authoritative roadmap.
+- duplicated mandatory sequences that could drift from the authoritative roadmap;
+- target-architecture documents presenting historical follow-up recommendations as the current execution queue.
 
-The following six documents are updated in this branch:
+The following seven guidance documents are updated in this branch:
 
 1. `docs/ROADMAP.md`
 2. `docs/PROJECT_CONTEXT.md`
@@ -28,12 +29,15 @@ The following six documents are updated in this branch:
 4. `docs/AI_DEVELOPMENT_OS.md`
 5. `docs/WORKFLOW.md`
 6. `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md`
+7. `docs/IDEAL_REPO_STRUCTURE_V11_1.md`
+
+This audit record is the eighth changed file.
 
 ## Repair Strategy
 
 - Route live phase status, completion claims, bottlenecks, and the immediate next action to `docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md` plus live GitHub evidence.
 - Preserve scoped technical contracts, exit criteria, architecture doctrine, safety rules, and historical release evidence.
-- Reclassify old issue sequences and phase labels as historical references rather than current commands.
+- Reclassify old issue sequences, follow-up recommendations, and phase labels as historical references rather than current commands.
 - Reconcile stale MVP-004/vector/hybrid/reranker status with the authoritative roadmap without claiming production readiness or performance improvement.
 - Keep truth boundaries explicit for protected holdout, human gold labels, runtime quality, legal/compliance/biosafety approval, production vector DB/KG, wet-lab validation, autonomous execution, and foundation-model capability.
 
@@ -44,7 +48,7 @@ No document is deleted in this PR.
 Reason:
 
 - the reviewed documents remain referenced by README, AGENTS, other roadmaps, workflow guidance, or productization documents;
-- several contain durable acceptance criteria and historical contracts that remain useful for regression review;
+- several contain durable acceptance criteria, target architecture, and historical contracts that remain useful for regression review;
 - deleting them would create broken links or remove audit context;
 - Git history alone is not a sufficient replacement for actively referenced governance contracts.
 
@@ -60,10 +64,10 @@ The authoritative current-state roadmap is being repaired in PR #172. This audit
 
 Required before merge:
 
-- exact seven-file scope;
+- exact eight-file scope;
 - Markdown fence balance;
 - relative path/link existence;
-- stale SHA and obsolete active-command scan across the six repaired docs;
+- stale SHA and obsolete active-command scan across the seven repaired guidance docs;
 - UTF-8 and trailing-whitespace review;
 - `git diff --check`;
 - docs-only CI/Quality Gates;
