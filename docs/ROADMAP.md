@@ -40,7 +40,7 @@ Do not reorder this sequence merely to add fashionable frameworks.
 
 ## V1 Internal Release Preparation — Historical Record
 
-The post-PR77 V1 release-preparation record remains useful historical evidence, but it is not the live next-step queue.
+The post-PR77 V1 release-preparation record remains immutable historical compatibility evidence, not current status or the live next-step queue. The canonical current-state roadmap and live GitHub evidence control current status and the next action.
 
 | V1 step | Historical record |
 |---|---|
@@ -48,11 +48,11 @@ The post-PR77 V1 release-preparation record remains useful historical evidence, 
 | 2. Benchmark Absorption & Stage-Gate Calibration | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
 | 3. MVP Performance Pack Backfill | Completed by `docs/V1_MVP_PERFORMANCE_PACK.md` |
 | 4. V1 Performance Closure Matrix | Completed by `docs/V1_PERFORMANCE_CLOSURE_MATRIX.md` after closure checks pass |
-| 5. P0/P1 Gap Fix Only | Recorded through `scripts/check_v1_p0_p1_gap_fix.py` and related PR evidence |
-| 6. Final Pre-RC Regression | Recorded in `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |
-| 7. v1.0.0-rc1 | Historical prerelease baseline at `7f28f0a60fae2d7e0b674d1111287386d2d64fc6` |
-| 8. Internal Dry-run | Status must be read from the canonical roadmap and live release evidence |
-| 9. v1.0.0-internal | Status must be read from the canonical roadmap and live release evidence |
+| 5. P0/P1 Gap Fix Only | Completed by `scripts/check_v1_p0_p1_gap_fix.py` after PR #86 main verification |
+| 6. Final Pre-RC Regression | Completed by `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |
+| 7. v1.0.0-rc1 | V1.0.0-rc1 baseline complete as prerelease at `7f28f0a60fae2d7e0b674d1111287386d2d64fc6` |
+| 8. Internal Dry-run | Pending reproducible dry-run evidence from `scripts/run_v1_internal_dry_run.py` |
+| 9. v1.0.0-internal | Pending; v1.0.0-internal pending until internal dry-run evidence passes |
 
 V1.1 handoff labels remain historical architectural context:
 
