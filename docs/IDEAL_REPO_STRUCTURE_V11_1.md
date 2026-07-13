@@ -13,11 +13,11 @@ The ideal Asperitas repo is not a prompt warehouse. It is a technical memory and
 The repo should make five states impossible to confuse:
 
 ```text
-source candidate != approved source
-approved source != ingested production index
-eval plan != passing eval suite
-agent scaffold != deployed agent
-foundation-model roadmap != foundation-model capability
+source candidate is not approved source
+approved source is not ingested production index
+eval plan is not passing eval suite
+agent scaffold is not deployed agent
+foundation-model roadmap is not foundation-model capability
 ```
 
 ## Target Directory Architecture
@@ -103,18 +103,18 @@ foundation-model roadmap != foundation-model capability
 
 ## Repository State Policy
 
-| Area | Allowed now | Not allowed to claim until verified |
+| Area | Allowed now | Claim blocked until verified |
 |---|---|---|
-| `docs/` | Operating doctrine, roadmaps, prompts, runbooks | Product shipped or production system complete |
-| `01_RAW_SOURCES/` | Classified source candidates and approved source copies | Licensed ingestion complete |
-| `02_SOURCE_REGISTRY/` | Registry schema and source status records | Legal review complete unless recorded |
-| `03_PROCESSED_KB/` | Extracted/redacted/chunked artifacts | Production vector DB complete |
-| `04_RETRIEVAL_CORE/` | Retrieval/rerank/citation code and fixtures | Production RAG quality without evals |
-| `05_ANSWER_CONTRACT/` | Claim/citation/compliance schemas and verifier | Full hallucination elimination |
-| `06_AGENTS/` | Scoped agent contracts and safe harnesses | Autonomous lab or commercial agent deployment |
-| `07_EVALS/` | Offline evals, golden sets, regression outputs | Passing eval suite without run artifacts |
-| `08_WORKFLOWS/` | Fixed/stateful workflow definitions | Unbounded autonomous execution |
-| `09_TRACES_LOGS/` | Decision, eval, and workflow evidence | Production observability without trace coverage |
+| `docs/` | Operating doctrine, roadmaps, prompts, runbooks | No product-shipped or production-complete claim without release evidence |
+| `01_RAW_SOURCES/` | Classified source candidates and approved source copies | No licensed-ingestion completion claim |
+| `02_SOURCE_REGISTRY/` | Registry schema and source status records | No legal-approval claim unless recorded |
+| `03_PROCESSED_KB/` | Extracted/redacted/chunked artifacts | No production vector DB completion claim |
+| `04_RETRIEVAL_CORE/` | Retrieval/rerank/citation code and fixtures | No production RAG quality claim without evals |
+| `05_ANSWER_CONTRACT/` | Claim/citation/compliance schemas and verifier | No full hallucination-elimination claim |
+| `06_AGENTS/` | Scoped agent contracts and safe harnesses | No autonomous-lab or commercial-agent deployment claim |
+| `07_EVALS/` | Offline evals, golden sets, regression outputs | No passing-eval-suite claim without run artifacts |
+| `08_WORKFLOWS/` | Fixed/stateful workflow definitions | No unbounded autonomous-execution claim |
+| `09_TRACES_LOGS/` | Decision, eval, and workflow evidence | No production-observability claim without trace coverage |
 
 ## MVP-Gated Upgrade Path
 
