@@ -1,40 +1,16 @@
 # Roadmap
 
-## Current Execution Authority (2026-07-11)
+## Current Execution Authority
 
-Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane.
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-Latest confirmed baseline before this documentation sync:
-
-- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
-- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
-- V1.10B diagnostic answer-sample reporting: merged;
-- V1.10C preflight: merged;
-- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
-
-If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
-
-Current mandatory sequence:
-
-```text
-V1.10C publication
--> V1.10 closure
--> representative biology/compliance eval reset
--> retrieval and reranker hardening
--> real grounded answer path and diagnostic verifier
--> compliance/security adversarial gates
--> trace, latency, token, and cost control plane
--> internal dogfood
--> approved data flywheel
--> web productization and production-readiness gates
-```
-
+This file is a durable compatibility roadmap. It must not duplicate mutable phase names, commit SHAs, issue status, or the immediate next action. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 This roadmap is the execution map for the Asperitas RAG Agent and its path toward a web-productized commercial AI platform. It must stay aligned with `docs/MVP_COMPLETION_MASTER_PLAN.md`, `docs/PERFORMANCE_IMPROVEMENT_STRATEGY.md`, `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md`, `docs/WEB_PRODUCTIZATION_ROADMAP.md`, GitHub Issues, and the active quality gates.
 
 ## Current Rule
 
-Do not mark an MVP as complete unless the relevant acceptance criteria, tests, evals, source-grounding review, compliance review, and release decision are recorded.
+Do not mark an MVP as complete unless the relevant acceptance criteria, tests, evals, source-grounding review, compliance review, release decision, and merge evidence are recorded.
 
 The Top Source Triad is the active operating baseline for future development. It is doctrine, not implementation proof.
 
@@ -44,61 +20,81 @@ ASPERITAS_PROJECT_SOURCE_CONSTITUTION_v11_0_KR.pdf
 + 딥리서치를 통해 GPT 채팅 학습용 자료.pdf
 ```
 
-## V1 Internal Release Preparation
+## Durable Development Sequence
 
-The post-PR77 V1 roadmap remains active and must not be collapsed into a single closeout claim. The current completed subtask is limited to Playbook v3 Absorption plus Benchmark Absorption & Stage-Gate Calibration; it is a docs/process/check-only step and does not implement performance features or alter runtime retrieval behavior.
+Exact active status comes from the canonical current-state roadmap. The enduring sequence is:
 
-| V1 step | Status |
+```text
+representative evaluation controls
+-> retrieval and reranker hardening
+-> real grounded answer path and diagnostic verifier
+-> compliance/security adversarial gates
+-> trace, latency, token, and cost control plane
+-> internal dogfood
+-> approved data flywheel
+-> web productization and production-readiness gates
+-> evidence-driven KG, DBTL, active learning, and foundation-model readiness
+```
+
+Do not reorder this sequence merely to add fashionable frameworks.
+
+## V1 Internal Release Preparation — Historical Record
+
+The post-PR77 V1 release-preparation record remains useful historical evidence, but it is not the live next-step queue.
+
+| V1 step | Historical record |
 |---|---|
 | 1. Playbook v3 Absorption | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
 | 2. Benchmark Absorption & Stage-Gate Calibration | Completed by `docs/V1_PLAYBOOK_V3_STAGE_GATE_ABSORPTION.md` |
 | 3. MVP Performance Pack Backfill | Completed by `docs/V1_MVP_PERFORMANCE_PACK.md` |
 | 4. V1 Performance Closure Matrix | Completed by `docs/V1_PERFORMANCE_CLOSURE_MATRIX.md` after closure checks pass |
-| 5. P0/P1 Gap Fix Only | Completed by `scripts/check_v1_p0_p1_gap_fix.py` after PR #86 main verification |
-| 6. Final Pre-RC Regression | Completed by `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |
-| 7. v1.0.0-rc1 | V1.0.0-rc1 baseline complete as prerelease at `7f28f0a60fae2d7e0b674d1111287386d2d64fc6` |
-| 8. Internal Dry-run | Pending reproducible dry-run evidence from `scripts/run_v1_internal_dry_run.py` |
-| 9. v1.0.0-internal | Pending; v1.0.0-internal pending until internal dry-run evidence passes |
+| 5. P0/P1 Gap Fix Only | Recorded through `scripts/check_v1_p0_p1_gap_fix.py` and related PR evidence |
+| 6. Final Pre-RC Regression | Recorded in `docs/V1_FINAL_PRE_RC_REGRESSION.md` for RC preparation only |
+| 7. v1.0.0-rc1 | Historical prerelease baseline at `7f28f0a60fae2d7e0b674d1111287386d2d64fc6` |
+| 8. Internal Dry-run | Status must be read from the canonical roadmap and live release evidence |
+| 9. v1.0.0-internal | Status must be read from the canonical roadmap and live release evidence |
 
-V1.1 handoff items:
+V1.1 handoff labels remain historical architectural context:
 
 - V1.1A failure log collector
 - V1.1B local/internal web dogfood UI
 - V1.1C real RAG answer provider integration
 - V1.1D retrieval/answer baseline
 
-Allowed status after the V1 Performance Closure Matrix passes its checks: ready to evaluate whether P0/P1 Gap Fix Only is needed. This is not final RC readiness, internal dry-run readiness, public web-product readiness, or commercial readiness.
+They must not override later merged roadmap decisions.
 
-## V1.5 Gap Closure And Performance Hardening
+## V1.5 Gap Closure And Performance Hardening — Historical Contract
 
-V1.5 begins with V1.5A harness-first, cost-aware, regression-safe documentation and gate sync. The active policy file is `docs/V1_5_PERFORMANCE_ROADMAP.md`.
+`docs/V1_5_PERFORMANCE_ROADMAP.md` preserves the V1.5 scoped harness-first, cost-aware, regression-safe contract. It is not the live phase authority.
 
-Required V1.5A operating loop:
+Durable operating loop:
 
 ```text
 Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
 ```
 
-V1.5A is governance and verification-policy work only. It does not implement V2 vector DB/KG, V3 modular agents, V4 ML/DL, production RAG, production KG, production vector DB, answer behavior changes, retrieval scoring changes, source ingestion, generated indexes, legal approval, regulatory approval, wet-lab validation, customer traction, public SaaS, or production readiness.
+V1.5A was governance and verification-policy work only. It did not implement production RAG, production KG, production vector DB, answer behavior changes, source ingestion, legal approval, regulatory approval, wet-lab validation, customer traction, public SaaS, or production readiness.
 
 ## MVP Status Table
 
-| MVP | Name | Status | Primary Issue(s) | Exit Condition |
-|---|---|---|---|---|
-| MVP-001 | Foundation | Completed / baseline | historical | repo and core structure exist |
-| MVP-002 | Retrieval Structure | Completed / baseline | historical | initial retrieval pipeline exists |
-| MVP-002.5 | Evaluation Baseline | Completed / baseline | historical | repeatable retrieval eval exists |
-| MVP-003 | Metadata-Aware Retrieval | Completed / baseline | historical | metadata-aware retrieval exists |
-| MVP-004 | Structure-Aware Chunking | Needs final close gate | #1 | quality gate output recorded with no unexplained regression |
-| MVP-005 | Embeddings + Vector DB | Planned / next | #2, #3, #4, #5, #6 | vector retrieval exists as comparable mode with metadata preserved |
-| MVP-006 | Hybrid Retrieval | Planned | #10, #11 | hybrid mode improves or preserves retrieval/source-grounding metrics |
-| MVP-007 | Reranker | Planned | #12, #13 | reranker improves ordering or is rejected with evidence |
-| MVP-008 | Source-Grounded Answer Generation | Planned | #14, #15 | generated answers cite retrieved evidence and handle insufficient evidence safely |
-| MVP-009 | Compliance Guardrails | Planned | #16, #17 | high-risk biological/compliance outputs block or escalate |
-| MVP-010 | Internal UI/API | Planned | #18, #19, #20 | internal interface/API operates the agent with evidence and compliance visibility |
-| MVP-011 | Web Productization Foundation | Planned | TBD | backend/API, LLM adapter, auth boundary, observability, deployment, and secrets policy are defined and testable |
-| MVP-012 | Web App MVP | Planned | TBD | authenticated web UI supports queries, evidence, citations, verifier status, compliance warnings, and operator review |
-| MVP-013 | Production Readiness Gate | Planned | TBD | security, privacy, source-license, compliance, cost, latency, rollback, and public-claim gates pass with evidence |
+Live status must be reconciled with the canonical current-state roadmap and current GitHub evidence.
+
+| MVP | Name | Reconciled state | Boundary |
+|---|---|---|---|
+| MVP-001 | Foundation | Completed / baseline | Repository and core structure exist; not production deployment |
+| MVP-002 | Retrieval Structure | Completed / baseline | Initial retrieval pipeline exists |
+| MVP-002.5 | Evaluation Baseline | Completed / baseline | Repeatable retrieval evaluation exists; fixtures remain limited |
+| MVP-003 | Metadata-Aware Retrieval | Completed / protected reference | Deterministic metadata-aware mode remains comparable |
+| MVP-004 | Structure-Aware Chunking | Closed by recorded quality-gate evidence | Historical tables marking it pending are stale |
+| MVP-005 | Embeddings + Vector DB | Offline vector comparison mode implemented | Not a selected production vector backend |
+| MVP-006 | Hybrid Retrieval | Comparison mode implemented and accepted for comparison | Not default; fixture-specific section expectations limit claims |
+| MVP-007 | Reranker | Interface and deterministic test reranker implemented | Existing test reranker regressed source@3; no quality-improvement claim |
+| MVP-008 | Source-Grounded Answer Generation | Contracts/scaffolds exist | Real RAG answer provider is not the default production path |
+| MVP-009 | Compliance Guardrails | Repository controls/scaffolds exist | Not production approval or external deployment |
+| MVP-010 | Internal UI/API | Planned or partially scaffolded by component | Not authenticated commercial SaaS |
+| MVP-011 | Web Productization Foundation | Planned | Requires backend/API/provider/auth/observability/deployment evidence |
+| MVP-012 | Web App MVP | Planned | Requires authenticated web UI and operator-review evidence |
+| MVP-013 | Production Readiness Gate | Planned | Requires security, privacy, license, compliance, cost, latency, rollback, and release evidence |
 
 ## MVP-001 Foundation
 
@@ -116,21 +112,21 @@ Status: completed baseline. Future retrieval work must remain backward-compatibl
 
 Create baseline retrieval evaluation so future changes can be measured against repeatable metrics.
 
-Status: completed baseline. This is the foundation for all performance claims.
+Status: completed baseline. This is the foundation for performance claims, but current fixtures do not prove holdout generalization.
 
 ## MVP-003 Metadata-Aware Retrieval
 
 Use document and chunk metadata to improve filtering, attribution, retrieval quality, and source traceability.
 
-Status: completed baseline. Existing `mvp003` eval mode must remain comparable.
+Status: completed protected reference. Existing `mvp003` eval mode must remain comparable.
 
 ## MVP-004 Structure-Aware Chunking
 
 Improve chunking so document structure, biological context, headings, tables, methods, and source boundaries are preserved more effectively.
 
-Active task: Issue #1.
+Status: closed by recorded quality-gate evidence. Historical references to Issue #1 as the active task are stale.
 
-Exit criteria:
+Exit criteria retained for regression review:
 
 - full quality gate run;
 - chunk section audit recorded;
@@ -141,13 +137,15 @@ Exit criteria:
 
 Add embedding generation and vector database boundaries for scalable semantic retrieval.
 
-Active sequence:
+Historical implementation sequence:
 
-1. Issue #2: embedding record schema and metadata-preservation tests.
-2. Issue #3: offline embedding provider boundary.
-3. Issue #4: local vector store adapter.
-4. Issue #5: vector retrieval eval mode.
-5. Issue #6: select vector backend after adapter and eval exist.
+1. embedding record schema and metadata-preservation tests;
+2. offline embedding provider boundary;
+3. local vector store adapter;
+4. vector retrieval eval mode;
+5. backend selection after adapter and eval exist.
+
+Current boundary: an offline vector comparison mode exists, but no production vector backend is selected.
 
 Exit criteria:
 
@@ -160,72 +158,70 @@ Exit criteria:
 
 Combine semantic vector retrieval with lexical, metadata-aware, and section-aware retrieval.
 
-Active sequence:
-
-1. Issue #10: design hybrid scoring contract.
-2. Issue #11: implement hybrid mode and eval comparison.
+Current boundary: hybrid comparison exists and remains non-default. Promotion requires fresh, leakage-resistant evidence.
 
 Exit criteria:
 
 - hybrid mode is separately selectable;
 - eval compares baseline, mvp003, vector, and hybrid;
-- no source/evidence traceability regression.
+- no source/evidence traceability regression;
+- query-derived intent replaces fixture-answer or expected-section shortcuts before promotion.
 
 ## MVP-007 Reranker
 
 Add a reranking stage to improve evidence ordering before answer generation.
 
-Active sequence:
-
-1. Issue #12: reranker interface and deterministic test reranker.
-2. Issue #13: reranker eval and top-k ordering comparison.
+Current boundary: interface/plumbing and a deterministic test reranker exist. The existing test reranker lowered source@3 and is not promoted.
 
 Exit criteria:
 
 - reranker preserves metadata;
 - reranker can be measured before/after;
-- ordering improves or deferral is justified by evidence.
+- ordering improves or deferral is justified by evidence;
+- latency/token and source-priority effects are recorded.
 
 ## MVP-008 Source-Grounded Answer Generation
 
 Generate answers only from retrieved source evidence, with citations and clear insufficient-evidence behavior.
 
-Active sequence:
+Historical implementation sequence:
 
-1. Issue #14: define answer contract and citation format.
-2. Issue #15: implement source-grounded answer generator.
+1. define answer contract and citation format;
+2. implement source-grounded answer generator.
 
 Exit criteria:
 
 - material claims trace to evidence;
 - citation format preserves source ID, source priority, and evidence label;
-- insufficient evidence produces uncertainty/refusal, not fabrication.
+- insufficient evidence produces uncertainty/refusal, not fabrication;
+- real provider behavior is evaluated separately from synthetic/offline diagnostics.
 
 ## MVP-009 Compliance Guardrails
 
 Add guardrails for biological intelligence use cases, including source constraints, uncertainty handling, and compliance-aware refusal or escalation behavior.
 
-Active sequence:
+Historical implementation sequence:
 
-1. Issue #16: define compliance risk taxonomy and guardrail contract.
-2. Issue #17: implement compliance guardrail tests and escalation behavior.
+1. define compliance risk taxonomy and guardrail contract;
+2. implement compliance guardrail tests and escalation behavior.
 
 Exit criteria:
 
 - high-risk domains are classified;
 - guardrail tests exist;
 - high-risk outputs block or escalate;
-- public/investor claims require evidence.
+- public/investor claims require evidence;
+- evaluator output grants no legal, compliance, biosafety, IP, wet-lab, public, investor, release, or production approval.
 
 ## MVP-010 Internal UI/API
 
 Provide an internal interface and API for testing, reviewing, and operating the RAG agent.
 
-Active sequence:
+Historical implementation sequence:
 
-1. Issue #18: define internal API contract.
-2. Issue #19: implement minimal internal API/UI with evidence and compliance debug view.
-3. Issue #20: close first agent release with release notes and operating guide.
+1. define internal API contract;
+2. implement minimal internal API/UI with evidence and compliance debug view;
+3. close first agent release with release notes and operating guide.
 
 Exit criteria:
 
@@ -295,15 +291,10 @@ Exit criteria:
 - public/investor claims have source support and human approval;
 - release note states exactly what is implemented and what remains unverified.
 
-## Supporting Engineering Issues
+## Supporting Engineering References
 
-- Issue #7: dependency/security review before external libraries.
-- Issue #8: later RAGAS/DSPy-style answer evaluation.
-- Issue #9: later LangGraph-style orchestration.
-- Future issue: MVP-011 backend/API/provider/auth/observability contract.
-- Future issue: MVP-012 authenticated web UI with evidence/compliance panel.
-- Future issue: MVP-013 production readiness and commercialization gate.
+Historical issue numbers and earlier future-work labels remain useful for provenance, but they are not live execution commands. New work must be scoped from the canonical current-state roadmap and current GitHub evidence.
 
 ## Default Next Command
 
-Start with Issue #1. Do not start MVP-005 implementation until MVP-004 quality gate output is known. Do not start MVP-011 implementation until MVP-010 internal UI/API evidence exists and a separate web-productization scope lock is approved.
+Read the canonical current-state roadmap's `Immediate Next Action` and verify it against live GitHub evidence. Do not start work from historical issue numbers, stale phase labels, or old commit references in this compatibility roadmap.

@@ -1,34 +1,10 @@
 # Top Source Triad + V11.1 + P0+ AI Lead Operating Baseline
 
-## Current Execution Authority (2026-07-11)
+## Current Execution Authority
 
-Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane.
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-Latest confirmed baseline before this documentation sync:
-
-- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
-- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
-- V1.10B diagnostic answer-sample reporting: merged;
-- V1.10C preflight: merged;
-- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
-
-If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
-
-Current mandatory sequence:
-
-```text
-V1.10C publication
--> V1.10 closure
--> representative biology/compliance eval reset
--> retrieval and reranker hardening
--> real grounded answer path and diagnostic verifier
--> compliance/security adversarial gates
--> trace, latency, token, and cost control plane
--> internal dogfood
--> approved data flywheel
--> web productization and production-readiness gates
-```
-
+This document defines stable operating doctrine. It must not duplicate mutable phase names, commit SHAs, or next-step claims. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 ## Executive Bottom Line
 
@@ -178,6 +154,8 @@ This layer becomes a moat only when GitHub evidence proves measurable improvemen
 | P2 | Biosafety / Compliance Router | Risk route, refusal, escalation verified |
 | P3 | DBTL Planner + Failure Analysis | Failure taxonomy and next-cycle recommendation |
 | P4 | Active Learning + Proprietary Dataset | Information-value ranking and dataset versioning |
+
+The exact active phase and immediate next action come from the canonical current-state roadmap and live GitHub evidence.
 
 ## Commercial End State
 

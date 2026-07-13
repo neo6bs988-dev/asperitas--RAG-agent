@@ -1,34 +1,10 @@
 # Project Context
 
-## Current Execution Authority (2026-07-11)
+## Current Execution Authority
 
-Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane.
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-Latest confirmed baseline before this documentation sync:
-
-- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
-- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
-- V1.10B diagnostic answer-sample reporting: merged;
-- V1.10C preflight: merged;
-- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
-
-If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
-
-Current mandatory sequence:
-
-```text
-V1.10C publication
--> V1.10 closure
--> representative biology/compliance eval reset
--> retrieval and reranker hardening
--> real grounded answer path and diagnostic verifier
--> compliance/security adversarial gates
--> trace, latency, token, and cost control plane
--> internal dogfood
--> approved data flywheel
--> web productization and production-readiness gates
-```
-
+This file preserves durable project context and must not duplicate mutable phase names, commit SHAs, or next-step claims. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 Asperitas is building a source-grounded biological intelligence system that starts as an internal RAG/agent control plane and must ultimately become a web-productized, commercially deployable AI platform.
 
@@ -46,7 +22,7 @@ These sources are operating doctrine. They are not evidence that production vect
 
 ## Current Repository Stage
 
-The repository remains in a staged internal-development path. MVP-004 through MVP-010 build the internal RAG/agent foundation. MVP-011 through MVP-013 convert that internal system into a web-productization pathway.
+The repository remains in a staged internal-development path. The exact active phase, completed milestones, bottlenecks, and immediate next action are controlled by the canonical current-state roadmap and live GitHub evidence.
 
 ## Completed Baseline Milestones
 
@@ -55,11 +31,11 @@ The repository remains in a staged internal-development path. MVP-004 through MV
 - MVP-002.5 Evaluation baseline.
 - MVP-003 Metadata-aware retrieval.
 
+Later capability status, including structure-aware chunking, vector/hybrid retrieval, reranking, answer generation, compliance controls, internal UI/API, and web productization, must be read from the canonical current-state roadmap rather than inferred from this context file.
+
 ## Active Technical Focus
 
-- MVP-004 Structure-aware chunking closure.
-- MVP-005 Embeddings + Vector DB planning after MVP-004 quality gate evidence.
-- V1.5/V1.6 performance hardening, claim-to-citation verifier, and security/adversarial eval readiness.
+Use the canonical roadmap's `Current Bottleneck`, `Mandatory Development Order`, and `Immediate Next Action`. Do not revive historical issue numbers or phase labels from older documents as active work.
 
 ## Commercialization Direction
 
@@ -78,8 +54,8 @@ internal source-grounded RAG core
 ## Next Work
 
 - Preserve Top Source Triad alignment in README, AGENTS, roadmap, and Codex prompts.
-- Close MVP-004 only with recorded gate evidence.
 - Keep deterministic retrieval and metadata-preservation baselines comparable while adding vector/hybrid/reranker layers.
 - Add source-grounded answer generation only after retrieval/evidence packaging is reliable.
 - Add compliance guardrails before public or investor-facing outputs.
 - Add backend API, LLM adapter, auth, observability, deployment, cost/latency gates, and user-role boundaries before web-product claims.
+- Resolve the exact next work item from the canonical roadmap and live GitHub evidence.

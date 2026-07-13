@@ -1,34 +1,10 @@
 # AI Development OS
 
-## Current Execution Authority (2026-07-11)
+## Current Execution Authority
 
-Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane.
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-Latest confirmed baseline before this documentation sync:
-
-- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
-- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
-- V1.10B diagnostic answer-sample reporting: merged;
-- V1.10C preflight: merged;
-- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
-
-If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
-
-Current mandatory sequence:
-
-```text
-V1.10C publication
--> V1.10 closure
--> representative biology/compliance eval reset
--> retrieval and reranker hardening
--> real grounded answer path and diagnostic verifier
--> compliance/security adversarial gates
--> trace, latency, token, and cost control plane
--> internal dogfood
--> approved data flywheel
--> web productization and production-readiness gates
-```
-
+This document defines the durable operating model. It must not duplicate mutable phase names, commit SHAs, or next-step claims. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 The Asperitas AI Development OS is the operating model for building a source-grounded, eval-driven, compliance-native, biology-specific AI agent infrastructure with Codex, GitHub, tests, evals, reusable skills, and executable quality gates.
 
@@ -36,13 +12,15 @@ This document is an operating layer. Do not use it as proof that any database, r
 
 ## Current Operating State
 
-- V1.3 strengthened retrieval diagnostics, source coverage, answer contract, and truth/compliance routing.
-- V1.4 strengthened token/context efficiency and closed optimization readiness.
-- V1.5 is the current operating focus: gap closure, documentation sync, GitHub-native gates, performance hardening, and modular-agent readiness.
-- V1.6 and later work should harden claim-to-citation verification, adversarial/security evals, biology/compliance golden sets, and measurable latency/cost/token performance.
-- MVP-011 through MVP-013 define the web-productization and commercialization-readiness pathway after the internal RAG/API/UI foundation is credible.
+The exact active phase, completed milestones, and immediate next action are controlled by the canonical current-state roadmap and live GitHub evidence.
 
-The repository should be treated as Phase-0 core infrastructure: source registry, metadata, retrieval, answer contract, truth/compliance router, eval harnesses, decision logs, and agent scaffolds.
+Durable state:
+
+- V1.3 strengthened retrieval diagnostics, source coverage, answer contract, and truth/compliance routing.
+- V1.4 strengthened token/context efficiency and optimization readiness.
+- Later V1.x work adds evaluation, reporting, security, workflow, and performance controls through merged PR evidence.
+- MVP-011 through MVP-013 define the web-productization and commercialization-readiness pathway after the internal RAG/API/UI foundation is credible.
+- The repository remains Phase-0 core infrastructure: source registry, metadata, retrieval, answer contract, truth/compliance router, eval harnesses, decision logs, and agent scaffolds.
 
 ## Top Source Triad Baseline
 
@@ -67,6 +45,7 @@ PDF and Deep Research sources remain upstream operating doctrine. They guide wor
 | Layer | Purpose | Source of Truth |
 |---|---|---|
 | Strategy layer | Mission, benchmark doctrine, roadmap, operating philosophy | Project chat, AOS/PRIME docs, `README.md` |
+| Current-state layer | Active phase, completion claims, bottlenecks, next action | Canonical current-state roadmap + live GitHub evidence |
 | Source-triad layer | Latest operating baseline and development doctrine | `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md` |
 | Agent instruction layer | Codex/agent behavior and stop rules | `AGENTS.md`, `.agents/skills/*` |
 | Governance layer | Source priority, confidentiality, truth boundary, compliance | `docs/AOS_SOURCE_POLICY.md`, registry docs |
@@ -103,14 +82,15 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 
 - `README.md` states the repository mission, truth boundary, benchmark doctrine, roadmap, and tool doctrine.
 - `AGENTS.md` defines repo-wide agent behavior, safety rules, testing expectations, report format, and stop rules.
+- `docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md` defines live status, bottlenecks, phase ordering, and immediate next action.
 - `docs/AI_DEVELOPMENT_OS.md` explains this full operating system.
 - `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md` defines the active source triad and how future development must use it.
 - `docs/WEB_PRODUCTIZATION_ROADMAP.md` defines the path from internal RAG/API/UI to web app and commercialization gates.
-- `docs/CODEX_NEXT_PROMPT_WEB_PRODUCTIZATION.md` provides the next Codex-ready prompt for this workstream.
+- `docs/CODEX_NEXT_PROMPT_WEB_PRODUCTIZATION.md` provides a Codex-ready prompt for that workstream when the canonical roadmap authorizes it.
 - `docs/WORKFLOW.md` defines the standard human + Codex loop.
 - `docs/QUALITY_GATES.md` defines checks that must pass before work is called done.
 - `docs/AOS_SOURCE_POLICY.md` defines source priority, disclosure, evidence labels, and do-not-confuse boundaries.
-- `docs/V1_5_PERFORMANCE_ROADMAP.md` defines the current performance-hardening path.
+- `docs/V1_5_PERFORMANCE_ROADMAP.md` preserves the V1.5 scoped performance-hardening contract; it is not the live phase authority.
 - `.github/pull_request_template.md` makes scope, tests, metrics, source grounding, and compliance explicit.
 - GitHub Actions run executable CI gates when configured.
 - Tests and evals prove behavior.
@@ -119,7 +99,7 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 ## Default Operating Loop
 
 1. Define the outcome and success criteria.
-2. Read `AGENTS.md`, relevant docs, the Top Source Triad baseline, and relevant skills.
+2. Read `AGENTS.md`, the canonical roadmap, relevant docs, the Top Source Triad baseline, and relevant skills.
 3. Inspect existing files before editing.
 4. Choose the smallest safe change.
 5. Run the smallest sufficient checks.
@@ -129,9 +109,9 @@ Do not claim a benchmark capability is implemented until code, docs, tests, eval
 9. Merge only when scope and pass/fail evidence are clear.
 10. Update the next Codex prompt based on gaps found.
 
-## V1.5A Harness-First Discipline
+## Harness-First Discipline
 
-V1.5A makes the default development loop harness-first, cost-aware, and regression-safe:
+The default development loop is harness-first, cost-aware, and regression-safe:
 
 ```text
 Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
@@ -189,7 +169,7 @@ Default roles:
 | Semgrep / gitleaks / Dependabot / Trivy | Security, secret, dependency, and supply-chain checks |
 | Qdrant / Chroma / Neo4j | Vector DB and KG candidates after governance stabilizes |
 | BioPython / RDKit / ESM / AlphaFold-class tools | Biology ML/DL stage after source/compliance controls |
-| FastAPI / Next.js / Vercel / Render / AWS / GCP | Web productization candidates only after MVP-011 scope lock and security review |
+| FastAPI / Next.js / Vercel / Render / AWS / GCP | Web productization candidates only after scope lock and security review |
 
 Do not add frameworks or services without a Scout -> License -> Security -> Benchmark -> Adapt -> Test ledger.
 

@@ -1,5 +1,11 @@
 # Ideal Repository Structure v11.1
 
+## Current Execution Authority
+
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
+
+This file defines a target architecture and durable placement rules. It is not a live implementation inventory or next-step queue. Historical follow-up notes and recommendations below remain provenance only and must not override the canonical current-state roadmap.
+
 ## Executive Bottom Line
 
 The ideal Asperitas repo is not a prompt warehouse. It is a technical memory and control plane for source-grounded biological intelligence infrastructure.
@@ -7,11 +13,11 @@ The ideal Asperitas repo is not a prompt warehouse. It is a technical memory and
 The repo should make five states impossible to confuse:
 
 ```text
-source candidate != approved source
-approved source != ingested production index
-eval plan != passing eval suite
-agent scaffold != deployed agent
-foundation-model roadmap != foundation-model capability
+source candidate is not approved source
+approved source is not ingested production index
+eval plan is not passing eval suite
+agent scaffold is not deployed agent
+foundation-model roadmap is not foundation-model capability
 ```
 
 ## Target Directory Architecture
@@ -97,18 +103,18 @@ foundation-model roadmap != foundation-model capability
 
 ## Repository State Policy
 
-| Area | Allowed now | Not allowed to claim until verified |
+| Area | Allowed now | Claim blocked until verified |
 |---|---|---|
-| `docs/` | Operating doctrine, roadmaps, prompts, runbooks | Product shipped or production system complete |
-| `01_RAW_SOURCES/` | Classified source candidates and approved source copies | Licensed ingestion complete |
-| `02_SOURCE_REGISTRY/` | Registry schema and source status records | Legal review complete unless recorded |
-| `03_PROCESSED_KB/` | Extracted/redacted/chunked artifacts | Production vector DB complete |
-| `04_RETRIEVAL_CORE/` | Retrieval/rerank/citation code and fixtures | Production RAG quality without evals |
-| `05_ANSWER_CONTRACT/` | Claim/citation/compliance schemas and verifier | Full hallucination elimination |
-| `06_AGENTS/` | Scoped agent contracts and safe harnesses | Autonomous lab or commercial agent deployment |
-| `07_EVALS/` | Offline evals, golden sets, regression outputs | Passing eval suite without run artifacts |
-| `08_WORKFLOWS/` | Fixed/stateful workflow definitions | Unbounded autonomous execution |
-| `09_TRACES_LOGS/` | Decision, eval, and workflow evidence | Production observability without trace coverage |
+| `docs/` | Operating doctrine, roadmaps, prompts, runbooks | No product-shipped or production-complete claim without release evidence |
+| `01_RAW_SOURCES/` | Classified source candidates and approved source copies | No licensed-ingestion completion claim |
+| `02_SOURCE_REGISTRY/` | Registry schema and source status records | No legal-approval claim unless recorded |
+| `03_PROCESSED_KB/` | Extracted/redacted/chunked artifacts | No production vector DB completion claim |
+| `04_RETRIEVAL_CORE/` | Retrieval/rerank/citation code and fixtures | No production RAG quality claim without evals |
+| `05_ANSWER_CONTRACT/` | Claim/citation/compliance schemas and verifier | No full hallucination-elimination claim |
+| `06_AGENTS/` | Scoped agent contracts and safe harnesses | No autonomous-lab or commercial-agent deployment claim |
+| `07_EVALS/` | Offline evals, golden sets, regression outputs | No passing-eval-suite claim without run artifacts |
+| `08_WORKFLOWS/` | Fixed/stateful workflow definitions | No unbounded autonomous-execution claim |
+| `09_TRACES_LOGS/` | Decision, eval, and workflow evidence | No production-observability claim without trace coverage |
 
 ## MVP-Gated Upgrade Path
 
@@ -183,12 +189,16 @@ workflow/API/UI
 
 Do not mix runtime behavior, eval thresholds, source ingestion, and productization claims in one PR unless it is a release-gate PR.
 
-## Completed In Current V11.1 Follow-Up PR
+## Historical V11.1 Follow-Up Evidence
+
+The following items were recorded by the V11.1 follow-up workstream and are retained as historical evidence rather than current-state claims:
 
 1. Added `02_SOURCE_REGISTRY/source_registry.schema.json` with v11.1 fields.
 2. Added `02_SOURCE_REGISTRY/README.md` and a non-production example registry file.
-3. Added `docs/PULL_REQUEST_TEMPLATE_V11_1.md` as a template reference when `.github` writes are unavailable.
-4. Documented workflow and eval contracts below so the repo has a single canonical scaffold even before physical folders are created.
+3. Added `docs/PULL_REQUEST_TEMPLATE_V11_1.md` as a template reference when `.github` writes were unavailable.
+4. Documented workflow and eval contracts below so the repo had a canonical scaffold before all physical folders existed.
+
+Verify present implementation against live repository paths and merged PR evidence before relying on any item as current capability.
 
 ## Deep Research -> Registry Workflow Skeleton
 
@@ -291,12 +301,16 @@ request_more_evidence
 
 Risk domains should stay high-level and avoid procedural enablement. Use categories such as regulated resource, biosafety, biosecurity, IP, privacy, legal/public claim, investor claim, source license, and production-readiness claim.
 
-## Recommended Next Technical PRs
+## Historical Recommendations
 
-1. Add physical workflow/eval fixture files when write access allows.
-2. Add source registry schema validation test using standard-library JSON parsing first.
-3. Add PR template to `.github/PULL_REQUEST_TEMPLATE.md` if repository write guard permits.
+The following recommendations are retained for provenance only and are not the live execution queue:
+
+1. Add physical workflow/eval fixture files when scope and write access allow.
+2. Add source registry schema validation using standard-library JSON parsing first.
+3. Keep the active PR template aligned with current governance requirements.
 4. Add loader code only after schema and fixture validation are stable.
+
+Read the canonical current-state roadmap's `Immediate Next Action` and verify it against live GitHub evidence before starting work.
 
 ## Stop Rule
 

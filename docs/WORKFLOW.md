@@ -1,49 +1,26 @@
 # Human + Codex Workflow
 
-## Current Execution Authority (2026-07-11)
+## Current Execution Authority
 
-Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane.
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
 
-Latest confirmed baseline before this documentation sync:
-
-- `main`: `1e437c4515cc664f6acdb6e5bb197aaf576d34af`;
-- PR #166 guard hardening: merged after CI #250 and Quality Gates #381 succeeded;
-- V1.10B diagnostic answer-sample reporting: merged;
-- V1.10C preflight: merged;
-- V1.10C six-file implementation: preserved locally and pending publication; not on `main`.
-
-If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
-
-Current mandatory sequence:
-
-```text
-V1.10C publication
--> V1.10 closure
--> representative biology/compliance eval reset
--> retrieval and reranker hardening
--> real grounded answer path and diagnostic verifier
--> compliance/security adversarial gates
--> trace, latency, token, and cost control plane
--> internal dogfood
--> approved data flywheel
--> web productization and production-readiness gates
-```
-
+This workflow defines durable execution rules. It must not duplicate mutable phase names, commit SHAs, or next-step claims. If an older status table or “next step” conflicts with the canonical roadmap, treat the older wording as historical while preserving its scoped technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
 
 Use this workflow for all Asperitas AI RAG Agent changes. The goal is to keep every change small, verifiable, source-grounded, compliance-aware, and aligned with the benchmark-beating performance doctrine in `README.md` and `AGENTS.md`.
 
-## V1.5A Preflight Overlay
+## Current Preflight Overlay
 
-For V1.5 and later tasks, perform this preflight before editing:
+Before editing:
 
 - Risk level: low, medium, or high.
-- Changed surface: docs, templates, CI, source code, retrieval, answer generation, compliance/security, or evals.
+- Changed surface: docs, templates, CI, source code, retrieval, answer generation, compliance/security, evals, trace/logging, schema, or deployment.
 - Verification scope: docs sanity, targeted tests, retrieval eval, compliance review, CI review, or release gate.
 - Test budget: targeted checks by default; full local suites or broad GitHub Actions expansion only when risk justifies them.
 - Metric provenance: label results as `Fresh Run`, `Historical`, or `Not Run`.
 - Branch/PR path: use a non-main branch and GitHub PR review for mergeable work.
+- Active phase and next action: read from the canonical current-state roadmap and live GitHub evidence.
 
-V1.5A operating loop:
+Operating loop:
 
 ```text
 Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR -> Log -> Improve
@@ -53,7 +30,7 @@ Preflight -> Plan -> Implement -> Cheap QA -> Targeted Verification -> GitHub PR
 
 - State the requested outcome in one sentence.
 - Identify whether the task is docs, source code, eval, CI, release, compliance, review, or roadmap.
-- Identify the active stage: V1.5 gap closure/performance hardening unless a later merged roadmap says otherwise.
+- Identify the active stage from the canonical current-state roadmap rather than from historical phase labels in this file.
 - Identify whether retrieval, answer generation, source registry, chunks, evals, compliance, or public/investor claims are affected.
 - Confirm constraints around safety, confidentiality, GitHub writes, and production-status claims.
 
@@ -64,10 +41,11 @@ Read the narrowest relevant context:
 - Treat ChatGPT / Asperitas Project Chat as the command tower that distilled Deep Research, PDFs, AOS/PRIME doctrine, benchmark doctrine, user memory, and strategy into the current task prompt.
 - `README.md` for mission, truth boundary, benchmark doctrine, roadmap, and tool doctrine.
 - `AGENTS.md` for agent behavior, stop rules, testing rules, and report format.
+- `docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md` for live status, bottlenecks, phase order, and next action.
 - `docs/AI_DEVELOPMENT_OS.md` for the operating model.
 - `docs/QUALITY_GATES.md` for verification scope.
 - `docs/AOS_SOURCE_POLICY.md` for source hierarchy and claim rules.
-- `docs/V1_5_PERFORMANCE_ROADMAP.md` for current performance priorities.
+- Historical phase roadmaps only for their scoped contracts and acceptance criteria.
 - Relevant `.agents/skills/*/SKILL.md` for specialized workflows.
 
 Do not request all PDFs or Deep Research files by default. Ask only for exact missing source text when source ingestion, source registry status, citation-level evidence, or PDF-derived content is directly required.
@@ -101,7 +79,7 @@ Avoid source code changes during docs/governance tasks.
 - Change only files required by the objective.
 - Preserve existing behavior unless behavior change is the objective.
 - Prefer additive, scoped, reversible changes.
-- Do not delete files unless explicitly requested.
+- Do not delete files unless explicitly requested and reference impact is checked.
 - Do not relax gates to make checks pass.
 - Do not add dependencies, services, endpoints, secrets, generated indexes, or model binaries without approval.
 
@@ -111,7 +89,7 @@ Use `docs/QUALITY_GATES.md`.
 
 Docs-only changes may skip pytest and retrieval eval when they do not affect source code, source registry, chunks, retrieval, ranking, scoring, embeddings, vector DB, reranking, answer generation, or eval fixtures. The PR must state this clearly.
 
-For V1.5A+, run changed-area verification first. Docs/templates-only work normally uses cheap QA: re-read edited files, check headings/links/paths/code fences, inspect the diff, and run `git diff --check`.
+Run changed-area verification first. Docs/templates-only work normally uses cheap QA: re-read edited files, check headings/links/paths/code fences, inspect the diff, and run `git diff --check`.
 
 Behavior changes require targeted tests and relevant evals.
 
@@ -184,7 +162,7 @@ A PR may merge when:
 - no false production-status claim is introduced;
 - source-grounding and compliance risks are labeled;
 - skipped checks have rationale;
-- next step is clear.
+- next step is clear and sourced from the canonical roadmap.
 
 A PR must not merge when:
 
@@ -210,10 +188,4 @@ Recommended next step:
 
 ## Current Default Next Step
 
-After this documentation sync, continue with V1.5 Gap Closure:
-
-1. confirm docs/PR template/quality gates are aligned;
-2. add or update issue/milestone templates if missing;
-3. split slow validation into targeted CI jobs;
-4. implement claim-to-citation verifier planning;
-5. define biology-specific golden set scope.
+Read the canonical current-state roadmap's `Immediate Next Action` and verify it against live GitHub evidence. Do not use historical issue numbers or phase labels in this workflow as an execution command.
