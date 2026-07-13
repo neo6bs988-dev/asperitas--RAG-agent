@@ -1,5 +1,11 @@
 # Ideal Repository Structure v11.1
 
+## Current Execution Authority
+
+Use [`CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) together with the latest merged GitHub PR, commit, CI, Quality Gates, test, eval, release, and human-review evidence for live status.
+
+This file defines a target architecture and durable placement rules. It is not a live implementation inventory or next-step queue. Historical follow-up notes and recommendations below remain provenance only and must not override the canonical current-state roadmap.
+
 ## Executive Bottom Line
 
 The ideal Asperitas repo is not a prompt warehouse. It is a technical memory and control plane for source-grounded biological intelligence infrastructure.
@@ -183,12 +189,16 @@ workflow/API/UI
 
 Do not mix runtime behavior, eval thresholds, source ingestion, and productization claims in one PR unless it is a release-gate PR.
 
-## Completed In Current V11.1 Follow-Up PR
+## Historical V11.1 Follow-Up Evidence
+
+The following items were recorded by the V11.1 follow-up workstream and are retained as historical evidence rather than current-state claims:
 
 1. Added `02_SOURCE_REGISTRY/source_registry.schema.json` with v11.1 fields.
 2. Added `02_SOURCE_REGISTRY/README.md` and a non-production example registry file.
-3. Added `docs/PULL_REQUEST_TEMPLATE_V11_1.md` as a template reference when `.github` writes are unavailable.
-4. Documented workflow and eval contracts below so the repo has a single canonical scaffold even before physical folders are created.
+3. Added `docs/PULL_REQUEST_TEMPLATE_V11_1.md` as a template reference when `.github` writes were unavailable.
+4. Documented workflow and eval contracts below so the repo had a canonical scaffold before all physical folders existed.
+
+Verify present implementation against live repository paths and merged PR evidence before relying on any item as current capability.
 
 ## Deep Research -> Registry Workflow Skeleton
 
@@ -291,12 +301,16 @@ request_more_evidence
 
 Risk domains should stay high-level and avoid procedural enablement. Use categories such as regulated resource, biosafety, biosecurity, IP, privacy, legal/public claim, investor claim, source license, and production-readiness claim.
 
-## Recommended Next Technical PRs
+## Historical Recommendations
 
-1. Add physical workflow/eval fixture files when write access allows.
-2. Add source registry schema validation test using standard-library JSON parsing first.
-3. Add PR template to `.github/PULL_REQUEST_TEMPLATE.md` if repository write guard permits.
+The following recommendations are retained for provenance only and are not the live execution queue:
+
+1. Add physical workflow/eval fixture files when scope and write access allow.
+2. Add source registry schema validation using standard-library JSON parsing first.
+3. Keep the active PR template aligned with current governance requirements.
 4. Add loader code only after schema and fixture validation are stable.
+
+Read the canonical current-state roadmap's `Immediate Next Action` and verify it against live GitHub evidence before starting work.
 
 ## Stop Rule
 
