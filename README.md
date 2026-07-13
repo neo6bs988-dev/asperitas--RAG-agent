@@ -1,32 +1,36 @@
 # Asperitas AI RAG Agent
 
-## Current Execution Authority (2026-07-12)
+## Current Execution Authority (2026-07-13)
 
-Use [`docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane. For files already inside `docs/`, the path refers to `CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md` in the same directory.
+Use [`docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane. Mutable live status must also be verified against the latest merged GitHub pull request, commit, CI, Quality Gates, test, evaluation, and human-review evidence.
 
-Latest confirmed baseline:
+Latest confirmed merged evidence:
 
-- `main`: `84809ddd2f18d14ea25c2ecb0d43b2d7b01e5691`;
-- PR #168 V1.10C stable evaluator sample IDs implementation: merged;
-- PR #169 V1.10 final closure: merged after GitHub checks succeeded;
-- V1.10: closed as a CI-gated deterministic offline diagnostic reporting and stable sample-identity phase;
-- active next phase: Representative Biology / Compliance Evaluation Reset, beginning with a docs-only V1.11A preflight.
+- PR #170 V1.11A representative biology/compliance evaluation-reset preflight: merged;
+- PR #171 V1.11B public-safe development evaluation pack: merged;
+- PR #172 V1.11C Quality Gates and final closure: merged after green exact-head CI and Quality Gates;
+- PR #174 documentation authority hygiene: merged after green exact-head CI and Quality Gates;
+- V1.11 is closed only as CI-gated public-safe development evaluation infrastructure;
+- the next separately scoped software phase is V1.12 retrieval and reranker hardening.
 
-If an older status table or “next step” conflicts with the current-state roadmap, treat the older status wording as historical. Preserve its technical contracts and acceptance criteria. Do not treat doctrine, plans, scaffolds, synthetic fixtures, or diagnostic reports as proof of runtime quality, production readiness, compliance approval, biological validation, vector DB/KG completion, or foundation-model capability.
+When an older status table, baseline SHA, phase label, or “next step” conflicts with the canonical roadmap and latest merged GitHub evidence, treat the older status wording as historical. Preserve its scoped technical contracts, acceptance criteria, risk analysis, and historical evidence.
+
+V1.11 does not prove a protected holdout, private holdout operations, qualified human gold labels, holdout generalization, retrieval or reranker improvement, generated-answer quality, runtime verification or blocking, legal/compliance/biosafety/biosecurity/IP approval, production vector DB or KG, wet-lab validation, autonomous execution, production readiness, or proprietary biological foundation-model capability.
 
 Current mandatory sequence:
 
 ```text
-V1.10 closed
--> V1.11A representative biology/compliance eval-reset preflight
--> separate representative benchmark implementation
--> retrieval and reranker hardening
--> real grounded answer path and diagnostic verifier
+V1.11 public-safe development evaluation infrastructure closed
+-> V1.12 retrieval and reranker hardening
+-> real source-grounded answer path
+-> claim-to-citation verifier in diagnostic/shadow mode
 -> compliance/security adversarial gates
--> trace, latency, token, and cost control plane
--> internal dogfood
--> approved data flywheel
--> web productization and production-readiness gates
+-> tracing, latency, token, and cost control plane
+-> internal API/UI dogfood
+-> approved Deep Research-to-Registry data flywheel
+-> authenticated web productization
+-> production-readiness gate
+-> evidence-driven KG, DBTL, active learning, and foundation-model readiness
 ```
 
 
