@@ -4,7 +4,9 @@ import argparse
 import faulthandler
 import gc
 import json
+import math
 import sys
+import time
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -175,6 +177,14 @@ class EvalQuestion:
 
 
 @dataclass(frozen=True)
+class RetrievalQuestion:
+    """The oracle-free subset permitted to reach non-legacy retrievers."""
+
+    question_id: str
+    user_question: str
+
+
+@dataclass(frozen=True)
 class RerankerApplication:
     results_by_question: dict[str, list[dict[str, Any]]]
     fallback_diagnostics: dict[str, tuple[str, ...]]
@@ -187,6 +197,60 @@ def normalize_path(value: str) -> str:
 def normalize_oracle_text(value: str) -> str:
     normalized = normalize_section_text(normalize_path(value))
     return " ".join(normalized.split())
+
+
+def retrieval_safe_questions(questions: list[EvalQuestion]) -> list[RetrievalQuestion]:
+    return [RetrievalQuestion(question_id=question.question_id, user_question=question.user_question) for question in questions]
+
+
+def source_level_top_results(results: list[dict[str, Any]], limit: int = 5) -> list[dict[str, Any]]:
+    """Keep the first result for each normalized source identity in stable input order."""
+    unique: list[dict[str, Any]] = []
+    seen_sources: set[str] = set()
+    for result in results:
+        source = normalize_path(str(result.get("source_file", "")))
+        if not source:
+            raise EvalError("Result is missing required source_file identity")
+        if source not in seen_sources:
+            seen_sources.add(source)
+            unique.append(result)
+        if len(unique) == limit:
+            break
+    return unique
+
+
+def deterministic_percentile(samples_ms: list[float], percentile: float) -> float:
+    """Linearly interpolate a sorted finite, non-negative sample series."""
+    if not samples_ms:
+        raise EvalError("Latency samples must not be empty")
+    if not 0.0 <= percentile <= 100.0:
+        raise EvalError("Percentile must be between 0 and 100")
+    if any(not math.isfinite(value) or value < 0.0 for value in samples_ms):
+        raise EvalError("Latency samples must be finite and non-negative")
+    ordered = sorted(samples_ms)
+    position = (len(ordered) - 1) * (percentile / 100.0)
+    lower = math.floor(position)
+    upper = math.ceil(position)
+    if lower == upper:
+        return ordered[lower]
+    fraction = position - lower
+    return ordered[lower] + (ordered[upper] - ordered[lower]) * fraction
+
+
+def summarize_latency_ms(samples_ms: list[float]) -> dict[str, float | int]:
+    if not samples_ms:
+        raise EvalError("Latency summary requires at least one sample")
+    if any(not math.isfinite(value) or value < 0.0 for value in samples_ms):
+        raise EvalError("Latency samples must be finite and non-negative")
+    return {
+        "count": len(samples_ms),
+        "min": min(samples_ms),
+        "mean": sum(samples_ms) / len(samples_ms),
+        "p50": deterministic_percentile(samples_ms, 50.0),
+        "p95": deterministic_percentile(samples_ms, 95.0),
+        "max": max(samples_ms),
+        "total": sum(samples_ms),
+    }
 
 
 def optional_string_list(row: dict[str, Any], field_name: str) -> tuple[str, ...]:
@@ -328,7 +392,7 @@ def load_simulated_results(path: Path) -> dict[str, list[dict[str, Any]]]:
 
 
 def run_baseline_retrieval(
-    questions: list[EvalQuestion],
+    questions: list[RetrievalQuestion],
     registry_path: Path,
     chunks_path: Path,
     limit: int,
@@ -372,7 +436,7 @@ def run_baseline_retrieval(
 
 
 def run_mvp003_retrieval(
-    questions: list[EvalQuestion],
+    questions: list[RetrievalQuestion],
     registry_path: Path,
     chunks_path: Path,
     limit: int,
@@ -428,7 +492,7 @@ def vector_eval_chunk_text(chunk: Any, record: Any | None = None) -> str:
 
 
 def run_vector_retrieval(
-    questions: list[EvalQuestion],
+    questions: list[RetrievalQuestion],
     registry_path: Path,
     chunks_path: Path,
     limit: int,
@@ -764,13 +828,47 @@ def run_retriever(
     chunks_path: Path,
     limit: int,
 ) -> tuple[str, dict[str, list[dict[str, Any]]]]:
+    safe_questions = retrieval_safe_questions(questions)
     if retriever == "mvp003":
-        return "mvp003-deterministic-metadata", run_mvp003_retrieval(questions, registry_path, chunks_path, limit)
+        return "mvp003-deterministic-metadata", run_mvp003_retrieval(safe_questions, registry_path, chunks_path, limit)
     if retriever == "vector":
-        return MVP005_VECTOR_EVAL_MODE, run_vector_retrieval(questions, registry_path, chunks_path, limit)
+        return MVP005_VECTOR_EVAL_MODE, run_vector_retrieval(safe_questions, registry_path, chunks_path, limit)
     if retriever == "hybrid":
         return MVP006_HYBRID_EVAL_MODE, run_hybrid_retrieval(questions, registry_path, chunks_path, limit)
-    return "current-tfidf-baseline", run_baseline_retrieval(questions, registry_path, chunks_path, limit)
+    return "current-tfidf-baseline", run_baseline_retrieval(safe_questions, registry_path, chunks_path, limit)
+
+
+def run_retriever_with_diagnostics(
+    retriever: str,
+    questions: list[EvalQuestion],
+    registry_path: Path,
+    chunks_path: Path,
+    limit: int,
+) -> tuple[str, dict[str, list[dict[str, Any]]], dict[str, Any]]:
+    """Opt-in per-query timing; each query remains evaluated through the normal dispatcher."""
+    combined: dict[str, list[dict[str, Any]]] = {}
+    per_question: list[dict[str, Any]] = []
+    mode: str | None = None
+    started = time.perf_counter()
+    for question in questions:
+        question_started = time.perf_counter()
+        current_mode, rows = run_retriever(retriever, [question], registry_path, chunks_path, limit)
+        elapsed_ms = (time.perf_counter() - question_started) * 1000.0
+        if not math.isfinite(elapsed_ms) or elapsed_ms < 0.0:
+            raise EvalError("Measured retrieval latency is invalid")
+        if mode is None:
+            mode = current_mode
+        elif mode != current_mode:
+            raise EvalError("Retriever mode changed between questions")
+        combined[question.question_id] = rows.get(question.question_id, [])
+        per_question.append({"question_id": question.question_id, "retrieval_latency_ms": elapsed_ms})
+    if mode is None:
+        raise EvalError("Cannot measure diagnostics for zero questions")
+    return mode, combined, {
+        "per_question": per_question,
+        "retrieval_latency_ms": summarize_latency_ms([row["retrieval_latency_ms"] for row in per_question]),
+        "end_to_end_ms": (time.perf_counter() - started) * 1000.0,
+    }
 
 
 def build_reranker(reranker_name: str) -> Reranker | None:
@@ -1133,6 +1231,11 @@ def combine_optional_matches(values: list[bool | None]) -> bool | None:
 def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dict[str, Any]:
     top3 = results[:3]
     top5 = results[:5]
+    source_level_top5 = source_level_top_results(results, limit=5)
+    strict_source_rank = next(
+        (index for index, result in enumerate(source_level_top5, start=1) if source_matches_strict(question, result)),
+        None,
+    )
     matched = next((result for result in top5 if source_matches_strict(question, result)), None)
     section_match = contains_section(matched, question.expected_chunk_or_section) if matched else (None if not question.expected_chunk_or_section else False)
     path_context_match = contains_path_context(matched, question.expected_path_context) if matched else (None if not question.expected_path_context else False)
@@ -1209,6 +1312,8 @@ def score_question(question: EvalQuestion, results: list[dict[str, Any]]) -> dic
     relaxed_overall_pass = overall_pass or any(candidate_overall_pass(result) for result, _basis in relaxed_candidates)
     return {
         "question_id": question.question_id,
+        "strict_source_rank_at_5": strict_source_rank,
+        "source_file_match_top1": strict_source_rank == 1,
         "source_file_match_top3": source_file_match_top3,
         "source_file_match_top5": source_file_match_top5,
         "source_priority_match": source_priority_match,
@@ -1247,6 +1352,16 @@ def score_results(questions: list[EvalQuestion], results_by_question: dict[str, 
     def rate(field: str) -> float:
         return sum(1 for row in per_question if row[field]) / total
 
+    reciprocal_ranks = [1 / row["strict_source_rank_at_5"] if row["strict_source_rank_at_5"] else 0.0 for row in per_question]
+    ndcg_scores = []
+    for question in questions:
+        gains = [
+            1.0 if source_matches_strict(question, result) else 0.0
+            for result in source_level_top_results(results_by_question.get(question.question_id, []), limit=5)
+        ]
+        dcg = sum(gain / math.log2(index + 2) for index, gain in enumerate(gains))
+        ndcg_scores.append(dcg)
+
     section_rows = [row for row in per_question if row["section_match"] is not None]
     section_rate = None
     if section_rows:
@@ -1265,6 +1380,9 @@ def score_results(questions: list[EvalQuestion], results_by_question: dict[str, 
         relaxed_path_context_rate = sum(1 for row in relaxed_path_context_rows if row["relaxed_path_context_match"]) / len(relaxed_path_context_rows)
     return {
         "total_questions": total,
+        "source_file_match_at_1": rate("source_file_match_top1"),
+        "mean_reciprocal_rank_at_5": sum(reciprocal_ranks) / total,
+        "source_level_ndcg_at_5": sum(ndcg_scores) / total,
         "source_file_match_at_3": rate("source_file_match_top3"),
         "source_file_match_at_5": rate("source_file_match_top5"),
         "source_priority_match": rate("source_priority_match"),
@@ -1440,6 +1558,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--limit", type=int, default=5)
     parser.add_argument("--json", action="store_true", help="Print machine-readable summary JSON.")
     parser.add_argument(
+        "--measure-diagnostics",
+        action="store_true",
+        help="Opt in to per-query retrieval timing diagnostics; does not alter scoring or thresholds.",
+    )
+    parser.add_argument(
         "--enforce-thresholds",
         action="store_true",
         help="Exit non-zero if the selected retriever misses its source-grounding threshold profile.",
@@ -1465,9 +1588,16 @@ def main(argv: list[str] | None = None) -> int:
             results = load_simulated_results(args.results_jsonl)
         else:
             emit_progress(f"running retriever={args.retriever} limit={args.limit}")
-            mode, results = run_retriever(args.retriever, questions, args.registry, args.chunks, args.limit)
+            if args.measure_diagnostics:
+                mode, results, diagnostics = run_retriever_with_diagnostics(
+                    args.retriever, questions, args.registry, args.chunks, args.limit
+                )
+            else:
+                mode, results = run_retriever(args.retriever, questions, args.registry, args.chunks, args.limit)
         emit_progress("aggregating retrieval metrics")
         base_summary = score_results(questions, results)
+        if args.measure_diagnostics and not args.results_jsonl:
+            base_summary["diagnostics"] = diagnostics
         reranker = build_reranker(args.reranker)
         if reranker is None:
             summary = base_summary
@@ -1488,6 +1618,8 @@ def main(argv: list[str] | None = None) -> int:
                 mode = f"{mode}+policy:{args.reranker_policy}"
             emit_progress("aggregating reranked metrics")
             summary = score_results(questions, results)
+            if args.measure_diagnostics and not args.results_jsonl:
+                summary["diagnostics"] = diagnostics
             summary["reranker_comparison"] = compare_reranker_outputs(
                 questions=questions,
                 base_results=base_results,

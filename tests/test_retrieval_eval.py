@@ -1583,6 +1583,139 @@ class FlushTrackingStream:
         self.flush_count += 1
 
 
+def v112b_result(source_file: str, *, score: float = 1.0) -> dict:
+    return {
+        "source_file": source_file,
+        "source_id": f"source::{source_file}",
+        "source_priority": "P0",
+        "evidence_label": "Document-Supported Fact",
+        "section": "Source Priority Policy",
+        "title": source_file,
+        "text": "Source Priority Policy",
+        "score": score,
+    }
+
+
+@pytest.mark.parametrize(
+    ("results", "expected_rank", "expected_mrr"),
+    [
+        ([v112b_result("AGENTS.md")], 1, 1.0),
+        ([v112b_result("README.md"), v112b_result("AGENTS.md")], 2, 0.5),
+        (
+            [v112b_result(name) for name in ("A.md", "B.md", "C.md", "D.md", "AGENTS.md")],
+            5,
+            0.2,
+        ),
+        ([v112b_result(name) for name in ("A.md", "B.md", "C.md", "D.md", "E.md", "AGENTS.md")], None, 0.0),
+    ],
+)
+def test_v112b_strict_source_rank_and_mrr_are_source_level(results, expected_rank, expected_mrr):
+    module = load_eval_module()
+    summary = module.score_results([eval_question()], {"Q1": results})
+
+    assert summary["per_question"][0]["strict_source_rank_at_5"] == expected_rank
+    assert summary["mean_reciprocal_rank_at_5"] == expected_mrr
+    assert summary["source_file_match_at_1"] == (1.0 if expected_rank == 1 else 0.0)
+
+
+def test_v112b_strict_metrics_do_not_use_relaxed_aliases_or_accepted_sources():
+    module = load_eval_module()
+    question = module.EvalQuestion(**{**eval_question().__dict__, "accepted_sources": ("README.md",), "multi_valid_source": True})
+    summary = module.score_results([question], {"Q1": [v112b_result("README.md")]})
+
+    assert summary["source_file_match_at_1"] == 0.0
+    assert summary["mean_reciprocal_rank_at_5"] == 0.0
+    assert summary["source_level_ndcg_at_5"] == 0.0
+
+
+def test_v112b_duplicate_chunks_do_not_distort_source_rank_or_ndcg():
+    module = load_eval_module()
+    results = [v112b_result("README.md"), v112b_result("README.md"), v112b_result("AGENTS.md")]
+    summary = module.score_results([eval_question()], {"Q1": results})
+
+    assert summary["per_question"][0]["strict_source_rank_at_5"] == 2
+    assert summary["mean_reciprocal_rank_at_5"] == 0.5
+    assert summary["source_level_ndcg_at_5"] == pytest.approx(1.0 / __import__("math").log2(3))
+
+
+def test_v112b_metric_outputs_are_finite_bounded_and_serialized():
+    module = load_eval_module()
+    summary = module.score_results([eval_question()], {"Q1": []})
+
+    assert summary["per_question"][0]["strict_source_rank_at_5"] is None
+    for name in ("source_file_match_at_1", "mean_reciprocal_rank_at_5", "source_level_ndcg_at_5"):
+        assert 0.0 <= summary[name] <= 1.0
+    assert json.loads(json.dumps(summary))["per_question"][0]["strict_source_rank_at_5"] is None
+
+
+def test_v112b_missing_source_identity_fails_closed():
+    module = load_eval_module()
+
+    with pytest.raises(module.EvalError, match="source_file identity"):
+        module.score_results([eval_question()], {"Q1": [{"source_file": ""}]})
+
+
+def test_v112b_percentile_and_latency_summary_are_deterministic():
+    module = load_eval_module()
+
+    assert module.deterministic_percentile([10.0], 50.0) == 10.0
+    assert module.deterministic_percentile([10.0, 30.0], 50.0) == 20.0
+    assert module.deterministic_percentile([40.0, 10.0, 30.0, 20.0], 95.0) == 38.5
+    assert module.summarize_latency_ms([10.0, 30.0]) == {
+        "count": 2, "min": 10.0, "mean": 20.0, "p50": 20.0, "p95": 29.0, "max": 30.0, "total": 40.0,
+    }
+
+
+@pytest.mark.parametrize("samples", [[], [-1.0], [float("inf")]])
+def test_v112b_latency_rejects_empty_negative_and_nonfinite_samples(samples):
+    module = load_eval_module()
+
+    with pytest.raises(module.EvalError):
+        module.summarize_latency_ms(samples)
+
+
+@pytest.mark.parametrize("retriever", ["baseline", "mvp003", "vector"])
+def test_v112b_oracle_free_retrievers_receive_safe_projection(monkeypatch, retriever):
+    module = load_eval_module()
+    received = []
+
+    def fake_retrieval(questions, registry_path, chunks_path, limit):
+        received.extend(questions)
+        return {"Q1": []}
+
+    monkeypatch.setattr(module, {"baseline": "run_baseline_retrieval", "mvp003": "run_mvp003_retrieval", "vector": "run_vector_retrieval"}[retriever], fake_retrieval)
+    module.run_retriever(retriever, [eval_question()], Path("registry.csv"), Path("chunks.jsonl"), 5)
+
+    assert received and type(received[0]) is module.RetrievalQuestion
+    assert received[0].question_id == "Q1"
+    assert not hasattr(received[0], "expected_source_file")
+    assert not hasattr(received[0], "accepted_sources")
+
+
+def test_v112b_reranked_diagnostics_preserve_retrieval_latency(monkeypatch, tmp_path, capsys):
+    module = load_eval_module()
+    questions_path = tmp_path / "questions.jsonl"
+    expected_path = tmp_path / "expected.jsonl"
+    write_jsonl(questions_path, [valid_question()])
+    write_jsonl(expected_path, [valid_expected()])
+
+    monkeypatch.setattr(
+        module,
+        "run_retriever_with_diagnostics",
+        lambda *args: (
+            "mvp006-hybrid-metadata-vector",
+            {"Q1": [v112b_result("AGENTS.md")]},
+            {"per_question": [{"question_id": "Q1", "retrieval_latency_ms": 1.0}], "retrieval_latency_ms": {"count": 1}, "end_to_end_ms": 1.0},
+        ),
+    )
+
+    assert module.main([
+        "--questions", str(questions_path), "--expected", str(expected_path), "--retriever", "hybrid",
+        "--reranker", module.RERANKER_DETERMINISTIC_TEST, "--measure-diagnostics", "--json",
+    ]) == 0
+    assert json.loads(capsys.readouterr().out)["diagnostics"]["retrieval_latency_ms"] == {"count": 1}
+
+
 def eval_question():
     module = load_eval_module()
     return module.EvalQuestion(
