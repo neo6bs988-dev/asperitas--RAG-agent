@@ -68,6 +68,8 @@ PR #171 and PR #172 improve public-safe development evaluation infrastructure on
 
 The next performance gap is not lack of another agent framework.
 
+V1.12A is the active docs-only retrieval/reranker preflight: fresh baseline, `mvp003`, and vector evidence is certified; hybrid and reranker values remain historical rather than freshly reverified; V1.12B owns durable all-mode measurement. No retrieval/reranker improvement is implemented, `mvp003` remains protected, and protected holdout remains separately human-gated.
+
 The main bottlenecks are:
 
 1. small and partially synthetic evaluation fixtures;
