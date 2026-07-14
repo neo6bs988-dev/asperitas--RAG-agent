@@ -1,24 +1,159 @@
-# Repository ownership for Asperitas Agent
-# GitHub uses CODEOWNERS on the base branch to request review from owners.
+# =============================================================================
+# Asperitas CODEOWNERS v2
+# =============================================================================
+#
+# Purpose:
+# - require explicit ownership for repository governance, source provenance,
+#   biological evidence, compliance, evaluation, packaging, CI, and runtime
+#   control surfaces;
+# - keep a repository-wide fallback owner so newly introduced files do not
+#   silently become ownerless;
+# - make sensitive ownership boundaries visible before future team delegation.
+#
+# Current canonical owner:
+#   @neo6bs988-dev
+#
+# Enforcement boundary:
+# - CODEOWNERS identifies requested reviewers.
+# - Mandatory approval requires a GitHub branch ruleset or branch-protection
+#   rule that requires review from Code Owners.
+# - Ownership does not itself prove security, correctness, rights clearance,
+#   scientific validation, deployment, or production readiness.
+#
+# Pattern-order rule:
+# - GitHub applies the last matching CODEOWNERS pattern.
+# - The repository-wide fallback appears first.
+# - More specific sensitive paths appear later.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Repository-wide fallback
+#
+# Every current and future tracked path receives an owner even when a newly
+# introduced directory has not yet been classified below.
+# -----------------------------------------------------------------------------
 
 * @neo6bs988-dev
 
-# Governance and security files require owner review.
+
+# -----------------------------------------------------------------------------
+# GitHub governance, automation, review, and dependency controls
+# -----------------------------------------------------------------------------
+
 /.github/ @neo6bs988-dev
+/.github/workflows/ @neo6bs988-dev
+/.github/ISSUE_TEMPLATE/ @neo6bs988-dev
+/.github/PULL_REQUEST_TEMPLATE.md @neo6bs988-dev
+/.github/pull_request_template.md @neo6bs988-dev
+/.github/dependabot.yml @neo6bs988-dev
+/.github/CODEOWNERS @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Repository constitutions, operating doctrine, security, and status evidence
+# -----------------------------------------------------------------------------
+
 /AGENTS.md @neo6bs988-dev
 /README.md @neo6bs988-dev
 /SECURITY.md @neo6bs988-dev
-
-# Source governance, docs, and decision logs require owner review.
-/00_ADMIN/ @neo6bs988-dev
-/01_RAW_SOURCES/ @neo6bs988-dev
-/02_REDACTED_SOURCES/ @neo6bs988-dev
-/03_PROCESSED_KB/ @neo6bs988-dev
+/gitcore.md @neo6bs988-dev
+/CHECKPOINT_MVP_002.md @neo6bs988-dev
 /docs/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Build, packaging, dependency, import, and repository-normalization controls
+# -----------------------------------------------------------------------------
+
+/pyproject.toml @neo6bs988-dev
+/sitecustomize.py @neo6bs988-dev
+/requirements*.txt @neo6bs988-dev
+
+/.gitignore @neo6bs988-dev
+/.gitattributes @neo6bs988-dev
+/.editorconfig @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Agent, Codex, workspace, and local execution control planes
+# -----------------------------------------------------------------------------
+
+/.agents/ @neo6bs988-dev
+/.codex/ @neo6bs988-dev
+/.vscode/ @neo6bs988-dev
+
+/00_ADMIN/.vscode/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Administrative schemas, registries, source authority, and rights metadata
+#
+# These paths may influence source identity, provenance, disclosure level,
+# permitted use, verification state, retrieval eligibility, and capability
+# claims. They require explicit owner review.
+# -----------------------------------------------------------------------------
+
+/00_ADMIN/ @neo6bs988-dev
+/00_ADMIN/metadata_schema.yaml @neo6bs988-dev
+/00_ADMIN/source_registries/ @neo6bs988-dev
+
+/02_SOURCE_REGISTRY/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Raw, processed, and derived biological or external-source material
+#
+# Ownership is not equivalent to license approval, lawful access, PIC/MAT,
+# CITES clearance, sequencing rights, model-training rights, commercialization
+# rights, sublicense authority, scientific validation, or public-release
+# approval.
+# -----------------------------------------------------------------------------
+
+/01_RAW_SOURCES/ @neo6bs988-dev
+/03_PROCESSED_KB/ @neo6bs988-dev
+/data/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Agent architecture, retrieval, vector, RAG, and workflow surfaces
+# -----------------------------------------------------------------------------
+
+/04_AGENT_SYSTEM/ @neo6bs988-dev
+/04_VECTOR_DB/ @neo6bs988-dev
+/05_RAG_PIPELINE/ @neo6bs988-dev
+/08_WORKFLOWS/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Evaluation fixtures, graders, thresholds, results, and certification evidence
+#
+# Changes here can alter pass/fail outcomes and must not silently weaken
+# fixtures, answer keys, schemas, thresholds, prohibited behavior, or critical
+# classifications after results are known.
+# -----------------------------------------------------------------------------
+
+/06_EVALS/ @neo6bs988-dev
+/07_EVALS/ @neo6bs988-dev
+/eval/ @neo6bs988-dev
+/eval_results/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Decision logs, run evidence, audit records, and implementation-status records
+# -----------------------------------------------------------------------------
+
 /09_LOGS/ @neo6bs988-dev
 
-# Agent skills and source code require owner review.
-/.agents/ @neo6bs988-dev
+
+# -----------------------------------------------------------------------------
+# Canonical package, compatibility package, applications, scripts, and tests
+# -----------------------------------------------------------------------------
+
 /src/ @neo6bs988-dev
-/tests/ @neo6bs988-dev
+/src/asperitas_agent/ @neo6bs988-dev
+
+/asperitas_agent/ @neo6bs988-dev
+/apps/ @neo6bs988-dev
 /scripts/ @neo6bs988-dev
+/tests/ @neo6bs988-dev
