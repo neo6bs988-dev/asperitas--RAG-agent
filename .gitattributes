@@ -1,0 +1,192 @@
+# =============================================================================
+# Asperitas Git attribute policy
+# =============================================================================
+#
+# Goals:
+# - deterministic line endings across Windows, Linux, CI, and agent worktrees;
+# - clean diffs for code, schemas, registries, and evidence files;
+# - no accidental text conversion of Office, archive, model, or database files;
+# - no implicit Git LFS dependency.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Default text normalization
+# -----------------------------------------------------------------------------
+
+* text=auto eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Source code and scripts
+# -----------------------------------------------------------------------------
+
+*.py      text eol=lf diff=python
+*.pyi     text eol=lf diff=python
+*.sh      text eol=lf
+*.bash    text eol=lf
+*.zsh     text eol=lf
+*.ps1     text eol=lf
+*.sql     text eol=lf
+
+# Native Windows command files retain CRLF.
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+
+
+# -----------------------------------------------------------------------------
+# Documentation and repository governance
+# -----------------------------------------------------------------------------
+
+*.md      text eol=lf
+*.mdx     text eol=lf
+*.rst     text eol=lf
+*.txt     text eol=lf
+*.adoc    text eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Configuration, schemas, registries, and structured evidence
+# -----------------------------------------------------------------------------
+
+*.toml    text eol=lf
+*.yaml    text eol=lf
+*.yml     text eol=lf
+*.json    text eol=lf
+*.jsonc   text eol=lf
+*.jsonl   text eol=lf
+*.csv     text eol=lf
+*.tsv     text eol=lf
+*.xml     text eol=lf
+*.ini     text eol=lf
+*.cfg     text eol=lf
+*.conf    text eol=lf
+*.properties text eol=lf
+*.lock    text eol=lf
+*.env.example text eol=lf
+*.env.sample  text eol=lf
+*.env.template text eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Web and diagram source files
+# -----------------------------------------------------------------------------
+
+*.html    text eol=lf
+*.css     text eol=lf
+*.scss    text eol=lf
+*.js      text eol=lf
+*.jsx     text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.svg     text eol=lf
+*.mmd     text eol=lf
+*.mermaid text eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Notebook source
+# -----------------------------------------------------------------------------
+
+*.ipynb   text eol=lf
+
+
+# -----------------------------------------------------------------------------
+# Binary documents and archives
+# -----------------------------------------------------------------------------
+
+*.pdf     binary
+*.hwp     binary
+*.hwpx    binary
+
+*.doc     binary
+*.docx    binary
+*.xls     binary
+*.xlsx    binary
+*.ppt     binary
+*.pptx    binary
+
+*.zip     binary
+*.7z      binary
+*.rar     binary
+*.tar     binary
+*.gz      binary
+*.tgz     binary
+*.bz2     binary
+*.xz      binary
+
+
+# -----------------------------------------------------------------------------
+# Images, audio, video, and fonts
+# -----------------------------------------------------------------------------
+
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.webp    binary
+*.bmp     binary
+*.ico     binary
+*.tif     binary
+*.tiff    binary
+
+*.mp3     binary
+*.wav     binary
+*.flac    binary
+*.mp4     binary
+*.mov     binary
+*.avi     binary
+*.webm    binary
+
+*.ttf     binary
+*.otf     binary
+*.woff    binary
+*.woff2   binary
+
+
+# -----------------------------------------------------------------------------
+# Databases, scientific arrays, datasets, and model artifacts
+# -----------------------------------------------------------------------------
+
+*.db          binary
+*.sqlite      binary
+*.sqlite3     binary
+
+*.npy         binary
+*.npz         binary
+*.h5          binary
+*.hdf5        binary
+*.parquet     binary
+*.feather     binary
+*.arrow       binary
+
+*.pkl         binary
+*.pickle      binary
+*.joblib      binary
+
+*.pt          binary
+*.pth         binary
+*.ckpt        binary
+*.onnx        binary
+*.safetensors binary
+*.faiss       binary
+*.ann         binary
+*.hnsw        binary
+
+
+# -----------------------------------------------------------------------------
+# Executables and compiled artifacts
+# -----------------------------------------------------------------------------
+
+*.exe     binary
+*.dll     binary
+*.so      binary
+*.dylib   binary
+*.a       binary
+*.lib     binary
+*.o       binary
+*.obj     binary
+*.class   binary
+*.jar     binary
+*.war     binary
+*.wasm    binary
