@@ -1,0 +1,273 @@
+{
+  // ===========================================================================
+  // Asperitas repository workspace settings
+  // ===========================================================================
+  //
+  // Scope:
+  // - repository-local developer experience;
+  // - deterministic Python/test configuration;
+  // - conservative Git and task behavior;
+  // - no automatic dependency installation, network access, or external write.
+  //
+  // pyproject.toml remains authoritative for pytest, Ruff, mypy, and coverage.
+  // ===========================================================================
+
+  // ---------------------------------------------------------------------------
+  // Python interpreter and import analysis
+  // ---------------------------------------------------------------------------
+
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.executeInFileDir": false,
+
+  // Editor-only src-layout support. Runtime behavior remains governed by the
+  // selected interpreter, editable installation, and repository configuration.
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src"
+  ],
+
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.completeFunctionParens": true,
+  "python.analysis.useLibraryCodeForTypes": true,
+  "python.analysis.indexing": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.inlayHints.pytestParameters": true,
+
+  // Keep Pylance focused on canonical source and tests rather than generated,
+  // historical, raw-source, cache, or local service state.
+  "python.analysis.exclude": [
+    "**/.git/**",
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/.pytest_cache/**",
+    "**/.pytest_tmp/**",
+    "**/.mypy_cache/**",
+    "**/.ruff_cache/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/*.egg-info/**",
+    "**/01_RAW_SOURCES/**",
+    "**/09_LOGS/**",
+    "**/data/**",
+    "**/eval_results/**",
+    "**/.chroma/**",
+    "**/chroma_db/**",
+    "**/.qdrant/**",
+    "**/.weaviate/**",
+    "**/.milvus/**",
+    "**/.neo4j/**"
+  ],
+
+  // ---------------------------------------------------------------------------
+  // Pytest
+  // ---------------------------------------------------------------------------
+
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}",
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+
+  // Test discovery is refreshed only when test files change, reducing needless
+  // workspace-wide discovery after ordinary source edits.
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.testing.autoTestDiscoverOnSavePattern": "tests/**/*.py",
+
+  // ---------------------------------------------------------------------------
+  // Ruff
+  // ---------------------------------------------------------------------------
+
+  "ruff.configuration": "${workspaceFolder}/pyproject.toml",
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.detectIndentation": false,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.rulers": [
+      120
+    ],
+    "files.trimTrailingWhitespace": true
+  },
+
+  // ---------------------------------------------------------------------------
+  // Repository-safe file behavior
+  // ---------------------------------------------------------------------------
+
+  "files.autoSave": "off",
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.formatOnSave": false,
+    "files.trimTrailingWhitespace": false
+  },
+
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [
+      120
+    ]
+  },
+
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [
+      120
+    ]
+  },
+
+  "[powershell]": {
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4
+  },
+
+  // ---------------------------------------------------------------------------
+  // Explorer visibility
+  //
+  // Only disposable developer artifacts are hidden. Source registries, raw
+  // sources, evaluation evidence, data artifacts, and decision logs remain
+  // visible for governance and audit.
+  // ---------------------------------------------------------------------------
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/*.pyo": true,
+    "**/.pytest_cache": true,
+    "**/.pytest_tmp": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/.coverage": true,
+    "**/htmlcov": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/*.egg-info": true
+  },
+
+  // ---------------------------------------------------------------------------
+  // Search performance
+  // ---------------------------------------------------------------------------
+
+  "search.exclude": {
+    "**/.git": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.pytest_tmp": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/htmlcov": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/*.egg-info": true,
+    "**/.chroma": true,
+    "**/chroma_db": true,
+    "**/.qdrant": true,
+    "**/.weaviate": true,
+    "**/.milvus": true,
+    "**/.neo4j": true
+  },
+
+  "search.useIgnoreFiles": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.followSymlinks": false,
+
+  // ---------------------------------------------------------------------------
+  // Filesystem watcher performance
+  // ---------------------------------------------------------------------------
+
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.pytest_tmp/**": true,
+    "**/.mypy_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/htmlcov/**": true,
+    "**/build/**": true,
+    "**/dist/**": true,
+    "**/*.egg-info/**": true,
+    "**/.chroma/**": true,
+    "**/chroma_db/**": true,
+    "**/.qdrant/**": true,
+    "**/.weaviate/**": true,
+    "**/.milvus/**": true,
+    "**/.neo4j/**": true
+  },
+
+  // ---------------------------------------------------------------------------
+  // Git guardrails
+  //
+  // These are editor protections only. Actual enforcement requires GitHub
+  // rulesets, required reviews, CODEOWNERS, and exact-head status checks.
+  // ---------------------------------------------------------------------------
+
+  "git.branchProtection": [
+    "main"
+  ],
+  "git.allowForcePush": false,
+  "git.enableSmartCommit": false,
+  "git.suggestSmartCommit": false,
+  "git.confirmSync": true,
+  "git.autofetch": false,
+  "git.openRepositoryInParentFolders": "never",
+  "git.detectSubmodules": true,
+  "git.alwaysShowStagedChangesResourceGroup": true,
+
+  // ---------------------------------------------------------------------------
+  // Tasks and terminal safety
+  // ---------------------------------------------------------------------------
+
+  "task.allowAutomaticTasks": "off",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+
+  // ---------------------------------------------------------------------------
+  // General editor behavior
+  // ---------------------------------------------------------------------------
+
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.largeFileOptimizations": true
+}
