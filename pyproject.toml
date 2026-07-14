@@ -1,22 +1,82 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
+
 
 [project]
 name = "asperitas-agent"
-version = "0.1.0"
-description = "Asperitas source-grounded compliance-aware RAG core MVP-001"
+dynamic = ["version"]
+description = "Source-grounded, compliance-aware RAG development core for biological evidence workflows."
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
 
+# This repository has no confirmed open-source license.
+# Prevent accidental publication to the public Python Package Index.
+classifiers = [
+  "Private :: Do Not Upload",
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+keywords = [
+  "artificial-intelligence",
+  "biological-intelligence",
+  "compliance",
+  "evaluation",
+  "provenance",
+  "rag",
+  "retrieval",
+  "synthetic-biology",
+]
+
+
 [project.optional-dependencies]
-dev = ["pytest"]
-parsers = ["pypdf", "python-docx"]
+dev = [
+  "pytest>=8,<10",
+]
+
+parsers = [
+  "pypdf",
+  "python-docx",
+]
+
+
+[project.scripts]
+asperitas-agent = "asperitas_agent.cli:main"
+
+
+[project.urls]
+Repository = "https://github.com/neo6bs988-dev/asperitas--RAG-agent"
+Issues = "https://github.com/neo6bs988-dev/asperitas--RAG-agent/issues"
+Security = "https://github.com/neo6bs988-dev/asperitas--RAG-agent/security/policy"
+
+
+[tool.setuptools]
+include-package-data = false
+
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = [
+  "asperitas_agent",
+  "asperitas_agent.*",
+]
+namespaces = false
+
+
+[tool.setuptools.dynamic]
+version = { attr = "asperitas_agent.__version__" }
+
 
 [tool.pytest.ini_options]
-addopts = "-p no:cacheprovider --basetemp=.pytest_tmp"
+minversion = "8.0"
+addopts = "-ra --strict-config --strict-markers -p no:cacheprovider --basetemp=.pytest_tmp"
 testpaths = ["tests"]
 pythonpath = ["src"]
+xfail_strict = true
