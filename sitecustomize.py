@@ -25,8 +25,8 @@ Editable installation remains the preferred development configuration.
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Final
 
 
