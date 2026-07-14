@@ -1,13 +1,102 @@
+# =============================================================================
+# Asperitas Dependabot Configuration v2
+# =============================================================================
+#
+# Purpose:
+# - keep GitHub Actions and Python dependencies current;
+# - reduce pull-request noise by grouping compatible minor/patch updates;
+# - isolate major-version changes for independent review;
+# - delay newly published version updates through a short cooldown period;
+# - preserve immediate Dependabot security-update behavior;
+# - align dependency PRs with the protected-main, exact-head CI workflow.
+#
+# Truth boundary:
+# - A Dependabot PR is an update candidate, not evidence that the dependency is
+#   safe, compatible, licensed, or approved.
+# - Required CI, Quality Gates, Exact Head Certification, human review, and
+#   squash merge remain mandatory.
+# =============================================================================
+
 version: 2
+
 updates:
+  # ---------------------------------------------------------------------------
+  # GitHub Actions supply-chain updates
+  #
+  # Dependabot scans .github/workflows and root action.yml/action.yaml files
+  # when the GitHub Actions ecosystem uses directory "/".
+  # ---------------------------------------------------------------------------
   - package-ecosystem: "github-actions"
     directory: "/"
+
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
 
+    target-branch: "main"
+    open-pull-requests-limit: 3
+
+    assignees:
+      - "neo6bs988-dev"
+
+    commit-message:
+      prefix: "ci(deps)"
+
+    cooldown:
+      default-days: 7
+
+    groups:
+      github-actions-minor-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Major Action upgrades remain independent PRs because they may change
+    # runner requirements, Node runtimes, permissions, inputs, outputs, or
+    # security behavior.
+
+
+  # ---------------------------------------------------------------------------
+  # Python dependency updates
+  #
+  # The root pyproject.toml is the current Python dependency authority.
+  # Minor and patch updates are grouped; major updates remain isolated.
+  # ---------------------------------------------------------------------------
   - package-ecosystem: "pip"
     directory: "/"
+
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+      day: "thursday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+
+    target-branch: "main"
+    open-pull-requests-limit: 3
+
+    assignees:
+      - "neo6bs988-dev"
+
+    commit-message:
+      prefix: "chore(deps)"
+
+    cooldown:
+      default-days: 7
+
+    groups:
+      python-minor-patch:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Major dependency upgrades remain independent PRs so changes to Python
+    # support, APIs, licenses, transitive dependencies, and package behavior
+    # can be evaluated and rolled back separately.
