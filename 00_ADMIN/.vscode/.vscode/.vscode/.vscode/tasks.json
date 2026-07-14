@@ -1,0 +1,249 @@
+{
+  "version": "2.0.0",
+
+  "options": {
+    "cwd": "${workspaceFolder}",
+    "env": {
+      "PYTHONUTF8": "1",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    }
+  },
+
+  "presentation": {
+    "echo": true,
+    "reveal": "always",
+    "focus": false,
+    "panel": "shared",
+    "showReuseMessage": false,
+    "clear": false
+  },
+
+  "tasks": [
+    {
+      "label": "Asperitas: Validate registry contract",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "asperitas_agent.cli",
+        "validate-registry-contract"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Verify artifacts",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "asperitas_agent.cli",
+        "verify-artifacts"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Pytest — Full suite",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "pytest",
+        "-q"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Pytest — Current file",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "pytest",
+        "-q",
+        "${file}"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Pytest — Skill registry and discovery",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "pytest",
+        "-q",
+        "tests/test_skill_registry.py",
+        "tests/test_skill_discovery.py"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Ruff — Check",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "ruff",
+        "check",
+        "src",
+        "tests",
+        "scripts"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Ruff — Format check",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "src",
+        "tests",
+        "scripts"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Mypy — Package",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "mypy",
+        "src/asperitas_agent"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Coverage — Full suite",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "coverage",
+        "run",
+        "-m",
+        "pytest"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Coverage — Report",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "coverage",
+        "report"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Git diff check",
+      "type": "process",
+      "command": "git",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Local gate — Core",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Asperitas: Validate registry contract",
+        "Asperitas: Verify artifacts",
+        "Asperitas: Pytest — Full suite",
+        "Asperitas: Git diff check"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Local gate — Optional quality",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Asperitas: Local gate — Core",
+        "Asperitas: Ruff — Check",
+        "Asperitas: Ruff — Format check",
+        "Asperitas: Mypy — Package"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    },
+    {
+      "label": "Asperitas: Coverage — Run and report",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Asperitas: Coverage — Full suite",
+        "Asperitas: Coverage — Report"
+      ],
+      "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1,
+        "reevaluateOnRerun": true
+      }
+    }
+  ]
+}
