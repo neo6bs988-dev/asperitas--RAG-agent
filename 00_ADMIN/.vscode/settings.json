@@ -1,19 +1,27 @@
 {
-  // Target path: .vscode/settings.json
-  // Place this file at the repository root. A nested
-  // 00_ADMIN/.vscode/settings.json is not applied when the repository root is
-  // opened as the VS Code workspace.
+  // ===========================================================================
+  // Asperitas repository workspace settings
+  // ===========================================================================
+  //
+  // Scope:
+  // - repository-local developer experience;
+  // - deterministic Python/test configuration;
+  // - conservative Git and task behavior;
+  // - no automatic dependency installation, network access, or external write.
+  //
+  // pyproject.toml remains authoritative for pytest, Ruff, mypy, and coverage.
+  // ===========================================================================
 
   // ---------------------------------------------------------------------------
-  // Python environment
+  // Python interpreter and import analysis
   // ---------------------------------------------------------------------------
 
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
   "python.terminal.activateEnvironment": true,
   "python.terminal.executeInFileDir": false,
 
-  // Keep runtime imports honest. `extraPaths` assists editor analysis only;
-  // terminal commands and tests still use the repository package configuration.
+  // Editor-only src-layout support. Runtime behavior remains governed by the
+  // selected interpreter, editable installation, and repository configuration.
   "python.analysis.extraPaths": [
     "${workspaceFolder}/src"
   ],
@@ -25,9 +33,10 @@
   "python.analysis.indexing": true,
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.inlayHints.pytestParameters": true,
 
-  // Exclude non-code and generated surfaces from Python analysis without hiding
-  // them from the Explorer or repository audit.
+  // Keep Pylance focused on canonical source and tests rather than generated,
+  // historical, raw-source, cache, or local service state.
   "python.analysis.exclude": [
     "**/.git/**",
     "**/.venv/**",
@@ -42,7 +51,13 @@
     "**/01_RAW_SOURCES/**",
     "**/09_LOGS/**",
     "**/data/**",
-    "**/eval_results/**"
+    "**/eval_results/**",
+    "**/.chroma/**",
+    "**/chroma_db/**",
+    "**/.qdrant/**",
+    "**/.weaviate/**",
+    "**/.milvus/**",
+    "**/.neo4j/**"
   ],
 
   // ---------------------------------------------------------------------------
@@ -55,10 +70,11 @@
   "python.testing.pytestArgs": [
     "tests"
   ],
-  "python.testing.autoTestDiscoverOnSaveEnabled": true,
 
-  // pytest behavior, strict markers, temporary paths, and test discovery rules
-  // remain authoritative in pyproject.toml.
+  // Test discovery is refreshed only when test files change, reducing needless
+  // workspace-wide discovery after ordinary source edits.
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+  "python.testing.autoTestDiscoverOnSavePattern": "tests/**/*.py",
 
   // ---------------------------------------------------------------------------
   // Ruff
@@ -95,7 +111,6 @@
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
 
-  // Markdown may intentionally use trailing spaces for explicit line breaks.
   "[markdown]": {
     "editor.wordWrap": "on",
     "editor.formatOnSave": false,
@@ -117,6 +132,8 @@
   },
 
   "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml",
+    "editor.formatOnSave": false,
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
     "editor.rulers": [
@@ -125,6 +142,8 @@
   },
 
   "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml",
+    "editor.formatOnSave": false,
     "editor.insertSpaces": true,
     "editor.tabSize": 2,
     "editor.rulers": [
@@ -132,8 +151,18 @@
     ]
   },
 
+  "[powershell]": {
+    "editor.formatOnSave": false,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4
+  },
+
   // ---------------------------------------------------------------------------
-  // Explorer, search, and watcher performance
+  // Explorer visibility
+  //
+  // Only disposable developer artifacts are hidden. Source registries, raw
+  // sources, evaluation evidence, data artifacts, and decision logs remain
+  // visible for governance and audit.
   // ---------------------------------------------------------------------------
 
   "files.exclude": {
@@ -151,6 +180,10 @@
     "**/*.egg-info": true
   },
 
+  // ---------------------------------------------------------------------------
+  // Search performance
+  // ---------------------------------------------------------------------------
+
   "search.exclude": {
     "**/.git": true,
     "**/.venv": true,
@@ -162,12 +195,22 @@
     "**/htmlcov": true,
     "**/build": true,
     "**/dist": true,
-    "**/*.egg-info": true
+    "**/*.egg-info": true,
+    "**/.chroma": true,
+    "**/chroma_db": true,
+    "**/.qdrant": true,
+    "**/.weaviate": true,
+    "**/.milvus": true,
+    "**/.neo4j": true
   },
 
   "search.useIgnoreFiles": true,
   "search.useGlobalIgnoreFiles": true,
   "search.followSymlinks": false,
+
+  // ---------------------------------------------------------------------------
+  // Filesystem watcher performance
+  // ---------------------------------------------------------------------------
 
   "files.watcherExclude": {
     "**/.git/objects/**": true,
@@ -181,11 +224,20 @@
     "**/htmlcov/**": true,
     "**/build/**": true,
     "**/dist/**": true,
-    "**/*.egg-info/**": true
+    "**/*.egg-info/**": true,
+    "**/.chroma/**": true,
+    "**/chroma_db/**": true,
+    "**/.qdrant/**": true,
+    "**/.weaviate/**": true,
+    "**/.milvus/**": true,
+    "**/.neo4j/**": true
   },
 
   // ---------------------------------------------------------------------------
-  // Git safety
+  // Git guardrails
+  //
+  // These are editor protections only. Actual enforcement requires GitHub
+  // rulesets, required reviews, CODEOWNERS, and exact-head status checks.
   // ---------------------------------------------------------------------------
 
   "git.branchProtection": [
@@ -201,14 +253,14 @@
   "git.alwaysShowStagedChangesResourceGroup": true,
 
   // ---------------------------------------------------------------------------
-  // Task and terminal boundaries
+  // Tasks and terminal safety
   // ---------------------------------------------------------------------------
 
   "task.allowAutomaticTasks": "off",
   "terminal.integrated.cwd": "${workspaceFolder}",
 
   // ---------------------------------------------------------------------------
-  // Editor defaults
+  // General editor behavior
   // ---------------------------------------------------------------------------
 
   "editor.formatOnSave": false,
