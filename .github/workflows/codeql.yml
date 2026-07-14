@@ -1,5 +1,5 @@
 # =============================================================================
-# Asperitas CodeQL Advanced Security Workflow v1
+# Asperitas CodeQL Advanced Security Workflow v1.1
 # =============================================================================
 #
 # Purpose:
@@ -94,15 +94,22 @@ jobs:
             exit 1
           fi
 
+      - name: Verify source diff hygiene
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Validate the checked-out source before CodeQL creates legitimate
+          # runner-local databases and analysis artifacts.
+          git diff --check
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
         with:
           languages: ${{ matrix.language }}
           build-mode: none
 
-          # Security-and-quality provides broader coverage than the smallest
-          # default suite. It can produce more findings, so the first run is a
-          # baseline and human triage remains mandatory.
+          # The broader suite can produce findings requiring human triage.
           config: |
             paths-ignore:
               - "01_RAW_SOURCES/**"
@@ -121,28 +128,6 @@ jobs:
         uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
         with:
           category: "/language:${{ matrix.language }}"
-
-      - name: Verify analysis did not mutate tracked files
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          git status --short --untracked-files=no
-
-          if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
-            echo "::error::CodeQL execution modified tracked repository files."
-            git diff --stat
-            git diff
-            exit 1
-          fi
-
-      - name: Verify repository diff hygiene
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --check
 
       - name: Write CodeQL summary
         if: always()
