@@ -1,363 +1,338 @@
 # Asperitas AI RAG Agent
 
-## Current Execution Authority (2026-07-13)
+[![CI](https://github.com/neo6bs988-dev/asperitas--RAG-agent/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/neo6bs988-dev/asperitas--RAG-agent/actions/workflows/ci.yml)
+[![Quality Gates](https://github.com/neo6bs988-dev/asperitas--RAG-agent/actions/workflows/quality-gates.yml/badge.svg?branch=main)](https://github.com/neo6bs988-dev/asperitas--RAG-agent/actions/workflows/quality-gates.yml)
 
-Use [`docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md`](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md) as the authoritative current-status and forward-performance control plane. Mutable live status must also be verified against the latest merged GitHub pull request, commit, CI, Quality Gates, test, evaluation, and human-review evidence.
+A deterministic, source-grounded, compliance-aware Python RAG development core for evaluating biological evidence retrieval and preparing later grounded-answer and agent workflows.
 
-Latest confirmed merged evidence:
-
-- PR #170 V1.11A representative biology/compliance evaluation-reset preflight: merged;
-- PR #171 V1.11B public-safe development evaluation pack: merged;
-- PR #172 V1.11C Quality Gates and final closure: merged after green exact-head CI and Quality Gates;
-- PR #174 documentation authority hygiene: merged after green exact-head CI and Quality Gates;
-- V1.11 is closed only as CI-gated public-safe development evaluation infrastructure;
-- the next separately scoped software phase is V1.12 retrieval and reranker hardening.
-
-When an older status table, baseline SHA, phase label, or “next step” conflicts with the canonical roadmap and latest merged GitHub evidence, treat the older status wording as historical. Preserve its scoped technical contracts, acceptance criteria, risk analysis, and historical evidence.
-
-V1.11 does not prove a protected holdout, private holdout operations, qualified human gold labels, holdout generalization, retrieval or reranker improvement, generated-answer quality, runtime verification or blocking, legal/compliance/biosafety/biosecurity/IP approval, production vector DB or KG, wet-lab validation, autonomous execution, production readiness, or proprietary biological foundation-model capability.
-
-Current mandatory sequence:
-
-```text
-V1.11 public-safe development evaluation infrastructure closed
--> V1.12 retrieval and reranker hardening
--> real source-grounded answer path
--> claim-to-citation verifier in diagnostic/shadow mode
--> compliance/security adversarial gates
--> tracing, latency, token, and cost control plane
--> internal API/UI dogfood
--> approved Deep Research-to-Registry data flywheel
--> authenticated web productization
--> production-readiness gate
--> evidence-driven KG, DBTL, active learning, and foundation-model readiness
-```
-
+> **Current baseline:** `main` at `6786b562aceb01ce0bf9b1e28ffb50374eb0ac3f` on 2026-07-13. Mutable status must be checked against the [canonical roadmap](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md), the latest merged pull request, and exact-head CI evidence.
 
 ## Executive Bottom Line
 
-This repository is the execution base for the Asperitas Biological Intelligence OS: a source-grounded, auditable, compliance-aware AI agent infrastructure for converting biodiversity access into structured biological data, AI-bio workflows, DBTL validation, IP, products, compliance trust, and platform advantage.
+- The repository currently provides source-registry contracts, local parsing/chunking, deterministic retrieval modes, retrieval evaluation, compliance-aware evidence summaries, validators, tests, and GitHub quality gates.
+- It is intended for engineers and research operators building auditable biological-intelligence infrastructure where source provenance, evidence labels, compliance boundaries, and regression evidence matter.
+- V1.12A measurement and leakage boundaries are merged; V1.12B durable ranking/latency measurement and leakage guards are the active engineering phase.
+- This repository is **not** evidence of production RAG, a production vector database or knowledge graph, protected-holdout generalization, legal or biosafety approval, wet-lab validation, autonomous execution, or proprietary biological foundation-model capability.
 
-This is not a generic chatbot repository. The target is a benchmark-beating biological intelligence infrastructure layer: every feature must improve source traceability, factual accuracy, evaluation coverage, compliance safety, biological relevance, workflow leverage, or long-term data moat.
+## Current Status
 
-## Current Truth Boundary
+| Area | Verified status | Repository evidence | Not yet proven |
+|---|---|---|---|
+| Source registry | Contract, artifacts, validation, and inventory/ingestion utilities exist | `02_SOURCE_REGISTRY/`, `src/asperitas_agent/registry.py`, `src/asperitas_agent/source_registry_contract.py` | Complete licensed production ingestion |
+| Parsing and chunking | Local deterministic pipeline exists | `src/asperitas_agent/loaders.py`, `src/asperitas_agent/chunking.py` | Production-scale ingestion or confidential-data clearance |
+| Retrieval | Baseline lexical retrieval and deterministic `mvp003` reference exist | `src/asperitas_agent/retrieval_tfidf.py`, `src/asperitas_agent/retrieval_mvp003.py` | Protected-holdout generalization or a selected production backend |
+| Vector comparison | Dependency-free offline comparison mode exists | `src/asperitas_agent/embeddings.py`, `scripts/run_retrieval_eval.py` | Production vector service or embedding deployment |
+| Hybrid retrieval | Implemented for comparison only | `src/asperitas_agent/hybrid_scoring.py`, `scripts/run_retrieval_eval.py` | Promotion-valid evidence independent of evaluation oracle fields |
+| Reranking | Interface, metadata-preservation checks, and deterministic test reranker exist | `src/asperitas_agent/reranking.py` | Demonstrated ranking improvement |
+| Evaluation | CI-gated deterministic development evaluation exists | `eval/`, `scripts/run_retrieval_eval.py`, V1.11 validators, `tests/` | Protected holdout, qualified human gold labels, or generalization evidence |
+| Answer path | Local evidence-summary contract with compliance flags exists | `src/asperitas_agent/rag.py`, `src/asperitas_agent/compliance.py` | Provider-backed grounded generation as a production-shaped default path |
+| Claim verification | Schemas and diagnostic components exist | `src/asperitas_agent/claim_verifier_schema.py`, `src/asperitas_agent/evidence_span_matcher.py`, `src/asperitas_agent/claim_verification_metrics.py` | Calibrated runtime blocking or approval authority |
+| Security and compliance | Repository policy, human-gate rules, tests, and CI controls exist | `SECURITY.md`, `AGENTS.md`, `.github/workflows/` | Legal, regulatory, CITES, Nagoya, LMO, biosafety, biosecurity, or IP approval |
+| Tracing and operations | Decision logs, failure records, readiness helpers, and CI evidence exist | `09_LOGS/`, `src/asperitas_agent/release_readiness.py`, scripts and tests | Production observability, durable online traces, or customer operations |
+| Agent workflow | Agent instructions and reusable skills exist | `AGENTS.md`, `.agents/skills/` | A deployed autonomous or multi-agent runtime |
+| Production readiness | Not established | Current roadmap and truth-boundary documents | Deployment, security review, operational SLOs, and release approval |
 
-This repository is the Phase-0 core for Asperitas internal RAG and agent development. It may contain prompts, source registries, retrieval logic, eval harnesses, governance docs, and agent scaffolds. It must not be described as any of the following unless a merged PR, test log, release note, and decision log prove it:
+## Why This Repository Exists
 
-| Do Not Confuse | With |
-|---|---|
-| Source map or registry | Production database fully ingested |
-| Prompt or architecture document | Deployed autonomous agent |
-| Chunk files or fixtures | Production vector database |
-| Benchmark doctrine | Asperitas internal fact |
-| Retrieval/eval scaffold | Full RAG/KG/eval production system |
-| Agent-stack roadmap | Not proof that a proprietary agent stack is implemented |
-| Model output or hypothesis | Wet-lab validation |
-| Compliance checklist | Legal or regulatory approval |
-| Investor or market signal | Committed capital or product-market fit |
-| RAG agent core | Proprietary biological foundation model |
+Biological and biodiversity-derived information is difficult to operationalize safely. Evidence can be incomplete, licenses and allowed uses vary, scientific claims require provenance, and regulatory or biosafety implications cannot be inferred from model confidence alone.
 
-If only a plan exists, say plan. If only a scaffold exists, say scaffold. If evidence is missing, label the gap.
-
-## Mission
-
-Turning Biodiversity into Biotechnology.
-
-Asperitas must build the operating infrastructure that compounds:
+This repository builds the smallest verifiable control plane first:
 
 ```text
-Biodiversity access
--> proprietary biological data
--> structured metadata
--> source-grounded RAG/KG
--> AI-bio models and agents
+source governance
+-> parsing and structured metadata
+-> deterministic retrieval
+-> measurable ranking and citation behavior
+-> grounded answer contracts
+-> compliance and human-review routing
+-> tracing and internal dogfood
+```
+
+The long-term Asperitas direction is:
+
+```text
+biodiversity access
+-> legally traceable proprietary biological data
+-> source registry / metadata / RAG / KG / eval / trace control plane
+-> AI-bio models
 -> DBTL validation
--> biological IP
--> compliance trust
--> products/licensing
--> platform revenue
--> biological infrastructure moat
+-> IP and compliance trust
+-> products and licensing
+-> global biological infrastructure
 ```
 
-## Active Constitution
+That direction is a roadmap, not a statement that every layer is implemented.
 
-The active operating constitution is:
+## Verified Capabilities
+
+- **Registry validation and source inventory** — validates registry schemas, builds inventories, and records decisions through the project CLI (`src/asperitas_agent/cli.py`).
+- **Local ingestion and chunking** — loads supported local documents, attaches parse and compliance metadata, produces chunks, and writes ingestion evidence (`src/asperitas_agent/loaders.py`, `src/asperitas_agent/chunking.py`, `src/asperitas_agent/ingestion_log.py`).
+- **Deterministic local search** — provides lexical TF-IDF retrieval and the protected `mvp003` metadata-aware reference mode (`src/asperitas_agent/retrieval_tfidf.py`, `src/asperitas_agent/retrieval_mvp003.py`).
+- **Offline retrieval comparisons** — evaluates baseline, `mvp003`, offline vector, hybrid, and deterministic-test reranker paths without requiring an external model or vector service (`scripts/run_retrieval_eval.py`).
+- **Grounding-preserving reranker contract** — checks candidate identity, source coverage, and source-grounding metadata preservation (`src/asperitas_agent/reranking.py`).
+- **Compliance-aware evidence summaries** — returns retrieved source metadata, evidence labels, confidence, limitations, risk tags, and a human-approval flag (`src/asperitas_agent/rag.py`, `src/asperitas_agent/compliance.py`).
+- **Public-safe development evaluation** — validates a synthetic development-only biology/compliance pack; it is not protected-holdout or qualified-gold evidence (`scripts/validate_v1_11b_representative_biology_compliance_dev.py`).
+- **Artifact and regression controls** — verifies generated artifacts, chunk metadata, fixtures, tests, and retrieval modes in GitHub Actions (`scripts/verify_artifacts.py`, `.github/workflows/ci.yml`, `.github/workflows/quality-gates.yml`).
+- **Audit-oriented engineering workflow** — defines scope, validation, source-grounding, security, rollback, and non-overclaim rules for coding agents and human reviewers (`AGENTS.md`, `docs/WORKFLOW.md`, `docs/QUALITY_GATES.md`).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A["Repository sources<br/>[Implemented artifacts]"] --> B["Source registry and metadata<br/>[Implemented contracts]"]
+    B --> C["Parsing and chunking<br/>[Implemented local pipeline]"]
+    C --> D["Lexical / metadata retrieval<br/>[Implemented reference paths]"]
+    D --> E["Evidence summary and risk tags<br/>[Implemented MVP path]"]
+
+    C --> F["Retrieval comparison modes<br/>baseline / mvp003 / vector / hybrid<br/>[Evaluation-only]"]
+    F --> G["Metrics, tests, and Quality Gates<br/>[Implemented controls]"]
+
+    E -. planned .-> H["Provider-backed grounded answers<br/>[Planned]"]
+    H -. planned .-> I["Claim-to-citation verification<br/>[Planned shadow integration]"]
+    I -. human gated .-> J["Compliance and release approval<br/>[Human-gated]"]
+    J -. planned .-> K["Internal product and DBTL feedback<br/>[Planned]"]
+
+    classDef implemented fill:#e8f5e9,stroke:#2e7d32,color:#111;
+    classDef evaluation fill:#e3f2fd,stroke:#1565c0,color:#111;
+    classDef planned fill:#fff8e1,stroke:#f9a825,color:#111;
+    classDef gated fill:#fce4ec,stroke:#ad1457,color:#111;
+
+    class A,B,C,D,E,G implemented;
+    class F evaluation;
+    class H,I,K planned;
+    class J gated;
+```
+
+**Implemented boundary:** local source governance, parsing/chunking, deterministic retrieval, evidence summaries, validators, tests, and CI controls.
+
+**Evaluation boundary:** vector, hybrid, and deterministic-test reranker modes are comparison infrastructure. The current hybrid path uses fixture-specific expected-section information and is not promotion-valid production evidence.
+
+**Planned boundary:** provider-backed grounded generation, integrated claim verification, production observability, authenticated product surfaces, KG, DBTL feedback, and active learning.
+
+**Human-approval boundary:** legal, regulatory, CITES, Nagoya/ABS, LMO/GMO, biosafety, biosecurity, IP/licensing, protected data, external communication, release, and wet-lab decisions.
+
+## Repository Structure
 
 ```text
-ASPERITAS PRIME v2.0
-= AOS v8.0 Core
-+ AOS v9.0 Strategic Upgrade
-+ AOS v10.0 Source-Grounded Agent Layer
-+ AOS v10.2 Universal Prompt Principles
-+ AOS v10.3 Advanced Prompt Layer
-+ AOS v10.4 Security/Privacy/Eval/Token Discipline
-+ AOS v11.0 Outcome-First Reasoning
-+ V11.1 Supergap Agent Build Leader Doctrine
-+ user-approved project memory and GitHub evidence
+.
+├── src/asperitas_agent/       # Core deterministic Python modules and contracts
+├── scripts/                   # Validation, evaluation, artifact, and diagnostic utilities
+├── tests/                     # Unit and regression tests
+├── eval/                      # Public development evaluation fixtures
+├── 02_SOURCE_REGISTRY/        # Source-registry example and contract artifacts
+├── data/                      # Local pipeline artifacts used by deterministic workflows
+├── docs/                      # Architecture, quality gates, roadmaps, and technical decisions
+├── 09_LOGS/decision_logs/     # Reviewable decision evidence
+├── .agents/skills/            # Reusable coding-agent skills
+├── .github/workflows/         # CI and Quality Gates
+├── AGENTS.md                  # Authoritative repository instructions for coding agents
+├── SECURITY.md                # Security and disclosure boundaries
+└── pyproject.toml             # Python package and development dependencies
 ```
 
-Earlier AOS layers remain inherited doctrine unless a later safe instruction explicitly supersedes them. The latest user instruction can override execution details, but never safety, legality, scientific truth, biosafety, source integrity, or compliance.
+## Quick Start
 
-V11.1 adds two practical rules:
+### Windows PowerShell
 
-1. Build a proprietary agent stack over frontier models before claiming any proprietary base model or foundation-model capability.
-2. Treat data flywheel, agent runtime, evals, tracing, tool interfaces, safety/security/governance, source-grounded RAG, biosafety gates, DBTL support, and GitHub verification as one operating system.
+```powershell
+git clone https://github.com/neo6bs988-dev/asperitas--RAG-agent.git
+cd asperitas--RAG-agent
 
-## V11.1 Control Documents
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-- `docs/V11_1_SUPERGAP_AGENT_BUILD_LEADER.md` — latest doctrine for proprietary agent stack, data flywheel, eval/trace/control-plane, compliance gates, and non-overclaim boundaries.
-- `docs/IDEAL_REPO_STRUCTURE_V11_1.md` — target repo architecture and stage-gated folder model.
-- `docs/CODEX_NEXT_PROMPT_V11_1_REPO_ALIGNMENT.md` — Codex-ready prompt for the next implementation PR with explicit reasoning level.
-- `docs/TOP_SOURCE_TRIAD_OPERATING_BASELINE.md` — active Top Source Triad plus v11.1 add-on baseline.
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev,parsers]"
 
-## Historical Constitution References
-
-The current README and AGENTS files are the compact active operating layer. The earlier long-form PRIME v2.0 README and AGENTS versions were not discarded; they remain in Git history and are indexed for future reference:
-
-- `docs/archive/README_PRE_V15_PRIME_V2.md`
-- `docs/archive/AGENTS_PRE_V15_PRIME_V2.md`
-
-These archives are historical context only. Active execution follows this README, `AGENTS.md`, `docs/AI_DEVELOPMENT_OS.md`, `docs/WORKFLOW.md`, `docs/QUALITY_GATES.md`, `docs/AOS_SOURCE_POLICY.md`, `docs/V1_5_PERFORMANCE_ROADMAP.md`, `docs/V11_1_SUPERGAP_AGENT_BUILD_LEADER.md`, latest user instruction, and GitHub PR/CI evidence.
-
-## Benchmark Doctrine
-
-Benchmarking is not decoration. It is a P6 operating layer used to extract durable engineering principles from top AI, data, infrastructure, biotech, VC, and unicorn company patterns.
-
-P6 benchmark doctrine may influence how we design systems, but it must never be presented as Asperitas internal proof. The benchmark rule is:
-
-```text
-Benchmark -> failure mode -> Asperitas-specific control -> eval gate -> PR evidence
+python -m asperitas_agent.cli validate-registry-contract
+python -m pytest -q tests/test_retrieval_eval.py
 ```
 
-A feature is not benchmark-beating because the document says so. It becomes benchmark-beating only when it passes measurable gates:
+The package requires Python `>=3.10`; GitHub Actions currently validates with Python 3.11.
 
-- higher retrieval quality without source-boundary loss
-- stronger claim-to-evidence alignment
-- lower hallucination and overclaim rate
-- better refusal/escalation behavior on risky tasks
-- lower token, cost, or latency with no answer-quality regression
-- stronger security and data-leakage resistance
-- clearer GitHub audit trail and reproducibility
-- stronger biology-specific decision quality
+### Smallest CI-aligned smoke checks
 
-## Workflow Complexity and Security Doctrine
-
-AI-assisted development speed must not flatten the agent workflow. Vibe-coded shortcuts are acceptable only when they preserve the real system boundaries, audit trail, tests, diagnostics, and future eval hooks.
-
-The verifier and RAG workflow must remain separable:
-
-```text
-source registry/raw sources
--> parsing/chunking
--> metadata/evidence span layer
--> retrieval/reranking
--> answer contract
--> atomic claim extraction
--> evidence-span matching
--> support-status classification
--> report aggregation
--> answer contract integration
--> adversarial/security eval
--> biology/compliance golden set
--> metrics/regression gate
+```powershell
+python -m asperitas_agent.cli validate-registry-contract
+python scripts/verify_artifacts.py
+git diff --check
 ```
 
-Do not collapse extraction, matching, classification, report aggregation, and answer integration into one broad helper. Small PRs are required, but small PRs must not oversimplify the architecture or hide state transitions.
+Do not run inventory or ingestion against confidential or unreviewed sources. Source licensing, confidentiality, provenance, `allowed_use`, and compliance status must be reviewed first.
 
-V1.5 and later work must preserve four completion pillars:
+## Usage
 
-| Pillar | Requirement |
+### Validate the source-registry contract
+
+```powershell
+python -m asperitas_agent.cli validate-registry-contract
+```
+
+### Search existing local chunks
+
+```powershell
+python -m asperitas_agent.cli search "Nagoya Protocol evidence requirements" --limit 5
+```
+
+### Produce a deterministic evidence summary
+
+```powershell
+python -m asperitas_agent.cli ask "What evidence is available for this claim?" --limit 5
+```
+
+The `ask` command is a local evidence-summary MVP. It does not call a frontier model and must not be represented as a production answer provider.
+
+### Run a retrieval evaluation
+
+```powershell
+python scripts/run_retrieval_eval.py --retriever baseline --limit 5
+python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
+python scripts/run_retrieval_eval.py --retriever vector --limit 5
+python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
+```
+
+`mvp003` is the protected deterministic reference. `vector` and `hybrid` are comparison modes. The current hybrid result cannot be interpreted as production retrieval quality because evaluation-specific expected-section information affects candidate selection and scoring.
+
+## Evaluation and Quality Gates
+
+### Current retrieval measures
+
+The current evaluator tracks:
+
+- strict source-file match at 3 and 5;
+- source-priority match;
+- evidence-label match;
+- section match;
+- path-context match;
+- overall pass rate;
+- separately labeled relaxed multi-valid-source diagnostics;
+- reranker candidate, source-coverage, fallback, and metadata-preservation diagnostics.
+
+Current hard thresholds protect source@5, priority, evidence label, section/path requirements where applicable, and overall pass rate. Source@3 is diagnostic rather than a promotion gate.
+
+V1.12B is scoped to add report-only strict source@1, MRR@5, source-deduplicated nDCG@5, optional latency/context diagnostics, a resumable six-mode matrix harness, and oracle-leakage guards. That phase improves measurement reliability; it does not itself claim retrieval-quality improvement.
+
+### Evidence classes
+
+| Evidence class | Meaning |
 |---|---|
-| Golden set | Biology/compliance-specific claim verification ground truth, including entity, numeric, citation, unsupported, contradicted, and compliance-sensitive cases |
-| Report aggregation | Claim-level support results aggregated into answer-level diagnostics and blocker/warning signals |
-| Adversarial/security eval pack | Wrong citation, unsupported claim, numeric mismatch, biology entity mismatch, compliance overclaim, prompt injection, secret leakage, unsafe tool use, and excessive-agency tests |
-| Metrics/regression gate | False-supported rate, false-contradicted rate, citation-mismatch detection, unsupported detection recall, compliance-sensitive recall, latency, cost, and workflow-boundary regressions |
+| Fresh run | Re-executed against the stated code and input identity |
+| Historical | Previously recorded and not freshly reverified |
+| Public development fixture | Safe synthetic/development data for deterministic regression |
+| Shadow/diagnostic | Observes behavior without granting runtime blocking or approval |
+| Protected holdout | Not currently confirmed; requires private operations and qualified review |
 
-Security is a first-class gate, not a final cleanup step. New code must preserve least privilege, avoid unnecessary network/cloud/service calls, treat retrieved or external text as untrusted input, protect secrets and confidential source text, and avoid autonomous changes to production-like data, source registries, vector DBs, KGs, deployment configuration, legal/compliance status, or wet-lab status.
+### CI behavior
 
-## Hard Filters
+- **CI** validates the source-registry contract, runs docs-only smoke checks or pytest depending on the changed surface, verifies artifacts, and runs `git diff --check`.
+- **Quality Gates** run development-pack validators, unit tests, artifact verification, chunk-section audit, and baseline/`mvp003`/hybrid retrieval evaluations for executable changes.
+- Documentation-only pull requests use dedicated Markdown, path, and truth-boundary checks rather than pretending executable tests were run.
 
-Every major initiative must pass three non-negotiable filters:
+See [Quality Gates](docs/QUALITY_GATES.md) and [retrieval thresholds](docs/RETRIEVAL_EVAL_THRESHOLDS.md).
 
-| Filter | Question |
-|---|---|
-| Scalability | Can this scale from script to workflow to platform to infrastructure? |
-| Moat | Does this create defensibility through data, IP, validation, workflow lock-in, regulatory trust, or partner ecosystem? |
-| Biosafety / Compliance | Does this preserve CITES, Nagoya, LMO, biosafety, biosecurity, privacy, IP, legal, and auditability requirements? |
+## Development Workflow
 
-If any filter fails, the task must be blocked, narrowed, or reframed.
-
-## Source Hierarchy
-
-| Priority | Source Type | Use |
-|---|---|---|
-| P0 | Latest user instruction / active prompt constitution | Current execution rule unless unsafe or false |
-| P1 | Internal Asperitas source-of-truth documents | Internal facts, strategy, AOS doctrine |
-| P2 | Official Asperitas public sources | Approved external positioning |
-| P3 | Peer-reviewed science and technical databases | Biological mechanism and technical claims |
-| P4 | Government, regulatory, institutional sources | Law, grants, compliance, policy, eligibility |
-| P5 | Industry, market, investor, conference intelligence | Market signals, competitors, adoption patterns |
-| P6 | External benchmark and operating doctrine | Analogy and process doctrine, not company fact |
-
-When sources conflict, prefer the source class that matches the claim type. Use P1 for internal company facts, P3 for technical biology, P4 for law and compliance, and P6 only for analogy or operating design.
-
-## Evidence Labels
-
-Every material claim should be labeled when possible:
-
-- Document-Supported Fact
-- Official Source
-- Peer-Reviewed Evidence
-- Regulatory Source
-- Industry Signal
-- Inference
-- Speculation
-- Needs External Verification
-
-Never upgrade speculation into fact. Never attach citations as decoration. Citations must support the exact claim they are attached to.
-
-## Current Development Operating Model
-
-GitHub is the execution headquarters. ChatGPT/project memory is strategic context. GitHub is implementation evidence.
+GitHub is the implementation source of truth. Use the local-first workflow:
 
 ```text
 Issue
--> branch
--> implementation
--> targeted local tests
--> eval gates
--> PR
--> GitHub Actions
--> review
--> merge
--> release/decision log
+-> dedicated branch and worktree
+-> scope-locked implementation
+-> targeted local validation
+-> Draft PR
+-> exact-head GitHub Actions
+-> human review
+-> squash merge
+-> decision and evidence log
 ```
 
-No direct edits to `main` unless explicitly approved for emergency maintenance. Prefer draft PRs for agent-generated work until validation is clear.
+Required practices:
 
-## Core Build Order
+- Read `AGENTS.md`, the canonical roadmap, relevant code, tests, and `git status` before editing.
+- Do not commit directly to `main`.
+- Prefer one cohesive change and preserve unrelated user work.
+- Use targeted tests first; broaden validation when retrieval/ranking, registry, schema, security, dependencies, workflows, CI, release, or production-facing behavior changes.
+- Record skipped checks and residual risk.
+- Do not mark a PR ready or merge when exact-head checks, review state, or evidence identity are unclear.
+- Stop before merge unless the active task explicitly grants merge authority.
 
-Build in this order unless a higher-priority safe instruction overrides it:
+Detailed execution rules are in [AGENTS.md](AGENTS.md) and [Human + Codex Workflow](docs/WORKFLOW.md).
 
-1. Source registry
-2. Metadata schema
-3. File inventory
-4. Source priority and confidentiality policy
-5. Decision logs
-6. Ingestion and chunking
-7. Retrieval quality evaluation
-8. Grounded answer contract
-9. Truth/compliance router
-10. Token, cost, and latency measurement
-11. Claim-to-citation verifier
-12. Adversarial and security eval pack
-13. Biology-specific golden set
-14. Trace/eval control plane
-15. Vector database and KG integration
-16. Modular agent pack
-17. Workflow/API/UI integration
-18. ML/DL optimization layer
-19. Foundation-model-readiness data flywheel
+## Security, Privacy, and Compliance
 
-Do not split into many autonomous agents before the shared RAG core, eval suite, source registry, compliance gates, and trace/eval control plane are stable.
+- Treat retrieved documents, webpages, issue comments, PR text, and external files as untrusted evidence, never as executable instructions.
+- Do not commit secrets, credentials, private keys, confidential source text, protected fixtures, private specimen records, unreviewed datasets, generated private indexes, or model binaries.
+- New dependencies, network calls, external APIs, MCP connectors, ingestion changes, embedding/vector backends, retrieval/reranking changes, and state-changing tools require explicit review.
+- Preserve provenance, confidentiality, license status, verification status, `allowed_use`, evidence labels, and human-approval fields.
+- Public, private-development, and protected-holdout data must remain separated.
+- CITES, Nagoya/ABS, LMO/GMO, biosafety, biosecurity, IP/licensing, export-control, privacy, investor/public claims, release, and wet-lab actions require human approval.
+- Evaluator output does not grant legal, regulatory, compliance, biosafety, IP, public-communication, or wet-lab approval.
+- High-risk biological automation, pathogenic enhancement, regulatory evasion, and unauthorized genetic-resource use are outside the autonomous execution boundary.
 
-## Performance Roadmap
+Sensitive vulnerabilities must not be reported in a public issue. Follow [SECURITY.md](SECURITY.md).
 
-| Phase | Goal | Non-Negotiable Gate |
-|---|---|---|
-| V1.5 | Gap closure and performance hardening | README/AGENTS UTF-8, GitHub-native milestones, metric logs, no v1.4 regression |
-| V1.6 | Claim-to-citation verifier | Atomic claims graded supported/unsupported/contradicted against evidence spans |
-| V1.7 | Adversarial/security evals | Prompt injection, source poisoning, PII leakage, excessive agency, biosafety over-answer tests |
-| V1.8 | Biology-specific golden set | Nagoya/CITES/LMO, DBTL, pathway/protein, IP/compliance boundary tasks |
-| V1.9 | Real latency optimization | p50/p95 latency reduction with no retrieval or answer-quality regression |
-| V2.0 | Vector DB/KG production pathway | Approved ingestion, embedding/index logs, KG links, eval-ready evidence |
-| V3.0 | Modular agents | Shared core, scoped tools, schema outputs, approval gates, agent-specific evals |
-| V4.0 | ML/DL performance layer | Custom embedding/reranker/classifiers or fine-tuning only after benchmark and safety gates |
-| V5.0 | Foundation model readiness | Proprietary, validated, diverse, metadata-rich biological data and DBTL feedback loops |
+## Roadmap
 
-## Evaluation Standard
+### Completed
 
-RAG and agent performance must be judged at the right layer:
+- Deterministic repository foundation and test harness
+- Registry/artifact validation and local retrieval scaffolds
+- V1.10 diagnostic sample identity and reporting
+- V1.11 public-safe development evaluation infrastructure
+- V1.12A retrieval/reranker measurement and leakage preflight
 
-- Retrieval: Recall@k, Precision@k, MRR, nDCG, source coverage, expected-source hit rate
-- Generation: faithfulness, answer relevance, unsupported-claim rate, citation accuracy
-- Safety: refusal accuracy, escalation accuracy, confidential-data leakage, unsafe bio output blocking
-- Operations: test pass rate, CI reliability, artifact integrity, decision-log completeness
-- Efficiency: retrieved-context tokens, answer tokens, cost, p50/p95 latency, cache hit rate with net runtime impact
-- Biology: mechanism quality, DBTL usefulness, compliance boundary accuracy, validation-status honesty
+### Active
 
-Metric improvements must preserve source IDs, source priorities, source paths, evidence labels, section metadata, and truth-boundary fields.
+- **V1.12B:** durable retrieval measurement harness, ranking metrics, latency/context diagnostics, resumable six-mode capture, and leakage guards
 
-## Tooling Doctrine
+### Next
 
-Use tools when they increase quality, speed, reproducibility, or safety more than they increase complexity or risk.
+1. Implement one leak-free query-derived retrieval/reranking candidate.
+2. Compare it against protected `mvp003` with non-regression, latency, context, and metadata-preservation evidence.
+3. Promote or defer based on reproducible measurements.
+4. Build the provider-neutral real grounded-answer path.
+5. Integrate claim-to-citation verification in diagnostic/shadow mode.
+6. Add compliance/security adversarial gates and trace/cost controls.
 
-Default tool roles:
+### Later
 
-| Tool | Role |
-|---|---|
-| ChatGPT | Strategy, architecture, prompt design, review, GO/NO-GO, executive synthesis |
-| Codex | Implementation, tests, branch work, PR packaging |
-| GitHub | Issues, PRs, CI, audit trail, releases, decision evidence |
-| GitHub Actions | Pull request and main-branch validation gates |
-| VS Code / terminal | Local debugging and manual inspection |
-| Claude Code / Cursor / Copilot | Review, refactor, alternative analysis; do not edit same branch concurrently |
-| Ragas / DeepEval / ARES-style evals | RAG and agent quality measurement when appropriate |
-| Semgrep / gitleaks / Dependabot / Trivy | Security, secret, dependency, and supply-chain checks |
-| Qdrant / Chroma / Neo4j | Vector DB and KG candidates after source governance is stable |
-| BioPython / RDKit / ESM / AlphaFold-class tools | Biology ML/DL stage after data governance and validation design |
+- Internal API/UI dogfood
+- Approved Deep Research-to-Registry data flywheel
+- Authenticated productization
+- Production-readiness review
+- Evidence-driven KG, DBTL learning records, active learning, and foundation-model readiness
 
-Do not add frameworks or services without a Scout -> License -> Security -> Benchmark -> Adapt -> Test ledger.
+The authoritative mutable plan is [Current State and Performance Roadmap](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md).
 
-## Validation Rules
+## Documentation
 
-After any change, run the smallest sufficient verification:
+- [Current State and Performance Roadmap](docs/CURRENT_STATE_AND_PERFORMANCE_ROADMAP_2026_07_11.md)
+- [V1.12A Retrieval/Reranker Hardening Preflight](docs/V1_12A_RETRIEVAL_RERANKER_HARDENING_PREFLIGHT.md)
+- [Retrieval Evaluation Thresholds](docs/RETRIEVAL_EVAL_THRESHOLDS.md)
+- [Quality Gates](docs/QUALITY_GATES.md)
+- [Human + Codex Workflow](docs/WORKFLOW.md)
+- [Agent Constitution](AGENTS.md)
+- [Security Policy](SECURITY.md)
 
-- Documentation-only: markdown review, link/path sanity, truth-boundary review
-- Code change: targeted tests plus relevant lint/type/schema checks
-- Retrieval change: retrieval evals and source coverage checks
-- Answer-generation change: answer contract, faithfulness, citation, refusal/escalation evals
-- Security/compliance change: adversarial, leakage, and compliance gate tests
-- Release/main: full suite, artifact readiness, retrieval/golden evals, metric gates, diff checks
+## Contributing
 
-If validation cannot run, state why and provide the next-best check. Never claim tests passed unless they were actually run.
+A formal `CONTRIBUTING.md` has not been confirmed. Until one is added:
 
-## Required Task Report
+1. Open or reference an issue for non-trivial work.
+2. Create a narrow branch and dedicated worktree.
+3. Keep the diff cohesive and preserve existing contracts.
+4. Run the smallest sufficient targeted validation.
+5. Open a Draft PR with exact changed files, commands, results, skipped checks, residual risks, and rollback.
+6. Wait for exact-head CI, Quality Gates, and human review before merge.
 
-Every implementation or review should end with:
+Changes affecting retrieval, source governance, compliance, security, schema, dependencies, workflows, or release controls require stronger evidence and may require a separate preflight PR.
 
-```text
-Changed files:
-Verification:
-Retrieval metrics:
-Compliance/source-grounding review:
-Risks or skipped checks:
-Recommended next step:
-```
+## License
 
-## V11.1 Required PR Addendum
+No open-source license file has been confirmed in this repository. Do not assume permission to copy, modify, redistribute, or commercially reuse repository content. Licensing must be decided and documented by the repository owner before external reuse.
 
-Every governance, RAG, eval, compliance, security, or agent-workflow PR should also include:
+## Support and Responsible Disclosure
 
-```text
-V11.1 alignment:
-Codex reasoning level: 매우높음 / 높음 / 중간 / 낮음
-Complexity level used:
-Why simpler pattern is enough or insufficient:
-Eval/trace impact:
-Production-status boundary:
-```
-
-## Final Repository Rule
-
-Always optimize for truth, leverage, scientific rigor, operational discipline, governance integrity, regulatory trust, biosafety, source traceability, adoption velocity, capital efficiency, and long-term compounding advantage.
-
-The permanent belief:
-
-```text
-Asperitas must build infrastructure, not just products.
-Validated data, not just narratives.
-Operating loops, not just prompts.
-Biological intelligence factories, not just experiments.
-Trust, not just technology.
-```
+- Use GitHub Issues for non-sensitive bugs, proposals, and documentation problems.
+- Do not place secrets, private data, partner information, specimen-level records, unpublished results, or sensitive security findings in public issues.
+- Report sensitive findings privately according to [SECURITY.md](SECURITY.md).
