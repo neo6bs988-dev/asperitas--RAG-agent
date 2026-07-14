@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import argparse
-from importlib import metadata
 import json
 import os
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from importlib import metadata
+from pathlib import Path
 from typing import Any, Sequence
 
 ROOT = Path(__file__).resolve().parents[1]
