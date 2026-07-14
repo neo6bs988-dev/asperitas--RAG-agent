@@ -59,6 +59,7 @@ jobs:
       - name: Verify focused lint contracts
         run: >-
           python -m ruff check
+          sitecustomize.py
           scripts/verify_packaging_contract.py
           scripts/verify_distribution_install.py
           tests/test_sitecustomize.py
