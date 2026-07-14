@@ -1,0 +1,25 @@
+{
+  // Workspace recommendations only.
+  // VS Code asks the user before installation; nothing is installed
+  // automatically by this file.
+  "recommendations": [
+    // Python runtime, IntelliSense, testing, and debugging
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+
+    // Repository-configured linting and formatting
+    "charliermarsh.ruff",
+
+    // TOML, YAML, and cross-editor formatting contracts
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+    "editorconfig.editorconfig",
+
+    // GitHub Actions workflow inspection
+    "github.vscode-github-actions",
+
+    // Existing Windows-oriented PowerShell scripts
+    "ms-vscode.powershell"
+  ]
+}
