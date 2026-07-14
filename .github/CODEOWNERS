@@ -1,74 +1,149 @@
 # =============================================================================
-# Asperitas CODEOWNERS v2
+# Asperitas CODEOWNERS v3
 # =============================================================================
 #
+# Status:
+#   ACTIVE REPOSITORY OWNERSHIP BASELINE
+#
 # Purpose:
-# - require explicit ownership for repository governance, source provenance,
-#   biological evidence, compliance, evaluation, packaging, CI, and runtime
-#   control surfaces;
-# - keep a repository-wide fallback owner so newly introduced files do not
-#   silently become ownerless;
-# - make sensitive ownership boundaries visible before future team delegation.
+# - assign explicit ownership to governance, CI, packaging, source provenance,
+#   biological evidence, rights metadata, retrieval, evaluation, security,
+#   runtime, application, documentation, and community control surfaces;
+# - preserve a repository-wide fallback so new files cannot silently become
+#   ownerless;
+# - make the highest-risk authority and certification files independently
+#   visible during pull-request review;
+# - support future delegation to qualified engineering, scientific, security,
+#   legal, compliance, and product teams without changing path semantics.
 #
 # Current canonical owner:
 #   @neo6bs988-dev
 #
 # Enforcement boundary:
-# - CODEOWNERS identifies requested reviewers.
-# - Mandatory approval requires a GitHub branch ruleset or branch-protection
-#   rule that requires review from Code Owners.
-# - Ownership does not itself prove security, correctness, rights clearance,
-#   scientific validation, deployment, or production readiness.
+# - CODEOWNERS assigns review ownership.
+# - It does not by itself require approval or block merge.
+# - Enforcement requires the active GitHub ruleset to require Code Owner review.
+# - Ownership is not legal clearance, scientific validation, rights clearance,
+#   security certification, deployment evidence, or production approval.
 #
-# Pattern-order rule:
-# - GitHub applies the last matching CODEOWNERS pattern.
-# - The repository-wide fallback appears first.
-# - More specific sensitive paths appear later.
+# Pattern rules:
+# - GitHub applies the last matching valid pattern.
+# - Paths are case-sensitive.
+# - The global fallback appears first.
+# - More specific authority surfaces appear after broader paths.
+# - The CODEOWNERS file owns itself in the final rule.
+#
+# Truth boundary:
+# - A tracked file may be documented, implemented, or tested without being
+#   approved, deployed, operationally verified, or production-ready.
 # =============================================================================
 
 
 # -----------------------------------------------------------------------------
 # Repository-wide fallback
-#
-# Every current and future tracked path receives an owner even when a newly
-# introduced directory has not yet been classified below.
 # -----------------------------------------------------------------------------
 
 * @neo6bs988-dev
 
 
 # -----------------------------------------------------------------------------
-# GitHub governance, automation, review, and dependency controls
+# GitHub governance and automation
 # -----------------------------------------------------------------------------
 
 /.github/ @neo6bs988-dev
-/.github/workflows/ @neo6bs988-dev
+/.github/actions/ @neo6bs988-dev
 /.github/ISSUE_TEMPLATE/ @neo6bs988-dev
+
 /.github/PULL_REQUEST_TEMPLATE.md @neo6bs988-dev
 /.github/pull_request_template.md @neo6bs988-dev
+
 /.github/dependabot.yml @neo6bs988-dev
-/.github/CODEOWNERS @neo6bs988-dev
 
 
 # -----------------------------------------------------------------------------
-# Repository constitutions, operating doctrine, security, and status evidence
+# CI, Quality Gates, and exact-head certification authorities
+#
+# These files determine whether repository changes are accepted as tested or
+# CI-verified. Changes must not silently remove mandatory checks, weaken
+# thresholds, change fixtures after observing results, or detach evidence from
+# the evaluated SHA.
 # -----------------------------------------------------------------------------
+
+/.github/workflows/ @neo6bs988-dev
+
+/.github/workflows/ci.yml @neo6bs988-dev
+/.github/workflows/quality-gates.yml @neo6bs988-dev
+/.github/workflows/exact-head-certification.yml @neo6bs988-dev
+
+/docs/EXACT_HEAD_CERTIFICATION.md @neo6bs988-dev
+
+/scripts/verify_packaging_contract.py @neo6bs988-dev
+/scripts/verify_distribution_install.py @neo6bs988-dev
+
+/tests/test_sitecustomize.py @neo6bs988-dev
+/tests/test_skill_registry.py @neo6bs988-dev
+/tests/test_skill_discovery.py @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Repository constitutions, contribution governance, and public-safe policy
+# -----------------------------------------------------------------------------
+
+/README.md @neo6bs988-dev
+/CONTRIBUTING.md @neo6bs988-dev
+/CODE_OF_CONDUCT.md @neo6bs988-dev
+/SUPPORT.md @neo6bs988-dev
+/GOVERNANCE.md @neo6bs988-dev
+/SECURITY.md @neo6bs988-dev
 
 /AGENTS.md @neo6bs988-dev
-/README.md @neo6bs988-dev
-/SECURITY.md @neo6bs988-dev
+**/AGENTS.md @neo6bs988-dev
+
 /gitcore.md @neo6bs988-dev
 /CHECKPOINT_MVP_002.md @neo6bs988-dev
+
 /docs/ @neo6bs988-dev
 
 
 # -----------------------------------------------------------------------------
-# Build, packaging, dependency, import, and repository-normalization controls
+# License, citation, notice, and release-governance surfaces
+#
+# The repository currently does not establish an open-source license grant.
+# Adding or changing these files requires explicit owner and legal approval.
+# -----------------------------------------------------------------------------
+
+/LICENSE @neo6bs988-dev
+/LICENSE.* @neo6bs988-dev
+/LICENSE-* @neo6bs988-dev
+/NOTICE @neo6bs988-dev
+/NOTICE.* @neo6bs988-dev
+/CITATION.cff @neo6bs988-dev
+/CHANGELOG.md @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Build, packaging, dependency, import, and normalization controls
 # -----------------------------------------------------------------------------
 
 /pyproject.toml @neo6bs988-dev
 /sitecustomize.py @neo6bs988-dev
+
 /requirements*.txt @neo6bs988-dev
+/constraints*.txt @neo6bs988-dev
+
+/uv.lock @neo6bs988-dev
+/poetry.lock @neo6bs988-dev
+/Pipfile @neo6bs988-dev
+/Pipfile.lock @neo6bs988-dev
+
+/setup.py @neo6bs988-dev
+/setup.cfg @neo6bs988-dev
+/MANIFEST.in @neo6bs988-dev
+
+/tox.ini @neo6bs988-dev
+/noxfile.py @neo6bs988-dev
+/.python-version @neo6bs988-dev
+/.pre-commit-config.yaml @neo6bs988-dev
 
 /.gitignore @neo6bs988-dev
 /.gitattributes @neo6bs988-dev
@@ -76,27 +151,29 @@
 
 
 # -----------------------------------------------------------------------------
-# Agent, Codex, workspace, and local execution control planes
+# Agent, Codex, workspace, and local-execution control planes
 # -----------------------------------------------------------------------------
 
 /.agents/ @neo6bs988-dev
 /.codex/ @neo6bs988-dev
 /.vscode/ @neo6bs988-dev
 
-/00_ADMIN/.vscode/ @neo6bs988-dev
-
 
 # -----------------------------------------------------------------------------
 # Administrative schemas, registries, source authority, and rights metadata
 #
-# These paths may influence source identity, provenance, disclosure level,
-# permitted use, verification state, retrieval eligibility, and capability
-# claims. They require explicit owner review.
+# These paths can alter source identity, provenance, disclosure level,
+# permitted use, verification state, retrieval eligibility, rights status,
+# evidence labels, and capability claims.
 # -----------------------------------------------------------------------------
 
 /00_ADMIN/ @neo6bs988-dev
+
 /00_ADMIN/metadata_schema.yaml @neo6bs988-dev
 /00_ADMIN/source_registries/ @neo6bs988-dev
+
+/00_ADMIN/source_registries/external_benchmark_source_registry.csv @neo6bs988-dev
+/00_ADMIN/source_registries/external_benchmark_source_registry.schema.json @neo6bs988-dev
 
 /02_SOURCE_REGISTRY/ @neo6bs988-dev
 
@@ -104,10 +181,17 @@
 # -----------------------------------------------------------------------------
 # Raw, processed, and derived biological or external-source material
 #
-# Ownership is not equivalent to license approval, lawful access, PIC/MAT,
-# CITES clearance, sequencing rights, model-training rights, commercialization
-# rights, sublicense authority, scientific validation, or public-release
-# approval.
+# Ownership is not equivalent to:
+# - lawful source-country access;
+# - collection authority;
+# - PIC/MAT;
+# - CITES authorization;
+# - research or sequencing rights;
+# - dataset or model-training rights;
+# - commercialization or sublicensing rights;
+# - IP/FTO clearance;
+# - scientific validation;
+# - public-release approval.
 # -----------------------------------------------------------------------------
 
 /01_RAW_SOURCES/ @neo6bs988-dev
@@ -116,7 +200,7 @@
 
 
 # -----------------------------------------------------------------------------
-# Agent architecture, retrieval, vector, RAG, and workflow surfaces
+# Agent architecture, vector, retrieval, RAG, and workflow surfaces
 # -----------------------------------------------------------------------------
 
 /04_AGENT_SYSTEM/ @neo6bs988-dev
@@ -126,11 +210,16 @@
 
 
 # -----------------------------------------------------------------------------
-# Evaluation fixtures, graders, thresholds, results, and certification evidence
+# Evaluation fixtures, graders, thresholds, results, and evidence
 #
-# Changes here can alter pass/fail outcomes and must not silently weaken
-# fixtures, answer keys, schemas, thresholds, prohibited behavior, or critical
-# classifications after results are known.
+# These paths can change pass/fail outcomes. They must not silently weaken:
+# - protected inputs or expected behavior;
+# - answer keys or grader metadata;
+# - thresholds;
+# - criticality;
+# - prohibited behavior;
+# - contamination controls;
+# - failure classification.
 # -----------------------------------------------------------------------------
 
 /06_EVALS/ @neo6bs988-dev
@@ -140,20 +229,37 @@
 
 
 # -----------------------------------------------------------------------------
-# Decision logs, run evidence, audit records, and implementation-status records
+# Decision logs, run evidence, audit records, and implementation status
 # -----------------------------------------------------------------------------
 
 /09_LOGS/ @neo6bs988-dev
+/09_LOGS/decision_logs/ @neo6bs988-dev
 
 
 # -----------------------------------------------------------------------------
-# Canonical package, compatibility package, applications, scripts, and tests
+# Canonical package and compatibility package
 # -----------------------------------------------------------------------------
 
 /src/ @neo6bs988-dev
 /src/asperitas_agent/ @neo6bs988-dev
 
 /asperitas_agent/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Applications, scripts, and tests
+# -----------------------------------------------------------------------------
+
 /apps/ @neo6bs988-dev
 /scripts/ @neo6bs988-dev
 /tests/ @neo6bs988-dev
+
+
+# -----------------------------------------------------------------------------
+# Final self-protection rule
+#
+# Keep this as the final matching rule. Changes to repository ownership must be
+# reviewed by the current repository owner.
+# -----------------------------------------------------------------------------
+
+/.github/CODEOWNERS @neo6bs988-dev
