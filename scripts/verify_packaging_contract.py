@@ -131,11 +131,15 @@ def verify_packaging_contract() -> dict[str, Any]:
     if git_error:
         errors.append(git_error)
 
-    expected_head = os.environ.get("GITHUB_SHA", "").strip() or None
+    expected_head = (
+        os.environ.get("ASPERITAS_EXPECTED_HEAD_SHA", "").strip()
+        or os.environ.get("GITHUB_SHA", "").strip()
+        or None
+    )
     if expected_head is not None and git_head != expected_head:
-        errors.append(f"checked-out HEAD differs from GITHUB_SHA: expected={expected_head} actual={git_head}")
+        errors.append(f"checked-out HEAD differs from expected exact head: expected={expected_head} actual={git_head}")
     if expected_head is None:
-        warnings.append("GITHUB_SHA is not set; exact-head identity was recorded but not externally asserted")
+        warnings.append("no expected head environment variable is set; HEAD was recorded but not externally asserted")
 
     return {
         "ok": not errors,
