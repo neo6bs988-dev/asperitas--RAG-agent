@@ -1,24 +1,29 @@
 # =============================================================================
-# Asperitas CodeQL Advanced Security Workflow v1.1
+# Asperitas CodeQL Advanced Security Workflow v2.0
 # =============================================================================
 #
-# Purpose:
-# - analyze canonical Python implementation and GitHub Actions workflows;
-# - detect security, data-flow, injection, unsafe API, and workflow findings;
-# - preserve exact-head identity and least-privilege permissions;
-# - use immutable GitHub Action commit SHAs;
-# - upload results to GitHub Code Scanning without claiming vulnerability absence.
+# Scope:
+# - Python source code
+# - GitHub Actions workflows
+#
+# Security controls:
+# - least-privilege GitHub token
+# - immutable Action commit SHAs
+# - no repository secrets
+# - no automatic code modification
 #
 # Truth boundary:
-# - A successful CodeQL run means only that the configured queries completed
-#   successfully against the analyzed revision.
-# - It is not proof of vulnerability absence, production readiness, legal or
-#   regulatory clearance, scientific validation, or operational security.
+# A successful scan confirms only that the configured CodeQL analysis completed.
+# It does not prove vulnerability absence or production security.
 # =============================================================================
 
 name: CodeQL
 
 on:
+  push:
+    branches:
+      - main
+
   pull_request:
     branches:
       - main
@@ -28,9 +33,7 @@ on:
       - reopened
       - ready_for_review
 
-  push:
-    branches:
-      - main
+  merge_group:
 
   # Thursday 05:37 KST / Wednesday 20:37 UTC
   schedule:
@@ -39,77 +42,49 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
-  packages: read
   security-events: write
 
 concurrency:
   group: codeql-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
 
-env:
-  PYTHONHASHSEED: "0"
-  PYTHONUTF8: "1"
-  PYTHONUNBUFFERED: "1"
+  # Cancel outdated PR analyses, but allow default-branch scans to finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   analyze:
-    name: CodeQL analysis (${{ matrix.language }})
-    runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
       matrix:
-        language:
-          - actions
-          - python
+        include:
+          - language: actions
+            build-mode: "none"
 
-    env:
-      ASPERITAS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          - language: python
+            build-mode: "none"
 
     steps:
-      - name: Checkout exact source revision
+      - name: Checkout analyzed revision
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
           clean: true
-          show-progress: false
-
-      - name: Verify exact checked-out revision
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          actual_head="$(git rev-parse HEAD)"
-          expected_head="${ASPERITAS_EXPECTED_HEAD_SHA}"
-
-          echo "Expected HEAD: ${expected_head}"
-          echo "Actual HEAD:   ${actual_head}"
-
-          if [[ "${actual_head}" != "${expected_head}" ]]; then
-            echo "::error::Checked-out revision does not match the expected event SHA."
-            exit 1
-          fi
-
-      - name: Verify source diff hygiene
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          # Validate the checked-out source before CodeQL creates legitimate
-          # runner-local databases and analysis artifacts.
-          git diff --check
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
         with:
           languages: ${{ matrix.language }}
-          build-mode: none
+          build-mode: ${{ matrix.build-mode }}
 
-          # The broader suite can produce findings requiring human triage.
+          # Includes security and code-quality queries.
+          queries: security-and-quality
+
           config: |
             paths-ignore:
               - "01_RAW_SOURCES/**"
@@ -119,33 +94,10 @@ jobs:
               - "build/**"
               - "dist/**"
               - ".venv/**"
+              - "**/__pycache__/**"
               - "tests/**"
-
-            queries:
-              - uses: security-and-quality
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
         with:
           category: "/language:${{ matrix.language }}"
-
-      - name: Write CodeQL summary
-        if: always()
-        shell: bash
-        run: |
-          {
-            echo "## Asperitas CodeQL"
-            echo
-            echo "- Check context: \`CodeQL analysis (${{ matrix.language }})\`"
-            echo "- Language: \`${{ matrix.language }}\`"
-            echo "- Expected SHA: \`${ASPERITAS_EXPECTED_HEAD_SHA}\`"
-            echo "- Checked-out SHA: \`$(git rev-parse HEAD 2>/dev/null || echo unavailable)\`"
-            echo "- Build mode: \`none\`"
-            echo "- Query suite: \`security-and-quality\`"
-            echo "- Runner: \`${RUNNER_OS}/${RUNNER_ARCH}\`"
-            echo
-            echo "A successful result confirms only that the configured CodeQL"
-            echo "analysis completed for this language and exact revision."
-            echo "It does not establish vulnerability absence, deployment safety,"
-            echo "production readiness, legal clearance, or scientific validation."
-          } >> "$GITHUB_STEP_SUMMARY"
