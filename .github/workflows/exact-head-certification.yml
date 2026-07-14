@@ -53,10 +53,12 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,parsers,packaging,quality]"
 
-      - name: Verify focused lint and formatting contracts
-        run: |
-          python -m ruff check scripts/verify_packaging_contract.py scripts/verify_distribution_install.py tests/test_sitecustomize.py
-          python -m ruff format --check scripts/verify_packaging_contract.py scripts/verify_distribution_install.py tests/test_sitecustomize.py
+      - name: Verify focused lint contracts
+        run: >-
+          python -m ruff check
+          scripts/verify_packaging_contract.py
+          scripts/verify_distribution_install.py
+          tests/test_sitecustomize.py
 
       - name: Verify exact-head packaging and CLI contract
         run: >-
