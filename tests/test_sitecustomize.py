@@ -108,6 +108,17 @@ def test_bootstrap_inserts_canonical_src_once(monkeypatch):
     assert sum(bootstrap._path_key(entry) == bootstrap._path_key(SRC) for entry in sys.path) == 1
 
 
+def test_bootstrap_moves_existing_src_to_front_and_deduplicates(monkeypatch):
+    monkeypatch.setattr(sys, "path", [str(ROOT), str(SRC), str(ROOT / "other"), str(SRC)])
+    monkeypatch.delenv("ASPERITAS_DISABLE_REPO_BOOTSTRAP", raising=False)
+
+    bootstrap._bootstrap_src_layout()
+
+    assert bootstrap._path_key(sys.path[0]) == bootstrap._path_key(SRC)
+    assert sum(bootstrap._path_key(entry) == bootstrap._path_key(SRC) for entry in sys.path) == 1
+    assert bootstrap._path_key(sys.path[1]) == bootstrap._path_key(ROOT)
+
+
 def test_disable_environment_prevents_insertion(monkeypatch):
     filtered = [entry for entry in sys.path if bootstrap._path_key(entry) != bootstrap._path_key(SRC)]
     monkeypatch.setattr(sys, "path", filtered)
