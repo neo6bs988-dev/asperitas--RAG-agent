@@ -135,19 +135,26 @@ print(Path(asperitas_agent.__file__).resolve())
     assert Path(result.stdout.strip().splitlines()[-1]) == CANONICAL_INIT
 
 
-def test_disable_environment_is_honored_in_fresh_process():
+def test_disable_environment_is_honored_in_fresh_process(tmp_path):
+    copied = tmp_path / "sitecustomize.py"
+    copied.write_text((ROOT / "sitecustomize.py").read_text(encoding="utf-8"), encoding="utf-8")
+    (tmp_path / "pyproject.toml").write_text("[build-system]\n", encoding="utf-8")
+    fake_src = tmp_path / "src"
+    (fake_src / "asperitas_agent").mkdir(parents=True)
+    (fake_src / "asperitas_agent" / "__init__.py").write_text("", encoding="utf-8")
+
     code = f"""
 import json
 import os
 import sys
-canonical = os.path.normcase(os.path.realpath({str(SRC)!r}))
+canonical = os.path.normcase(os.path.realpath({str(fake_src)!r}))
 paths = [os.path.normcase(os.path.realpath(path or os.curdir)) for path in sys.path]
 print(json.dumps({{"canonical_present": canonical in paths}}))
 """.strip()
     result = _run_python(
         code,
-        cwd=ROOT,
-        environment=_python_environment(pythonpath=ROOT, updates={"ASPERITAS_DISABLE_REPO_BOOTSTRAP": "1"}),
+        cwd=tmp_path,
+        environment=_python_environment(pythonpath=tmp_path, updates={"ASPERITAS_DISABLE_REPO_BOOTSTRAP": "1"}),
     )
 
     assert result.returncode == 0, result.stderr
