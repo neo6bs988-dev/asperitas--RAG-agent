@@ -12,6 +12,7 @@ import sitecustomize as bootstrap
 ROOT = Path(__file__).resolve().parents[1]
 SRC = (ROOT / "src").resolve()
 CANONICAL_INIT = SRC / "asperitas_agent" / "__init__.py"
+CANONICAL_CLI = SRC / "asperitas_agent" / "cli.py"
 
 
 def _python_environment(*, pythonpath: Path, updates: dict[str, str] | None = None) -> dict[str, str]:
@@ -129,11 +130,19 @@ def test_disable_environment_prevents_insertion(monkeypatch):
     assert all(bootstrap._path_key(entry) != bootstrap._path_key(SRC) for entry in sys.path)
 
 
-def test_fresh_repository_process_imports_canonical_src_package():
+def test_fresh_repository_process_resolves_canonical_package_implementation():
     code = """
+import json
 from pathlib import Path
 import asperitas_agent
-print(Path(asperitas_agent.__file__).resolve())
+import asperitas_agent.cli as cli
+payload = {
+    "package_file": str(Path(asperitas_agent.__file__).resolve()),
+    "package_paths": [str(Path(path).resolve()) for path in asperitas_agent.__path__],
+    "cli_file": str(Path(cli.__file__).resolve()),
+    "version": asperitas_agent.__version__,
+}
+print(json.dumps(payload, sort_keys=True))
 """.strip()
     result = _run_python(
         code,
@@ -142,7 +151,10 @@ print(Path(asperitas_agent.__file__).resolve())
     )
 
     assert result.returncode == 0, result.stderr
-    assert Path(result.stdout.strip().splitlines()[-1]) == CANONICAL_INIT
+    payload = json.loads(result.stdout.strip().splitlines()[-1])
+    assert str(SRC / "asperitas_agent") in payload["package_paths"]
+    assert Path(payload["cli_file"]) == CANONICAL_CLI
+    assert payload["version"]
 
 
 def test_disable_environment_is_honored_in_fresh_process(tmp_path):
