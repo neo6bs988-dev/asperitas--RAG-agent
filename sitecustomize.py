@@ -12,7 +12,7 @@ Security and behavior boundaries:
 - only the repository-local ``src`` directory may be added;
 - symlink escape outside the repository is rejected;
 - the expected project and package markers must exist;
-- equivalent ``sys.path`` entries are normalized to one canonical first entry;
+- existing equivalent ``sys.path`` entries are not duplicated;
 - no project module is imported;
 - no files, environment variables, network resources, or external systems are
   modified;
@@ -25,8 +25,8 @@ Editable installation remains the preferred development configuration.
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Final
 
 
@@ -99,38 +99,19 @@ def _path_is_registered(target: Path) -> bool:
     return False
 
 
-def _prepend_unique_path(target: Path) -> None:
-    """Place ``target`` first in ``sys.path`` and remove equivalent duplicates."""
-
-    target_key = _path_key(target)
-    retained_entries: list[object] = []
-
-    for entry in sys.path:
-        try:
-            if _path_key(entry) == target_key:
-                continue
-        except (OSError, TypeError, ValueError):
-            # Preserve malformed or non-filesystem entries owned by other tools.
-            pass
-        retained_entries.append(entry)
-
-    sys.path[:] = [str(target), *retained_entries]
-
-
 def _bootstrap_src_layout() -> None:
-    """Normalize the validated repository ``src`` path to first precedence."""
+    """Prepend the validated repository ``src`` path when required."""
 
     if _bootstrap_disabled():
         return
 
     src_directory = _validated_src_directory()
-    if src_directory is None:
+    if src_directory is None or _path_is_registered(src_directory):
         return
 
     # ``src`` must precede repository-root compatibility shims so imports use
-    # the canonical package implementation even when editable-install metadata
-    # already registered ``src`` later in ``sys.path``.
-    _prepend_unique_path(src_directory)
+    # the canonical package implementation.
+    sys.path.insert(0, str(src_directory))
 
 
 try:
