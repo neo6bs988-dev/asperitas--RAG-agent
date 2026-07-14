@@ -1,0 +1,138 @@
+{
+  "version": "0.2.0",
+
+  "configurations": [
+    {
+      "name": "Asperitas CLI: Validate registry contract",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "asperitas_agent.cli",
+      "args": [
+        "validate-registry-contract"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "subProcess": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "Asperitas CLI: Verify artifacts",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "asperitas_agent.cli",
+      "args": [
+        "verify-artifacts"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "subProcess": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "Asperitas CLI: Search",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "asperitas_agent.cli",
+      "args": [
+        "search",
+        "${input:searchQuery}",
+        "--limit",
+        "${input:resultLimit}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "subProcess": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "Asperitas CLI: Ask evidence summary",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "asperitas_agent.cli",
+      "args": [
+        "ask",
+        "${input:question}",
+        "--limit",
+        "${input:resultLimit}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "subProcess": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "Python: Debug active file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "subProcess": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      }
+    },
+    {
+      "name": "Python: Debug pytest from Test Explorer",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "purpose": [
+        "debug-test"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "subProcess": false,
+      "env": {
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_ADDOPTS": "--no-cov"
+      }
+    }
+  ],
+
+  "inputs": [
+    {
+      "id": "searchQuery",
+      "type": "promptString",
+      "description": "Search query for the local deterministic retrieval path",
+      "default": "source provenance and allowed use"
+    },
+    {
+      "id": "question",
+      "type": "promptString",
+      "description": "Question for the local evidence-summary path",
+      "default": "What evidence supports this claim?"
+    },
+    {
+      "id": "resultLimit",
+      "type": "pickString",
+      "description": "Maximum number of retrieved results",
+      "options": [
+        "3",
+        "5",
+        "10"
+      ],
+      "default": "5"
+    }
+  ]
+}
