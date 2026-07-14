@@ -1,10 +1,10 @@
 # Contributing to Asperitas AI RAG Agent
 
 > **Status:** ACTIVE CONTRIBUTION BASELINE  
-> **Version:** 1.0  
 > **Scope:** Human contributors, maintainers, coding agents, automation, documentation, source governance, evaluation, and repository changes  
 > **Owner:** Asperitas COO / AI Lead  
 > **Classification:** PUBLIC-SAFE GOVERNANCE  
+> **Repository:** `neo6bs988-dev/asperitas--RAG-agent`  
 > **Authority:** This guide is subordinate to [`gitcore.md`](gitcore.md), [`SECURITY.md`](SECURITY.md), the applicable [`AGENTS.md`](AGENTS.md), live GitHub rulesets, and explicit maintainer approval.  
 > **Truth boundary:** Contribution acceptance, passing CI, or merge into `main` does not establish deployment, production readiness, legal clearance, scientific validation, wet-lab validation, security completeness, or product-market fit.
 
@@ -28,9 +28,18 @@ correct scope
 + maintainable implementation
 ```
 
-A contribution is not improved merely by adding more frameworks, agents, abstractions, dependencies, prompts, documents, benchmarks, or files than the outcome requires.
+A contribution is not improved merely by adding:
 
-Prefer the lowest-complexity implementation that satisfies a falsifiable requirement:
+- more frameworks;
+- more agents;
+- more abstractions;
+- more dependencies;
+- more prompts;
+- more documentation volume;
+- more benchmark claims;
+- more files than required.
+
+Prefer the lowest-complexity implementation that satisfies a falsifiable requirement.
 
 ```text
 deterministic helper
@@ -41,13 +50,13 @@ deterministic helper
 -> multi-agent or graph
 ```
 
-A higher-complexity design must identify the failed lower-level baseline, target metric, expected gain, added cost and latency, new security burden, observability, rollback, and required evaluation evidence.
+Higher-complexity designs require evidence that a simpler baseline failed.
 
 ---
 
 ## 2. Read Before Contributing
 
-Before editing the repository, read the current applicable versions of:
+Before editing the repository, read the applicable current versions of:
 
 1. [`README.md`](README.md)
 2. [`AGENTS.md`](AGENTS.md)
@@ -57,7 +66,7 @@ Before editing the repository, read the current applicable versions of:
 6. relevant nested `AGENTS.md` files
 7. relevant schemas, tests, workflows, and decision records
 
-Live repository evidence takes precedence over stale documentation.
+Live repository evidence takes precedence over a stale document.
 
 Resolve current implementation state from:
 
@@ -72,22 +81,23 @@ checked-out code and configuration
 -> named approvals
 ```
 
-Roadmaps, architecture diagrams, issue text, prompts, benchmarks, and generated reports are not proof of implementation.
+Do not rely on roadmap language, architecture diagrams, benchmark descriptions, issue text, or generated reports as proof of implementation.
 
 ---
 
 ## 3. Non-Negotiable Boundaries
 
-### 3.1 Never expose sensitive material
+### 3.1 Never commit sensitive material
 
 Do not commit, paste, attach, quote, or expose:
 
-- API keys, tokens, cookies, credentials, private keys, or recovery material;
+- API keys, tokens, cookies, credentials, or private keys;
 - customer, partner, personal, or confidential business data;
 - unpublished sequences, assays, specimens, or research results;
 - sensitive species or collection-location data;
 - private contracts, permits, PIC/MAT, CITES, Nagoya/ABS, DSI, LMO/GMO, IP, or FTO records;
-- private source-registry contents, embeddings, indexes, traces, prompts, memories, or model data;
+- private source-registry contents;
+- private embeddings, indexes, traces, prompts, memories, or model data;
 - protected evaluation answer keys or holdouts;
 - exploit details that materially enable abuse.
 
@@ -97,7 +107,15 @@ For sensitive security findings, follow [`SECURITY.md`](SECURITY.md). Do not dis
 
 This repository does not currently establish an open-source license grant.
 
-Do not assume that repository visibility grants permission to reuse code, redistribute files, train models, ingest source content, commercialize derived data, sublicense biological information, or publish third-party material.
+Do not assume that repository visibility grants permission to:
+
+- reuse code;
+- redistribute files;
+- train models;
+- ingest source content;
+- commercialize derived data;
+- sublicense biological information;
+- publish third-party material.
 
 Do not add third-party code, data, documents, media, model weights, prompts, or datasets unless the contribution records a valid basis for inclusion and permitted use.
 
@@ -107,12 +125,14 @@ This guide does not create contribution-license terms. Maintainers may reject a 
 
 Model output, generated code, retrieval results, automated reports, or agent decisions cannot grant:
 
-- legal or regulatory approval;
+- legal approval;
+- regulatory clearance;
 - rights clearance;
 - biosafety or biosecurity approval;
 - scientific validation;
 - wet-lab authorization;
-- release or deployment approval;
+- release approval;
+- deployment approval;
 - permission to transmit confidential information.
 
 ### 3.4 Preserve evaluation integrity
@@ -122,15 +142,24 @@ Do not:
 - expose answer keys to runtime retrieval;
 - optimize directly against protected holdouts;
 - weaken tests after observing a failure;
-- lower thresholds merely to obtain a pass;
+- lower thresholds to make a change pass;
 - relabel `FAIL`, `PARTIAL`, or `NOT_TESTABLE` as `PASS`;
 - remove negative cases without an approved replacement;
+- change fixtures and implementation in a way that conceals regression;
 - use grader metadata as model input;
 - claim benchmark equivalence without comparable evidence.
 
 ### 3.5 Preserve scientific truth
 
-Do not present computational prediction as experimental validation, sequence similarity as confirmed function, one assay as replicated evidence, literature plausibility as product validation, source possession as downstream rights, or software output as legal or regulatory judgment.
+Do not present:
+
+- computational prediction as experimental validation;
+- sequence similarity as confirmed biological function;
+- one assay as replicated evidence;
+- literature plausibility as product validation;
+- source possession as research or commercialization rights;
+- registry inclusion as lawful downstream use;
+- software output as legal or regulatory judgment.
 
 ---
 
@@ -138,19 +167,65 @@ Do not present computational prediction as experimental validation, sequence sim
 
 ### Documentation-only correction
 
-Suitable for broken links, typographical errors, formatting defects, or clarification that does not alter authority, policy, evaluation meaning, rights interpretation, security posture, or capability claims.
+Suitable for:
+
+- broken links;
+- typographical errors;
+- formatting defects;
+- clarification that does not alter authority, policy, or capability claims.
+
+A documentation change is not “documentation-only” when it changes:
+
+- security requirements;
+- permissions;
+- source authority;
+- evaluation meaning;
+- rights interpretation;
+- compliance status;
+- implementation claims;
+- release or production status.
 
 ### Bounded code or test change
 
-Suitable for deterministic bug fixes, bounded validation logic, isolated tests, small CLI improvements, local error handling, or type and schema consistency.
+Suitable for:
+
+- deterministic bug fixes;
+- bounded validation logic;
+- isolated tests;
+- small CLI improvements;
+- local error handling;
+- type or schema consistency.
 
 ### Material architecture or governance change
 
-Use an issue or draft pull request before broad implementation when changing retrieval, reranking, source registries, schemas, evaluation fixtures, thresholds, compliance routing, agent permissions, workflows, CI, dependencies, ingestion, packaging, security controls, confidential-data handling, or public capability claims.
+Open an issue or draft PR before broad implementation when changing:
+
+- retrieval or reranking;
+- source registries or schemas;
+- evaluation fixtures or thresholds;
+- compliance routing;
+- agent permissions;
+- workflows or CI;
+- dependencies;
+- ingestion;
+- packaging;
+- security controls;
+- confidential-data handling;
+- public capability claims.
 
 ### High-impact change
 
-Explicit maintainer approval is required before deployment, release, package publication, external transmission, source ingestion with unresolved rights, production-like data mutation, legal or scientific status promotion, wet-lab execution, or high-risk biological work.
+Explicit maintainer approval is required before:
+
+- deployment;
+- release;
+- package publication;
+- external transmission;
+- source ingestion with unresolved rights;
+- production-like data mutation;
+- legal or scientific status promotion;
+- wet-lab execution;
+- high-risk biological work.
 
 ---
 
@@ -185,20 +260,34 @@ git rev-parse HEAD
 git branch --show-current
 ```
 
-Also inspect relevant implementation files, tests, schemas, workflows, recent overlapping changes, generated artifacts, and rollback options.
+Also inspect:
 
-Do not discard or overwrite unrelated work. Do not use destructive Git commands unless explicitly authorized.
+- the repository root;
+- applicable `AGENTS.md` files;
+- relevant implementation files;
+- relevant tests;
+- relevant schemas;
+- relevant GitHub workflows;
+- recent overlapping commits or pull requests;
+- generated artifacts affected by the change;
+- rollback options.
+
+Do not discard or overwrite unrelated work.
+
+Do not use destructive Git commands unless explicitly authorized.
 
 ---
 
 ## 6. Local Development Setup
 
-### Requirements
+### 6.1 Requirements
 
 - Python 3.10 or newer
 - Git
 - an isolated virtual environment
 - a clean working tree before material verification
+
+### 6.2 Create a virtual environment
 
 Linux or macOS:
 
@@ -214,10 +303,15 @@ py -3.11 -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-Install the development baseline:
+Upgrade packaging tools:
 
 ```bash
 python -m pip install --upgrade pip
+```
+
+### 6.3 Install the development baseline
+
+```bash
 python -m pip install -e ".[dev,parsers]"
 ```
 
@@ -235,7 +329,7 @@ python -m pip install -e ".[dev,parsers,security]"
 
 Security scanner output is review evidence, not proof that the repository is vulnerability-free.
 
-Verify the installation:
+### 6.4 Verify the installation
 
 ```bash
 python -c "import asperitas_agent; print(asperitas_agent.__version__)"
@@ -243,7 +337,13 @@ python -m asperitas_agent.cli --help
 asperitas-agent --help
 ```
 
-The canonical package implementation is under `src/asperitas_agent/`. The root `asperitas_agent/` path is a compatibility surface and must not become a second implementation authority.
+The canonical package implementation is under:
+
+```text
+src/asperitas_agent/
+```
+
+The root `asperitas_agent/` path is a compatibility surface and must not silently become a second implementation authority.
 
 ---
 
@@ -259,13 +359,13 @@ Use the highest applicable class.
 | `C3` | Security, permissions, CI, dependencies, ingestion, approval logic | Threat review, adversarial tests, least-privilege review, named approval |
 | `C4` | Release, deployment, external write, production data, legal/scientific clearance, high-risk biology | Explicit action approval, rollback rehearsal, post-action verification |
 
-A policy, authority, security, rights, or evaluation-semantic change is not `C0` merely because it is written in Markdown or YAML.
+Do not classify a policy, authority, security, rights, or evaluation-semantic change as `C0`.
 
 ---
 
 ## 8. Branch Naming
 
-Create a focused branch from current `main`.
+Create a focused branch from the current `main`.
 
 Recommended formats:
 
@@ -281,7 +381,23 @@ refactor/<short-description>
 chore/<short-description>
 ```
 
-Branch names should describe one cohesive outcome, avoid personal names and vague labels, and remain useful in audit and rollback records.
+Examples:
+
+```text
+fix/registry-duplicate-source-id
+test/sitecustomize-symlink-escape
+docs/contributing-community-pack
+ci/python-312-compatibility-probe
+governance/source-rights-status-contract
+```
+
+Branch names should:
+
+- describe one cohesive outcome;
+- avoid personal names;
+- avoid vague names such as `update`, `changes`, or `new`;
+- avoid combining unrelated work;
+- remain reusable in logs and rollback records.
 
 ---
 
@@ -292,30 +408,70 @@ A pull request should contain one primary decision.
 Good scope:
 
 ```text
-one bounded behavior change
+Add deterministic validation for one registry field
 + tests
-+ directly affected documentation
++ documentation directly affected
 ```
 
-Do not perform unrelated refactoring, reformat the entire repository, rename stable paths without migration evidence, add speculative scaffolding, create duplicate sources of truth, introduce silent dependencies, weaken tests, or mix unrelated generated artifacts with source changes.
+Bad scope:
+
+```text
+Replace retrieval architecture
++ rewrite documentation
++ change dependencies
++ rename directories
++ update evaluation thresholds
++ add unrelated UI work
+```
+
+Do not:
+
+- perform unrelated refactoring;
+- reformat the entire repository;
+- rename stable paths without migration evidence;
+- add speculative scaffolding;
+- add duplicate sources of truth;
+- silently introduce dependencies;
+- modify tests merely to accommodate incorrect behavior;
+- mix generated artifacts with unrelated source changes.
 
 ---
 
 ## 10. Coding Standards
 
-### Prefer deterministic components
+### 10.1 Prefer deterministic components
 
-Use deterministic logic for schema validation, metadata normalization, lifecycle transitions, hashing, permission checks, citation integrity, exact parsing, source filtering, status validation, and reproducible scoring.
+Use deterministic logic for:
+
+- schema validation;
+- metadata normalization;
+- lifecycle transitions;
+- hashing;
+- permission checks;
+- citation integrity;
+- exact parsing;
+- source filtering;
+- status validation;
+- reproducible scoring.
 
 Use model or agent behavior only when deterministic logic cannot satisfy the requirement.
 
-### Preserve the standard-library core
+### 10.2 Preserve the standard-library core
 
 The deterministic package core intentionally has no unconditional runtime dependencies.
 
-A new runtime dependency requires demonstrated need, simpler-alternative analysis, maintenance and supply-chain review, supported-version bounds, license review, failure behavior, rollback, and tests showing appropriate isolation.
+A new runtime dependency requires:
 
-### Error handling
+- a demonstrated need;
+- a simpler-alternative analysis;
+- maintenance and supply-chain review;
+- supported-version bounds;
+- license review;
+- failure behavior;
+- rollback plan;
+- tests showing the dependency is isolated appropriately.
+
+### 10.3 Error handling
 
 Material functions should define:
 
@@ -329,36 +485,76 @@ idempotency
 rollback or recovery
 ```
 
-Fail closed for unauthorized actions, unknown permissions, invalid registry state, unresolved source rights, contaminated evaluation, missing mandatory provenance, or ambiguous external-write authority.
+Fail closed for:
 
-### Type and schema discipline
+- unauthorized actions;
+- unknown permissions;
+- invalid registry state;
+- unresolved source rights;
+- contaminated evaluation;
+- missing mandatory provenance;
+- ambiguous external-write authority.
+
+Do not silently continue after a security, rights, evaluation-integrity, or approval failure.
+
+### 10.4 Type and schema discipline
 
 - Use explicit types where they improve correctness.
 - Validate external and untrusted input.
 - Keep schemas versioned and reviewable.
-- Do not introduce multiple vocabularies for one lifecycle state.
+- Do not introduce multiple vocabularies for the same lifecycle state.
 - Preserve backward compatibility or provide an explicit migration.
 - Do not silently reinterpret existing metadata.
 
-### Formatting and linting
+### 10.5 Formatting and linting
+
+Run:
 
 ```bash
 python -m ruff check src tests scripts
 python -m ruff format --check src tests scripts
-python -m mypy src/asperitas_agent
 ```
 
 Do not apply broad automatic formatting to unrelated files.
 
+For canonical package typing:
+
+```bash
+python -m mypy src/asperitas_agent
+```
+
+Typing checks are evidence for the inspected surface. They do not replace runtime tests.
+
 ---
 
-## 11. Tests and Verification
+## 11. Tests
 
-Every behavior-changing contribution should include or update tests for expected behavior, invalid input, boundary conditions, failure behavior, permission denial, provenance preservation, rollback or idempotency where applicable, and the exact defect being fixed.
+Every behavior-changing contribution should include or update tests.
 
-Avoid tests that depend on uncontrolled network access, current time, unstable ordering, private data, exposed answer keys, weakened fixtures, or implementation details unrelated to behavior.
+Tests should cover:
 
-Run the smallest relevant suite first, then the required broader suite.
+- expected behavior;
+- invalid input;
+- boundary conditions;
+- failure behavior;
+- permission denial;
+- provenance preservation;
+- rollback or idempotency where applicable;
+- regression for the exact defect being fixed.
+
+Avoid tests that:
+
+- depend on network access without explicit approval;
+- depend on current time without control;
+- use unstable ordering;
+- require private data;
+- expose evaluation answers;
+- assert implementation details instead of behavior;
+- pass only because a fixture was weakened.
+
+### 11.1 Targeted tests
+
+Run the smallest relevant suite first.
 
 Examples:
 
@@ -368,26 +564,30 @@ python -m pytest -q tests/test_skill_registry.py
 python -m pytest -q tests/test_sitecustomize.py
 ```
 
-Full test suite:
+### 11.2 Full test suite
+
+Before a material pull request is ready for merge:
 
 ```bash
 python -m pytest
 ```
 
-Artifact verification:
+### 11.3 Artifact verification
 
 ```bash
 python scripts/verify_artifacts.py
 ```
 
-Registry verification:
+### 11.4 Registry verification
 
 ```bash
 python -m asperitas_agent.cli validate-registry-contract
 python scripts/validate_external_benchmark_registry.py
 ```
 
-Retrieval evaluation when retrieval, metadata routing, ranking, or chunking can be affected:
+### 11.5 Retrieval evaluation
+
+When retrieval, metadata routing, ranking, or chunking can be affected:
 
 ```bash
 python scripts/run_retrieval_eval.py --retriever baseline --limit 5
@@ -395,9 +595,20 @@ python scripts/run_retrieval_eval.py --retriever mvp003 --limit 5
 python scripts/run_retrieval_eval.py --retriever hybrid --limit 5
 ```
 
-Record the evaluated commit SHA, environment, command, fixture identity, metrics, threshold, prohibited regressions, and contamination status.
+Record:
 
-Packaging verification for package, CLI, import-path, or bootstrap changes:
+- evaluated commit SHA;
+- environment;
+- command;
+- dataset or fixture identity;
+- metrics before and after;
+- threshold;
+- prohibited regressions;
+- contamination status.
+
+### 11.6 Packaging verification
+
+For packaging, CLI, import-path, or bootstrap changes:
 
 ```bash
 python -m build
@@ -406,7 +617,7 @@ python scripts/verify_packaging_contract.py --json
 python scripts/verify_distribution_install.py --dist-dir dist --json
 ```
 
-Diff hygiene:
+### 11.7 Diff hygiene
 
 ```bash
 git diff --check
@@ -418,13 +629,47 @@ git diff --check
 
 Source-related contributions must be metadata-first.
 
-A source candidate is not automatically approved, verified, licensed, ingested, indexed, retrievable, suitable for model training, suitable for commercialization, or suitable for public claims.
+A source candidate is not automatically:
 
-Record applicable fields defined by the canonical schemas, including source identity, origin, owner, date, URL, provenance, disclosure level, verification status, license status, ingestion status, permitted use, prohibited use, risk flags, and evidence label.
+- approved;
+- verified;
+- licensed;
+- ingested;
+- indexed;
+- retrievable;
+- suitable for model training;
+- suitable for commercialization;
+- suitable for public claims.
 
-Do not add raw external source files merely because a metadata record exists. Do not ingest, process, chunk, embed, index, train on, redistribute, or commercialize source content until required rights and approval state are established.
+Record the applicable fields defined by the current canonical schemas, including where relevant:
 
-Treat these rights separately:
+```text
+source_id
+title
+source_type
+origin
+author_or_owner
+version_or_date
+date_accessed
+source_url
+provenance
+disclosure_level
+verification_status
+license_status
+ingestion_status
+allowed_use_cases
+prohibited_use_cases
+risk_flags
+evidence_label
+```
+
+Do not add raw external source files merely because a metadata record exists.
+
+Do not ingest, process, chunk, embed, index, train on, redistribute, or commercialize source content until the required rights and approval state is established.
+
+### 12.1 Biological-rights separation
+
+Treat these as separate rights:
 
 ```text
 specimen possession
@@ -464,9 +709,29 @@ computational prediction
 -> commercial evidence
 ```
 
-Preserve controls, replicates, uncertainty, negative results, assay conditions, versioned inputs, provenance, failure taxonomy, and next decision.
+Preserve:
+
+- controls;
+- replicates;
+- uncertainty;
+- negative results;
+- assay conditions;
+- versioned inputs;
+- provenance;
+- failure taxonomy;
+- next decision.
 
 Do not submit high-risk wet-lab instructions, pathogenic enhancement, regulatory-evasion guidance, unauthorized genetic-resource use, or autonomous laboratory execution.
+
+Safe contributions may include:
+
+- public, non-sensitive computational analysis;
+- metadata normalization;
+- compliance-aware routing;
+- validation schemas;
+- evidence-state classification;
+- public literature synthesis with clear uncertainty;
+- non-operational biosafety documentation.
 
 ---
 
@@ -487,9 +752,29 @@ number of trials
 contamination controls
 ```
 
-Separate runner input, ground truth, grader metadata, and runtime retrieval corpus. Do not expose protected ground truth to the evaluated system.
+Separate:
 
-A valid evaluation report identifies exact commit SHA, evaluator version, fixture version, environment, commands, metrics, threshold, failure cases, invalid or untestable cases, and limitations.
+```text
+runner input
+ground truth
+grader metadata
+runtime retrieval corpus
+```
+
+Do not expose protected ground truth to the system being evaluated.
+
+A valid evaluation report must identify:
+
+- exact commit SHA;
+- evaluator version;
+- fixture version;
+- environment;
+- commands;
+- metrics;
+- threshold;
+- failure cases;
+- invalid or untestable cases;
+- limitations.
 
 Changes made after observing results require a fresh clean evaluation.
 
@@ -497,7 +782,19 @@ Changes made after observing results require a fresh clean evaluation.
 
 ## 15. Security Contributions
 
-Security changes should identify the protected asset, threat or failure mode, trust boundary, attacker capability, expected security property, least-privilege analysis, failure behavior, targeted test, adjacent regression, rollback, and residual risk.
+Security changes should include:
+
+- affected asset;
+- threat or failure mode;
+- trust boundary;
+- attacker capability;
+- expected security property;
+- least-privilege analysis;
+- failure behavior;
+- targeted test;
+- adjacent regression;
+- rollback;
+- residual risk.
 
 Do not claim that a scanner result or passing test proves the repository is secure.
 
@@ -526,9 +823,22 @@ tests:
 rollback:
 ```
 
-Prefer compatible version ranges, optional extras for non-core capabilities, official maintained packages, and minimal transitive dependency trees.
+Prefer:
 
-Avoid unclear provenance, silent major-version upgrades, trivial-helper dependencies, unauthorized network access, or changes that weaken supported Python versions.
+- pinned compatible ranges;
+- optional extras for non-core capabilities;
+- official packages;
+- maintained dependencies;
+- minimal transitive dependency trees.
+
+Avoid:
+
+- unmaintained libraries;
+- packages with unclear provenance;
+- silent major-version upgrades;
+- dependencies used only for trivial helper logic;
+- dependencies that introduce network access without explicit design;
+- dependencies that weaken supported Python versions.
 
 ---
 
@@ -551,19 +861,46 @@ Documentation must distinguish:
 | `BLOCKED` | A mandatory gate failed |
 | `INVALID` | Evidence integrity or comparability failed |
 
-Do not describe a planned capability as implemented, a CI-passing component as deployed, or a public benchmark as evidence of Asperitas implementation.
+Do not describe a planned or documented capability as implemented.
 
-Do not attribute private prompts, workflows, or undisclosed engineering methods to external companies or individuals.
+Do not describe a CI-passing component as deployed or production-ready.
+
+Do not attribute private prompts, private workflows, or undisclosed engineering methods to external companies or individuals.
+
+Use public official sources only as benchmark input, not as evidence that Asperitas uses equivalent internal systems.
 
 ---
 
 ## 18. AI-Assisted Contributions
 
-AI-assisted work is permitted, but the contributor remains responsible for correctness, security, licensing, provenance, hallucinated APIs or files, fabricated citations, unauthorized disclosure, evaluation contamination, overclaiming, and unnecessary complexity.
+AI-assisted work is permitted, but the contributor remains responsible for the result.
+
+Review all generated content for:
+
+- correctness;
+- security;
+- licensing;
+- provenance;
+- hallucinated APIs;
+- hallucinated files or tests;
+- stale package behavior;
+- fabricated citations;
+- unauthorized data disclosure;
+- evaluation contamination;
+- overclaiming;
+- unnecessary complexity.
 
 Do not paste confidential material into an external model or tool without explicit authorization.
 
-Disclose material AI assistance when it affected architecture, implementation, tests, security analysis, source selection, biological interpretation, or legal and compliance extraction.
+In the pull request, disclose material AI assistance when it affected:
+
+- architecture;
+- implementation;
+- tests;
+- security analysis;
+- source selection;
+- biological interpretation;
+- legal or compliance extraction.
 
 Suggested disclosure:
 
@@ -576,15 +913,22 @@ AI assistance:
 - Known limitations:
 ```
 
-Model output is not reviewer approval.
+Do not treat model output as reviewer approval.
 
 ---
 
 ## 19. Commit Guidelines
 
-Commits should be cohesive, reviewable, reversible, free of unrelated formatting, free of local artifacts or secrets, and descriptive enough for audit and rollback.
+Commits should be:
 
-Recommended format:
+- cohesive;
+- reviewable;
+- reversible;
+- free of unrelated formatting;
+- free of generated secrets or local artifacts;
+- descriptive enough for audit and rollback.
+
+Recommended commit format:
 
 ```text
 type(scope): imperative summary
@@ -600,7 +944,37 @@ ci(packaging): verify clean wheel installation
 security(permissions): fail closed on unknown write authority
 ```
 
-Do not use commit messages to claim verification that did not occur.
+Recommended types:
+
+```text
+feat
+fix
+test
+docs
+ci
+security
+governance
+refactor
+perf
+chore
+```
+
+Do not use a commit message to claim verification that did not occur.
+
+Bad:
+
+```text
+fix everything
+production ready
+fully secure
+validated biology
+```
+
+Better:
+
+```text
+fix(registry): reject malformed verification status
+```
 
 ---
 
@@ -671,9 +1045,33 @@ C0 / C1 / C2 / C3 / C4
 - exact revert or restoration path
 ```
 
-A pull request is not ready when scope is ambiguous, unrelated files are included, required tests are absent, tests are weakened, provenance is missing, rights status is overstated, sensitive information is exposed, evidence cannot be tied to the exact head, rollback is undefined, or capability claims exceed evidence.
+### 20.1 Pull request quality bar
 
-Use a draft PR for early C2-C4 design review, architecture changes, security-sensitive design without sensitive disclosure, work awaiting baseline measurement, or work awaiting full regression.
+A pull request is not ready when:
+
+- scope is ambiguous;
+- unrelated files are included;
+- required tests are absent;
+- tests are weakened;
+- source provenance is missing;
+- rights status is overstated;
+- sensitive information is exposed;
+- generated artifacts cannot be tied to the exact head;
+- rollback is undefined;
+- capability claims exceed evidence.
+
+### 20.2 Draft pull requests
+
+Use a draft PR for:
+
+- early design review;
+- C2–C4 work in progress;
+- architecture changes;
+- security-sensitive design without sensitive disclosure;
+- changes awaiting baseline measurement;
+- changes awaiting full regression.
+
+Do not mark a PR ready until its scope, tests, risks, and rollback are reviewable.
 
 ---
 
@@ -681,7 +1079,7 @@ Use a draft PR for early C2-C4 design review, architecture changes, security-sen
 
 The live GitHub ruleset and workflow definitions are authoritative.
 
-Expected required check contexts currently include:
+The expected required check contexts currently include:
 
 ```text
 Python smoke checks
@@ -700,13 +1098,58 @@ Before merge:
 - merge must use the allowed repository merge method;
 - the evaluated head SHA must match the merge decision.
 
+If check names or workflow structure change, update this guide in the same governance change or immediately afterward.
+
 Historical successful checks do not certify a new head.
 
 ---
 
 ## 22. Review Standards
 
-Reviewers evaluate correctness, scope, evidence, security, source governance, evaluation integrity, biology and compliance, failure behavior, observability, maintainability, and rollback.
+Reviewers evaluate:
+
+### Correctness
+
+- Does the implementation satisfy the stated contract?
+- Are edge cases and failure modes covered?
+
+### Scope
+
+- Is this the smallest sufficient change?
+- Are unrelated modifications excluded?
+
+### Evidence
+
+- Are claims tied to exact repository evidence?
+- Are verification commands and results reproducible?
+
+### Security
+
+- Does the change preserve least privilege?
+- Can untrusted input gain authority?
+- Are secrets or restricted data exposed?
+
+### Source governance
+
+- Is provenance preserved?
+- Are verification, license, and permitted-use states accurate?
+
+### Evaluation integrity
+
+- Were thresholds frozen?
+- Is ground truth isolated?
+- Was regression tested without contamination?
+
+### Biology and compliance
+
+- Are scientific claims at the correct evidence stage?
+- Are legal, rights, biosafety, and regulatory decisions human-gated?
+
+### Operations
+
+- Is failure observable?
+- Is rollback explicit?
+- Is the change maintainable?
 
 Review outcomes may be:
 
@@ -718,7 +1161,7 @@ BLOCK
 SUPERSEDED
 ```
 
-A request for changes identifies unmet repository requirements; it is not a personal judgment.
+A request for changes is not a personal judgment. It identifies unmet repository requirements.
 
 ---
 
@@ -726,7 +1169,13 @@ A request for changes identifies unmet repository requirements; it is not a pers
 
 Use the repository-approved merge method, normally squash merge.
 
-The squash commit should describe the decision, primary implementation, important verification, material limitations, and rollback identity.
+The squash commit should describe:
+
+- the decision;
+- the primary implementation;
+- important verification;
+- material limitations;
+- rollback identity.
 
 After merge:
 
@@ -734,19 +1183,46 @@ After merge:
 2. confirm required workflows;
 3. verify that no unexpected files were introduced;
 4. update implementation status only when evidence supports it;
-5. convert significant failures into durable tests, schemas, controls, or decision records.
+5. record significant failures as durable tests, schemas, controls, or decision records.
 
-A merged pull request proves only that code or documentation was merged. It does not by itself prove deployment, runtime correctness, vulnerability absence, legal or regulatory clearance, scientific validation, wet-lab validation, production readiness, or customer demand.
+A merged pull request proves only that the code was merged.
+
+It does not by itself prove:
+
+- deployment;
+- runtime correctness;
+- vulnerability absence;
+- legal or regulatory clearance;
+- scientific validation;
+- wet-lab validation;
+- production readiness;
+- customer demand.
 
 ---
 
 ## 24. Unacceptable Contributions
 
-Maintainers may close or reject contributions that expose confidential information, include unauthorized source material, weaken tests or thresholds, introduce prompt injection or permission bypass, make unverified legal/scientific/security/production claims, include high-risk biological instructions, duplicate authority or schema, introduce excessive architecture without baseline evidence, mix unrelated changes, lack provenance, conceal unverified AI-generated content, violate conduct expectations, or cannot be safely reviewed and rolled back.
+Maintainers may close or reject contributions that:
+
+- expose confidential or restricted information;
+- include unauthorized source material;
+- weaken tests or thresholds without approved evidence;
+- introduce prompt injection or permission bypass;
+- make unverified legal, scientific, security, or production claims;
+- include high-risk biological instructions;
+- duplicate an existing authority or schema;
+- introduce excessive architecture without baseline evidence;
+- mix unrelated changes;
+- lack provenance or permitted-use information;
+- conceal AI-generated content that was not human-verified;
+- use abusive, harassing, discriminatory, or disruptive conduct;
+- cannot be reviewed or safely rolled back.
 
 ---
 
 ## 25. Final Contributor Checklist
+
+Before requesting review, confirm:
 
 ```text
 [ ] I read README.md, AGENTS.md, gitcore.md, and SECURITY.md.
@@ -756,7 +1232,7 @@ Maintainers may close or reject contributions that expose confidential informati
 [ ] No secrets, confidential data, or restricted biological information are included.
 [ ] Third-party code and data have a documented permitted basis.
 [ ] Scientific, legal, security, and production claims match the evidence.
-[ ] Tests cover intended behavior and relevant failures.
+[ ] Tests cover the intended behavior and relevant failures.
 [ ] I did not weaken fixtures, thresholds, schemas, or expected behavior to obtain a pass.
 [ ] Runtime inputs are isolated from evaluation ground truth.
 [ ] Targeted tests pass.
