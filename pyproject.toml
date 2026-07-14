@@ -6,44 +6,89 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "asperitas-agent"
 dynamic = ["version"]
-description = "Source-grounded, compliance-aware RAG development core for biological evidence workflows."
-readme = "README.md"
+description = "Deterministic, source-grounded, compliance-aware RAG development core for biological evidence workflows."
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.10"
+authors = [
+  { name = "Asperitas Inc." },
+]
+maintainers = [
+  { name = "Asperitas Inc." },
+]
+
+# The deterministic core intentionally depends on the Python standard library.
+# Optional capabilities are isolated in explicit extras below.
 dependencies = []
 
-# This repository has no confirmed open-source license.
-# Prevent accidental publication to the public Python Package Index.
+# No open-source license has been confirmed for this repository.
+# Do not add a `license` field or remove the private classifier without
+# explicit owner and legal approval.
 classifiers = [
   "Private :: Do Not Upload",
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
 
 keywords = [
   "artificial-intelligence",
   "biological-intelligence",
+  "biosafety",
   "compliance",
   "evaluation",
+  "evidence",
   "provenance",
   "rag",
   "retrieval",
+  "source-governance",
   "synthetic-biology",
 ]
 
 
 [project.optional-dependencies]
+
+# CI-compatible test dependency.
 dev = [
-  "pytest>=8,<10",
+  "pytest>=8.0,<10",
 ]
 
+# Local document parsing support.
+# The repository must continue to treat parsed content as untrusted input.
 parsers = [
-  "pypdf",
-  "python-docx",
+  "pypdf>=5,<7",
+  "python-docx>=1.1,<2",
+]
+
+# Optional internal UI dependency.
+ui = [
+  "streamlit>=1.40,<2",
+]
+
+# Quality tools are deliberately separate from `dev` so normal CI installation
+# remains small and deterministic until these checks are explicitly enforced.
+quality = [
+  "coverage[toml]>=7.6,<8",
+  "mypy>=1.15,<2",
+  "ruff>=0.11,<1",
+]
+
+# Security scanning is an explicit opt-in capability.
+# Scanner output is evidence for review, not proof that the project is secure.
+security = [
+  "pip-audit>=2.8,<3",
+]
+
+# Local packaging validation only.
+# Public publication remains blocked until license and release gates are approved.
+packaging = [
+  "build>=1.2,<2",
+  "check-wheel-contents>=0.6,<1",
 ]
 
 
@@ -58,6 +103,7 @@ Security = "https://github.com/neo6bs988-dev/asperitas--RAG-agent/security/polic
 
 
 [tool.setuptools]
+package-dir = { "" = "src" }
 include-package-data = false
 
 
@@ -66,6 +112,10 @@ where = ["src"]
 include = [
   "asperitas_agent",
   "asperitas_agent.*",
+]
+exclude = [
+  "tests",
+  "tests.*",
 ]
 namespaces = false
 
@@ -76,7 +126,145 @@ version = { attr = "asperitas_agent.__version__" }
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra --strict-config --strict-markers -p no:cacheprovider --basetemp=.pytest_tmp"
 testpaths = ["tests"]
 pythonpath = ["src"]
+python_files = ["test_*.py"]
+addopts = [
+  "-ra",
+  "--strict-config",
+  "--strict-markers",
+  "-p",
+  "no:cacheprovider",
+  "--basetemp=.pytest_tmp",
+]
 xfail_strict = true
+junit_family = "xunit2"
+console_output_style = "progress"
+norecursedirs = [
+  ".git",
+  ".github",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".pytest_tmp",
+  ".ruff_cache",
+  ".venv",
+  "build",
+  "dist",
+  "eval_results",
+]
+markers = [
+  "integration: integration-level tests that cross multiple repository components",
+  "security: security, adversarial, permission, or trust-boundary tests",
+  "slow: tests excluded from the smallest targeted validation path",
+]
+
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+src = [
+  "src",
+  "tests",
+  "scripts",
+]
+extend-exclude = [
+  ".git",
+  ".mypy_cache",
+  ".pytest_cache",
+  ".pytest_tmp",
+  ".ruff_cache",
+  ".venv",
+  "build",
+  "dist",
+  "eval_results",
+  "01_RAW_SOURCES",
+  "09_LOGS",
+  "data",
+]
+
+
+[tool.ruff.lint]
+# Start with high-signal correctness and import rules.
+# Expand only through a separately measured lint-hardening change.
+select = [
+  "E4",
+  "E7",
+  "E9",
+  "F",
+  "I",
+]
+ignore = []
+
+
+[tool.ruff.lint.isort]
+known-first-party = ["asperitas_agent"]
+force-sort-within-sections = true
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+skip-magic-trailing-comma = false
+docstring-code-format = false
+
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/asperitas_agent"]
+mypy_path = "src"
+exclude = [
+  "^build/",
+  "^dist/",
+  "^eval_results/",
+]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unreachable = true
+no_implicit_optional = true
+strict_equality = true
+check_untyped_defs = true
+ignore_missing_imports = true
+show_error_codes = true
+show_column_numbers = true
+pretty = true
+
+# Strict mode is intentionally not enabled globally until the existing package
+# has a measured typing baseline and a regression-controlled migration plan.
+disallow_untyped_defs = false
+disallow_any_generics = false
+warn_return_any = false
+
+
+[tool.coverage.run]
+branch = true
+source = ["asperitas_agent"]
+relative_files = true
+data_file = ".coverage"
+
+
+[tool.coverage.paths]
+source = [
+  "src/asperitas_agent",
+  "*/site-packages/asperitas_agent",
+]
+
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 2
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+]
+
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+
+[tool.coverage.xml]
+output = "coverage.xml"
