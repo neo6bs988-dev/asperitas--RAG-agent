@@ -1,0 +1,113 @@
+name: Exact Head Certification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: exact-head-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  packaging-import-bootstrap:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: "3.10"
+          - os: ubuntu-latest
+            python: "3.11"
+          - os: windows-latest
+            python: "3.11"
+
+    env:
+      ASPERITAS_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Checkout exact source head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install certification dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,parsers,packaging,quality]"
+
+      - name: Initialize certification evidence directory
+        run: python -c "from pathlib import Path; Path('certification-results').mkdir(exist_ok=True)"
+
+      - name: Verify focused lint contracts
+        run: >-
+          python -m ruff check
+          scripts/verify_packaging_contract.py
+          scripts/verify_distribution_install.py
+          tests/test_sitecustomize.py
+          > certification-results/ruff.txt 2>&1
+
+      - name: Verify exact-head packaging and CLI contract
+        run: >-
+          python scripts/verify_packaging_contract.py
+          --json
+          --output certification-results/packaging-contract.json
+
+      - name: Validate canonical source registries
+        run: |
+          python -m asperitas_agent.cli validate-registry-contract
+          python scripts/validate_external_benchmark_registry.py
+
+      - name: Run repository bootstrap regression
+        run: >-
+          python -m pytest -q
+          tests/test_sitecustomize.py
+          --junitxml=certification-results/sitecustomize.xml
+
+      - name: Run agent governance regression
+        run: >-
+          python -m pytest -q
+          tests/test_skill_registry.py
+          tests/test_skill_discovery.py
+          --junitxml=certification-results/agent-governance.xml
+
+      - name: Build wheel and source distribution
+        run: |
+          python -c "from pathlib import Path; import shutil; shutil.rmtree(Path('dist'), ignore_errors=True)"
+          python -m build
+
+      - name: Verify wheel contents and clean isolated install
+        run: >-
+          python scripts/verify_distribution_install.py
+          --dist-dir dist
+          --json
+          --output certification-results/distribution-install.json
+
+      - name: Verify repository diff hygiene
+        run: git diff --check
+
+      - name: Upload run-scoped certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exact-head-${{ matrix.os }}-py${{ matrix.python }}
+          path: certification-results/
+          if-no-files-found: error
+          retention-days: 14
