@@ -1,7 +1,221 @@
 {
-    "python.testing.pytestArgs": [
-        "."
+  // Target path: .vscode/settings.json
+  // Place this file at the repository root. A nested
+  // 00_ADMIN/.vscode/settings.json is not applied when the repository root is
+  // opened as the VS Code workspace.
+
+  // ---------------------------------------------------------------------------
+  // Python environment
+  // ---------------------------------------------------------------------------
+
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.executeInFileDir": false,
+
+  // Keep runtime imports honest. `extraPaths` assists editor analysis only;
+  // terminal commands and tests still use the repository package configuration.
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/src"
+  ],
+
+  "python.analysis.autoSearchPaths": true,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.completeFunctionParens": true,
+  "python.analysis.useLibraryCodeForTypes": true,
+  "python.analysis.indexing": true,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "workspace",
+
+  // Exclude non-code and generated surfaces from Python analysis without hiding
+  // them from the Explorer or repository audit.
+  "python.analysis.exclude": [
+    "**/.git/**",
+    "**/.venv/**",
+    "**/__pycache__/**",
+    "**/.pytest_cache/**",
+    "**/.pytest_tmp/**",
+    "**/.mypy_cache/**",
+    "**/.ruff_cache/**",
+    "**/build/**",
+    "**/dist/**",
+    "**/*.egg-info/**",
+    "**/01_RAW_SOURCES/**",
+    "**/09_LOGS/**",
+    "**/data/**",
+    "**/eval_results/**"
+  ],
+
+  // ---------------------------------------------------------------------------
+  // Pytest
+  // ---------------------------------------------------------------------------
+
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}",
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // pytest behavior, strict markers, temporary paths, and test discovery rules
+  // remain authoritative in pyproject.toml.
+
+  // ---------------------------------------------------------------------------
+  // Ruff
+  // ---------------------------------------------------------------------------
+
+  "ruff.configuration": "${workspaceFolder}/pyproject.toml",
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    },
+    "editor.detectIndentation": false,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.rulers": [
+      120
     ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "files.trimTrailingWhitespace": true
+  },
+
+  // ---------------------------------------------------------------------------
+  // Repository-safe file behavior
+  // ---------------------------------------------------------------------------
+
+  "files.autoSave": "off",
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+
+  // Markdown may intentionally use trailing spaces for explicit line breaks.
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.formatOnSave": false,
+    "files.trimTrailingWhitespace": false
+  },
+
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2
+  },
+
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [
+      120
+    ]
+  },
+
+  "[toml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [
+      120
+    ]
+  },
+
+  // ---------------------------------------------------------------------------
+  // Explorer, search, and watcher performance
+  // ---------------------------------------------------------------------------
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/*.pyo": true,
+    "**/.pytest_cache": true,
+    "**/.pytest_tmp": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/.coverage": true,
+    "**/htmlcov": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/*.egg-info": true
+  },
+
+  "search.exclude": {
+    "**/.git": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.pytest_tmp": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true,
+    "**/htmlcov": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/*.egg-info": true
+  },
+
+  "search.useIgnoreFiles": true,
+  "search.useGlobalIgnoreFiles": true,
+  "search.followSymlinks": false,
+
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.venv/**": true,
+    "**/__pycache__/**": true,
+    "**/.pytest_cache/**": true,
+    "**/.pytest_tmp/**": true,
+    "**/.mypy_cache/**": true,
+    "**/.ruff_cache/**": true,
+    "**/htmlcov/**": true,
+    "**/build/**": true,
+    "**/dist/**": true,
+    "**/*.egg-info/**": true
+  },
+
+  // ---------------------------------------------------------------------------
+  // Git safety
+  // ---------------------------------------------------------------------------
+
+  "git.branchProtection": [
+    "main"
+  ],
+  "git.allowForcePush": false,
+  "git.enableSmartCommit": false,
+  "git.suggestSmartCommit": false,
+  "git.confirmSync": true,
+  "git.autofetch": false,
+  "git.openRepositoryInParentFolders": "never",
+  "git.detectSubmodules": true,
+  "git.alwaysShowStagedChangesResourceGroup": true,
+
+  // ---------------------------------------------------------------------------
+  // Task and terminal boundaries
+  // ---------------------------------------------------------------------------
+
+  "task.allowAutomaticTasks": "off",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+
+  // ---------------------------------------------------------------------------
+  // Editor defaults
+  // ---------------------------------------------------------------------------
+
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "editor.renderWhitespace": "boundary",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.largeFileOptimizations": true
 }
