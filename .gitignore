@@ -1,0 +1,319 @@
+# =============================================================================
+# Asperitas repository ignore policy
+# =============================================================================
+#
+# This file excludes local, generated, temporary, credential-bearing, and
+# machine-specific artifacts.
+#
+# IMPORTANT:
+# - .gitignore is not a security boundary.
+# - Never place confidential or restricted data in the repository merely
+#   because a path is ignored.
+# - Do not ignore canonical repository evidence directories such as data/,
+#   eval_results/, 09_LOGS/, or source registries as a whole.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Operating-system metadata
+# -----------------------------------------------------------------------------
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+
+# -----------------------------------------------------------------------------
+# Python bytecode and interpreter artifacts
+# -----------------------------------------------------------------------------
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+.python_history
+.python_history-*
+.pythonstartup
+
+
+# -----------------------------------------------------------------------------
+# Python environments
+# -----------------------------------------------------------------------------
+
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+__pypackages__/
+
+
+# -----------------------------------------------------------------------------
+# Python packaging and build outputs
+# -----------------------------------------------------------------------------
+
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+
+*.egg
+*.egg-info/
+.installed.cfg
+MANIFEST
+pip-wheel-metadata/
+
+
+# -----------------------------------------------------------------------------
+# Test, coverage, lint, type-check, and quality-tool state
+# -----------------------------------------------------------------------------
+
+.pytest_cache/
+.pytest_tmp/
+.tox/
+.nox/
+.hypothesis/
+
+.coverage
+.coverage.*
+coverage.xml
+coverage.json
+htmlcov/
+
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+.ruff_cache/
+.pyright/
+.pytype/
+.pyre/
+
+pytest-report.xml
+pytest-results.xml
+test-results.xml
+junit.xml
+junit-*.xml
+
+
+# -----------------------------------------------------------------------------
+# Jupyter and notebook state
+# -----------------------------------------------------------------------------
+
+.ipynb_checkpoints/
+
+
+# -----------------------------------------------------------------------------
+# IDE and editor state
+# -----------------------------------------------------------------------------
+
+.idea/
+*.iml
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+.history/
+*.code-workspace.local
+
+*.swp
+*.swo
+*.swn
+*~
+.~lock.*#
+\#*\#
+
+
+# -----------------------------------------------------------------------------
+# Temporary, backup, patch, and local diagnostic files
+# -----------------------------------------------------------------------------
+
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.rej
+*.stackdump
+
+tmp/
+temp/
+.cache/
+
+
+# -----------------------------------------------------------------------------
+# Runtime logs
+#
+# Canonical Markdown/JSON decision and run evidence under 09_LOGS/ remains
+# trackable. Only ordinary local *.log output is ignored.
+# -----------------------------------------------------------------------------
+
+*.log
+*.log.*
+logs.local/
+
+
+# -----------------------------------------------------------------------------
+# Environment variables, credentials, secrets, and private key material
+#
+# These patterns reduce accidental staging. They do not replace secret
+# scanning, credential rotation, access control, or human review.
+# -----------------------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+.secrets/
+secrets.json
+secrets.*.json
+
+credentials.json
+credentials.*.json
+service-account.json
+service-account-*.json
+service_account.json
+service_account_*.json
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+
+
+# -----------------------------------------------------------------------------
+# Streamlit local secrets
+# -----------------------------------------------------------------------------
+
+.streamlit/secrets.toml
+
+
+# -----------------------------------------------------------------------------
+# Local database, vector-store, and retrieval-service state
+#
+# Do not ignore canonical registry, chunk, evaluation, or audit artifacts.
+# Only machine-local service state and database sidecars are excluded.
+# -----------------------------------------------------------------------------
+
+.chroma/
+chroma_db/
+chroma.sqlite3
+
+.qdrant/
+.weaviate/
+.milvus/
+.neo4j/
+
+.vector_store/
+vector_store/
+
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.db-wal
+*.db-shm
+
+
+# -----------------------------------------------------------------------------
+# Explicit local-only project artifacts
+# -----------------------------------------------------------------------------
+
+.local_artifacts/
+local_artifacts/
+artifacts/local/
+
+data/local/
+eval_results/local/
+09_LOGS/run_logs/local/
+
+*.local.py
+*.local.toml
+*.local.yaml
+*.local.yml
+*.local.json
+config.local.*
+settings.local.*
+
+
+# -----------------------------------------------------------------------------
+# Codex and agent local runtime state
+#
+# Project-scoped checked-in configuration such as .codex/config.toml remains
+# trackable. Only local sessions, caches, logs, and history are ignored.
+# -----------------------------------------------------------------------------
+
+.codex/sessions/
+.codex/history/
+.codex/logs/
+.codex/.cache/
+
+.agents/.cache/
+.agents/local/
+.agents/sessions/
+
+
+# -----------------------------------------------------------------------------
+# Optional JavaScript tooling used by future UI surfaces
+# -----------------------------------------------------------------------------
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.npm/
+.pnpm-store/
+
+
+# -----------------------------------------------------------------------------
+# Local profiling and performance artifacts
+# -----------------------------------------------------------------------------
+
+*.prof
+*.lprof
+*.flamegraph
+profile-results/
+benchmark-local/
+
+
+# -----------------------------------------------------------------------------
+# Crash dumps and process artifacts
+# -----------------------------------------------------------------------------
+
+core
+core.*
+*.dmp
+*.dump
+*.pid
+*.pid.lock
