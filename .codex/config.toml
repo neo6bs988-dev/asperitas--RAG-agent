@@ -1,20 +1,232 @@
-# .codex/config.toml
-# Asperitas project-scoped Codex configuration.
-# Purpose: safe implementation default for source-grounded, auditable, compliance-aware repo work.
-# Boundary: this file configures Codex behavior only; it is not proof of production RAG, vector DB, KG, eval suite, tracing, legal approval, biosafety approval, wet-lab validation, autonomous lab execution, or foundation-model capability.
+#:schema https://developers.openai.com/codex/config-schema.json
 
-model = "gpt-5.5"
-model_reasoning_effort = "high"
-service_tier = "default"
+# =============================================================================
+# Asperitas Project-Scoped Codex Configuration v2-FINAL
+# =============================================================================
+#
+# Model routing:
+# - Default implementation: GPT-5.6 Terra / medium reasoning
+# - Planning: high reasoning
+# - Code review: GPT-5.6 Sol
+# - Core RAG/eval/security/compliance work: manually select Sol / xhigh
+# - Simple deterministic work: manually select Luna / low
+# - GPT-5.5: compatibility, regression comparison, or explicitly justified
+#   Fast-mode work only
+#
+# Security boundary:
+# - workspace writes allowed;
+# - subprocess network denied;
+# - web search disabled unless explicitly enabled for the session;
+# - external writes require approval;
+# - destructive app tools blocked;
+# - secret-like environment values excluded;
+# - unknown skill dependency installation blocked;
+# - agent depth and concurrency bounded.
+#
+# Truth boundary:
+# This file configures Codex behavior only. It does not prove production
+# readiness, deployment, security certification, legal clearance, scientific
+# validation, wet-lab validation, or autonomous-laboratory authorization.
+# =============================================================================
+
+
+# -----------------------------------------------------------------------------
+# Adaptive model baseline
+#
+# Terra is the default workhorse. CLI or UI model choices override this value.
+# Sol is reserved as the review model and for explicitly escalated core work.
+# -----------------------------------------------------------------------------
+
+model = "gpt-5.6-terra"
+review_model = "gpt-5.6-sol"
+
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "high"
+
+model_reasoning_summary = "concise"
+model_verbosity = "medium"
+
 personality = "pragmatic"
 
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
+# Preserve the complete repository constitution without forcing every other
+# document into the prompt.
+project_doc_max_bytes = 262144
+
+# Prevent exposure of private model reasoning.
+show_raw_agent_reasoning = false
+
+# Login shells can load aliases, credentials, and uncontrolled startup scripts.
 allow_login_shell = false
 
+
+# -----------------------------------------------------------------------------
+# Granular approval policy
+#
+# `true` means the approval prompt may be shown to the human user.
+# It does not mean that the operation is automatically approved.
+# -----------------------------------------------------------------------------
+
+approval_policy = { granular = { sandbox_approval = true, rules = true, mcp_elicitations = true, request_permissions = true, skill_approval = true } }
+
+approvals_reviewer = "user"
+
+
+# -----------------------------------------------------------------------------
+# Filesystem and network sandbox
+# -----------------------------------------------------------------------------
+
+sandbox_mode = "workspace-write"
+
+# Web search is separate from shell networking. Keep it disabled by default;
+# enable it explicitly only for tasks requiring current external evidence.
+web_search = "disabled"
+
+
 [sandbox_workspace_write]
+
+# Shell commands, package managers, scripts, and skills cannot access the
+# network unless the session is explicitly reconfigured.
 network_access = false
 
+
+# -----------------------------------------------------------------------------
+# Subprocess environment filtering
+#
+# Keep the usable core environment while excluding credentials. Avoid broad
+# patterns such as "*AUTH*" or "AWS_*", which can remove harmless build and
+# region configuration and create unnecessary execution failures.
+# -----------------------------------------------------------------------------
+
+[shell_environment_policy]
+
+inherit = "core"
+ignore_default_excludes = false
+
+exclude = [
+  "*PASSWORD*",
+  "*PASSWD*",
+  "*CREDENTIAL*",
+
+  "OPENAI_API_KEY",
+  "ANTHROPIC_API_KEY",
+
+  "GITHUB_TOKEN",
+  "GH_TOKEN",
+  "NPM_TOKEN",
+  "PYPI_TOKEN",
+
+  "AWS_ACCESS_KEY_ID",
+  "AWS_SECRET_ACCESS_KEY",
+  "AWS_SESSION_TOKEN",
+
+  "AZURE_CLIENT_SECRET",
+  "GOOGLE_APPLICATION_CREDENTIALS",
+
+  "DATABASE_URL",
+  "KUBECONFIG",
+]
+
+
+# -----------------------------------------------------------------------------
+# Multi-agent control
+#
+# One subagent layer permits useful parallel review without recursive agent
+# trees. Four concurrent threads provide bounded parallelism without turning
+# ordinary implementation into an expensive multi-agent workflow.
+# -----------------------------------------------------------------------------
+
+[agents]
+
+max_depth = 1
+max_threads = 4
+job_max_runtime_seconds = 1800
+interrupt_message = true
+
+
+# -----------------------------------------------------------------------------
+# Stable performance and safety features
+# -----------------------------------------------------------------------------
+
 [features]
-memories = true
-js_repl = false
+
+# Connector access remains available under the app approval controls below.
+apps = true
+
+# Compress supported streaming request payloads.
+enable_request_compression = true
+
+# Allow the user to select Fast mode when the active model supports it.
+# This does not enable the higher-cost service tier automatically.
+fast_mode = true
+
+# Support durable execution for explicitly bounded long-running work.
+goals = true
+
+# Repository hooks are disabled until individually reviewed and approved.
+hooks = false
+
+# Disable hidden cross-session model memory for reproducibility and eval
+# integrity. Durable project knowledge belongs in repository artifacts.
+memories = false
+
+# Enable subagents, subject to the depth and thread limits above.
+multi_agent = true
+
+# Keep experimental sandbox network proxying disabled.
+network_proxy = false
+
+personality = true
+
+# Do not expose the remote plugin catalog by default. Installed and explicitly
+# authorized integrations can still be handled under applicable controls.
+remote_plugin = false
+
+# Reduce repeated shell startup overhead.
+shell_snapshot = true
+shell_tool = true
+
+# Skills must not install missing MCP dependencies automatically.
+skill_mcp_dependency_install = false
+
+
+# -----------------------------------------------------------------------------
+# Apps and connectors
+#
+# Read-only connector operations may proceed without repeated prompts.
+# Write operations require approval. Destructive operations remain blocked.
+# Open-world reads are allowed because repository search and inspection may
+# require access to approved external systems.
+# -----------------------------------------------------------------------------
+
+[apps._default]
+
+enabled = true
+approvals_reviewer = "user"
+
+# Read operations can proceed; writes require approval.
+default_tools_approval_mode = "writes"
+
+# Deletion and other destructive tools are blocked at the config layer.
+destructive_enabled = false
+
+# Permit non-destructive reads from approved apps/connectors.
+open_world_enabled = true
+
+
+# -----------------------------------------------------------------------------
+# Reviewed repository skills
+#
+# Enabling a skill does not authorize scripts or external writes.
+# Skill scripts remain subject to `skill_approval`.
+# -----------------------------------------------------------------------------
+
+[[skills.config]]
+
+path = ".agents/skills/security-review"
+enabled = true
+
+
+[[skills.config]]
+
+path = ".agents/skills/asperitas-v1-architect"
+enabled = true
