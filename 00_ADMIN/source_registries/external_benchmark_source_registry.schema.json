@@ -1,0 +1,116 @@
+{
+  "schema_name": "asperitas_external_benchmark_source_registry",
+  "schema_version": "2.0",
+  "status": "metadata_only_candidate_registry",
+  "canonical_authority": "00_ADMIN/metadata_schema.yaml",
+  "canonical_benchmark_topology": "01_RAW_SOURCES/P6_EXTERNAL_BENCHMARKS/",
+  "csv_path": "00_ADMIN/source_registries/external_benchmark_source_registry.csv",
+  "list_separator": "|",
+  "required_fields": [
+    "source_id",
+    "title",
+    "source_family",
+    "source_priority",
+    "source_type",
+    "disclosure_level",
+    "origin",
+    "author_or_owner",
+    "date_accessed",
+    "jurisdiction",
+    "license_status",
+    "verification_status",
+    "ingestion_status",
+    "provenance",
+    "evidence_label",
+    "risk_flags",
+    "allowed_use_cases",
+    "prohibited_use_cases",
+    "source_url",
+    "version_or_date",
+    "notes"
+  ],
+  "allowed_values": {
+    "source_family": [
+      "ai_agent_architecture",
+      "evaluation_reference",
+      "ai_bio_platform_benchmark",
+      "security_reference",
+      "standards_reference"
+    ],
+    "source_priority": [
+      "P5",
+      "P6"
+    ],
+    "source_type": [
+      "official",
+      "paper",
+      "code",
+      "benchmark"
+    ],
+    "disclosure_level": [
+      "external-safe"
+    ],
+    "origin": [
+      "web"
+    ],
+    "jurisdiction": [
+      "US",
+      "GLOBAL"
+    ],
+    "license_status": [
+      "needs_review"
+    ],
+    "verification_status": [
+      "needs_external_verification"
+    ],
+    "ingestion_status": [
+      "registered"
+    ],
+    "evidence_label": [
+      "Official Source",
+      "Peer-Reviewed Evidence",
+      "Industry Signal",
+      "Needs External Verification"
+    ],
+    "risk_flags": [
+      "biosafety",
+      "biosecurity",
+      "IP",
+      "privacy",
+      "legal",
+      "external_comm"
+    ],
+    "allowed_use_cases": [
+      "strategy",
+      "science",
+      "compliance",
+      "market",
+      "operations",
+      "agent_development",
+      "rag",
+      "historical_context"
+    ],
+    "prohibited_use_cases": [
+      "raw_ingestion_without_review",
+      "model_training_without_review",
+      "external_claim_without_verification",
+      "asperitas_capability_claim",
+      "legal_clearance_claim",
+      "scientific_validation_claim"
+    ]
+  },
+  "invariants": {
+    "metadata_only": true,
+    "raw_acquisition_performed": false,
+    "processing_performed": false,
+    "chunking_performed": false,
+    "embedding_performed": false,
+    "indexing_performed": false,
+    "evaluation_performed": false,
+    "production_ingestion_allowed": false,
+    "official_url_required": true,
+    "unique_source_id_required": true,
+    "unique_source_url_required": true,
+    "canonical_enum_subset_required": true
+  }
+}
