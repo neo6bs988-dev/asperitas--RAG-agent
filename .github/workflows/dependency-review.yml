@@ -1,21 +1,14 @@
 # =============================================================================
-# Asperitas Dependency Security Workflow v1
+# Asperitas Dependency Security Workflow v1.1
 # =============================================================================
 #
 # Purpose:
 # - block pull requests that introduce dependencies with known vulnerabilities;
-# - audit the installed Asperitas Python dependency surface using pip-audit;
+# - audit the resolved third-party Python dependency surface using pip-audit;
 # - preserve exact-head identity and minimum GitHub token permissions;
 # - retain machine-readable dependency-security evidence;
+# - avoid treating the unpublished editable Asperitas package as a PyPI target;
 # - avoid claiming that successful scanners prove vulnerability absence.
-#
-# Security boundaries:
-# - runs only with read-only repository permissions;
-# - never uses pull_request_target;
-# - does not receive repository secrets;
-# - third-party Actions are pinned to full immutable commit SHAs;
-# - license enforcement remains disabled until a named legal/license policy is
-#   approved. License metadata is review evidence, not final legal clearance.
 # =============================================================================
 
 name: Dependency Security
@@ -99,24 +92,14 @@ jobs:
       - name: Review dependency changes
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
-          # Block newly introduced vulnerabilities at MODERATE or higher.
-          # Reassess after a clean baseline and documented false-positive policy.
           fail-on-severity: moderate
-
-          # Review both runtime and development dependency changes.
           fail-on-scopes: runtime, development
-
           vulnerability-check: true
-
-          # License policy requires separate named legal approval.
-          # Do not silently convert scanner metadata into legal clearance.
           license-check: false
-
           warn-only: false
           show-openssf-scorecard: true
           warn-on-openssf-scorecard-level: 4
           show-patched-versions: true
-
           retry-on-snapshot-warnings: true
           retry-on-snapshot-warnings-timeout: 120
 
@@ -209,9 +192,6 @@ jobs:
           set -euo pipefail
 
           python -m pip install --upgrade pip
-
-          # Audit the dependency surface used by development, parsing, UI,
-          # quality, security, and packaging workflows.
           python -m pip install \
             -e ".[dev,parsers,ui,quality,security,packaging]"
 
@@ -224,17 +204,62 @@ jobs:
           python -m pip freeze --all \
             > security-results/environment-freeze.txt
 
-      - name: Audit installed Python dependencies
+      - name: Build deterministic third-party audit input
         shell: bash
         run: |
           set -euo pipefail
 
-          # pip-audit queries an external vulnerability service.
-          # It performs no automatic dependency modification because --fix is
-          # intentionally absent.
+          python - <<'PY'
+          from __future__ import annotations
+
+          from pathlib import Path
+
+          source = Path("security-results/environment-freeze.txt")
+          destination = Path("security-results/audit-requirements.txt")
+          exclusions = Path("security-results/audit-exclusions.txt")
+
+          kept: list[str] = []
+          removed: list[str] = []
+
+          for raw_line in source.read_text(encoding="utf-8").splitlines():
+              line = raw_line.strip()
+              folded = line.casefold().replace("-", "_")
+
+              is_local_asperitas_editable = (
+                  line.startswith("-e ")
+                  and "#egg=asperitas_agent" in folded
+              )
+              is_local_asperitas_file_reference = (
+                  folded.startswith("asperitas_agent @ file:")
+              )
+
+              if is_local_asperitas_editable or is_local_asperitas_file_reference:
+                  removed.append(line)
+                  continue
+
+              if line:
+                  kept.append(line)
+
+          if len(removed) != 1:
+              raise SystemExit(
+                  "Expected exactly one local Asperitas distribution record; "
+                  f"found {len(removed)}."
+              )
+
+          if not kept:
+              raise SystemExit("Third-party audit input is empty.")
+
+          destination.write_text("\n".join(kept) + "\n", encoding="utf-8")
+          exclusions.write_text("\n".join(removed) + "\n", encoding="utf-8")
+          PY
+
+      - name: Audit resolved third-party Python dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+
           python -m pip_audit \
-            --local \
-            --skip-editable \
+            --requirement security-results/audit-requirements.txt \
             --strict \
             --progress-spinner off \
             --format json \
@@ -246,16 +271,19 @@ jobs:
         run: |
           set -o pipefail
 
+          if [[ ! -s security-results/audit-requirements.txt ]]; then
+            echo "Audit requirements were not generated." \
+              | tee security-results/pip-audit.txt
+            exit 0
+          fi
+
           python -m pip_audit \
-            --local \
-            --skip-editable \
+            --requirement security-results/audit-requirements.txt \
             --strict \
             --progress-spinner off \
             --format columns \
             2>&1 | tee security-results/pip-audit.txt
 
-          # Preserve the blocking result from the JSON audit step rather than
-          # using this reporting step to weaken or override it.
           exit 0
 
       - name: Verify audit did not mutate tracked repository files
@@ -298,7 +326,6 @@ jobs:
           root = Path("security-results")
           root.mkdir(exist_ok=True)
           output = root / "SHA256SUMS"
-
           lines: list[str] = []
 
           for path in sorted(root.rglob("*")):
@@ -326,12 +353,13 @@ jobs:
             echo "- Expected SHA: \`${ASPERITAS_EXPECTED_HEAD_SHA}\`"
             echo "- Checked-out SHA: \`$(git rev-parse HEAD 2>/dev/null || echo unavailable)\`"
             echo "- Python: \`3.11\`"
-            echo "- Audit mode: installed local environment"
+            echo "- Audit mode: resolved third-party environment"
+            echo "- Local project exclusion: one exact editable/file distribution record"
             echo "- Automatic fixes: disabled"
             echo "- Evidence directory: \`security-results/\`"
             echo
             echo "A successful result means pip-audit did not identify a known"
-            echo "vulnerability in the audited installed environment at run time."
+            echo "vulnerability in the audited third-party environment at run time."
             echo "Advisory databases, dependency resolution, applicability, and"
             echo "false-positive assessment remain external and time-dependent."
           } >> "$GITHUB_STEP_SUMMARY"
