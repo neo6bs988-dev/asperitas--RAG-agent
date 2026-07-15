@@ -2,138 +2,154 @@
 
 # =============================================================================
 # Asperitas Project-Scoped Codex Configuration
-# v2.1-PERFORMANCE-CANDIDATE
+# v2.2-MODEL-PICKER-FINAL
 # =============================================================================
 #
-# Candidate objective:
-# - improve complex-task correctness and review quality;
-# - preserve bounded cost, latency, permissions, and agent concurrency;
-# - improve official-document freshness without enabling unrestricted live web;
-# - avoid hidden memory contamination and unnecessary experimental features.
+# STATUS:
+# - DESIGN_FINAL
+# - RUNTIME_VERIFICATION_REQUIRED
 #
-# Model routing:
-# - Default implementation: GPT-5.6 Sol / medium
-# - Planning: high
-# - Code review: GPT-5.6 Sol
-# - Highest-risk/core work: manually escalate Sol to high or xhigh
-# - Bounded everyday work: manually select Terra / medium
-# - Deterministic repetitive work: manually select Luna / low
-# - GPT-5.5: regression comparison only
+# Objective:
+# - allow every model exposed by the current account/workspace to be selected;
+# - allow reasoning effort to be selected independently for each task;
+# - prevent project configuration from resetting the IDE model picker;
+# - preserve bounded permissions, sandboxing, concurrency, and connector use;
+# - avoid hidden memory contamination and uncontrolled network execution.
+#
+# MODEL FREEDOM CONTRACT
+#
+# The following keys are intentionally NOT configured:
+#
+#   model
+#   review_model
+#   model_reasoning_effort
+#   plan_mode_reasoning_effort
+#   model_reasoning_summary
+#   model_verbosity
+#   service_tier
+#
+# Omitting them delegates model, reasoning effort, review model, verbosity,
+# reasoning summary, and speed-tier selection to the current Codex thread and
+# composer model picker.
+#
+# Suggested manual routing:
+#
+# - Sol:
+#     complex architecture, security, repository-wide reasoning,
+#     difficult debugging, deep research, high-value review
+#
+# - Terra:
+#     everyday implementation, tests, documentation, ordinary PR work
+#
+# - Luna:
+#     deterministic extraction, classification, repetitive transformations,
+#     narrowly specified high-volume tasks
+#
+# - GPT-5.5:
+#     regression comparison or compatibility checks
 #
 # Truth boundary:
-# This candidate is expected to improve accuracy relative to v2-FINAL, but
-# improvement is not VERIFIED until it passes the same frozen evals and real-task
-# smoke checks as the incumbent.
+# This configuration permits selection. It does not unlock models unavailable
+# to the current ChatGPT plan, API organization, or managed workspace.
 # =============================================================================
-
-
-# -----------------------------------------------------------------------------
-# Accuracy-first adaptive model baseline
-#
-# Sol is the default because Asperitas work frequently involves repository-wide
-# reasoning, RAG/eval contracts, security, permissions, scientific evidence,
-# rights/compliance boundaries, and cross-file consistency.
-#
-# Medium remains the default reasoning effort to avoid applying high-cost
-# reasoning to every trivial task. High/xhigh is selected explicitly when the
-# task contract justifies it.
-# -----------------------------------------------------------------------------
-
-model = "gpt-5.6-sol"
-review_model = "gpt-5.6-sol"
-
-model_reasoning_effort = "medium"
-plan_mode_reasoning_effort = "high"
-
-model_reasoning_summary = "concise"
-model_verbosity = "medium"
-
-personality = "pragmatic"
 
 
 # -----------------------------------------------------------------------------
 # Repository instruction fidelity
-#
-# Preserve the complete root AGENTS.md execution constitution. This is a maximum
-# read allowance, not an instruction to fill the context with unrelated files.
 # -----------------------------------------------------------------------------
 
+# Maximum root AGENTS.md read allowance.
+# This does not require Codex to load unrelated repository content.
 project_doc_max_bytes = 262144
 
 
 # -----------------------------------------------------------------------------
-# Reasoning and shell privacy
+# Model-independent interaction defaults
 # -----------------------------------------------------------------------------
 
+# Personality does not select or lock a model and may still be overridden
+# from the active thread where supported.
+personality = "pragmatic"
+
+# Never expose private raw chain-of-thought content.
 show_raw_agent_reasoning = false
 
-# Login shells may load aliases, credentials, user profiles, or uncontrolled
-# startup scripts. Use reproducible non-login shells.
+# Avoid aliases, credentials, user profiles, and uncontrolled startup scripts
+# inherited from login-shell initialization.
 allow_login_shell = false
 
 
 # -----------------------------------------------------------------------------
-# Granular human approval
-#
-# These values allow approval prompts to reach the human reviewer.
-# They do not automatically approve the requested operation.
+# Human approval ownership
 # -----------------------------------------------------------------------------
-
-approval_policy = { granular = {
-  sandbox_approval = true,
-  rules = true,
-  mcp_elicitations = true,
-  request_permissions = true,
-  skill_approval = true
-} }
 
 approvals_reviewer = "user"
 
 
 # -----------------------------------------------------------------------------
-# Filesystem and command-network sandbox
+# Filesystem and command sandbox
 # -----------------------------------------------------------------------------
 
 sandbox_mode = "workspace-write"
 
 
+# -----------------------------------------------------------------------------
+# Evidence freshness
+# -----------------------------------------------------------------------------
+
+# Uses the maintained search index by default rather than unrestricted live
+# retrieval. A user may explicitly select a different supported search mode
+# for an authorized freshness-critical session.
+web_search = "cached"
+
+
+# -----------------------------------------------------------------------------
+# Granular approval routing
+#
+# true means the approval request may be shown to the user.
+# It does not mean that the action is pre-approved.
+# -----------------------------------------------------------------------------
+
+[approval_policy.granular]
+
+sandbox_approval = true
+rules = true
+mcp_elicitations = true
+request_permissions = true
+skill_approval = true
+
+
+# -----------------------------------------------------------------------------
+# Workspace-write sandbox controls
+# -----------------------------------------------------------------------------
+
 [sandbox_workspace_write]
 
-# Package managers, scripts, skills, and arbitrary subprocesses remain offline.
+# Package managers, arbitrary subprocesses, repository scripts, and skills
+# remain offline unless a separate approved permission path is used.
 network_access = false
 
 
 # -----------------------------------------------------------------------------
-# Evidence freshness
-#
-# Cached search uses the OpenAI-maintained search index rather than unrestricted
-# live web access. It improves access to current technical documentation while
-# preserving a narrower exposure boundary than live retrieval.
-#
-# For a specifically authorized freshness-critical task, override this session
-# to `indexed` or `live`.
+# Web-search tool configuration
 # -----------------------------------------------------------------------------
-
-web_search = "cached"
-
 
 [tools.web_search]
 
-# Preserve enough retrieved context for API, configuration, dependency, and
-# security documentation comparisons.
+# Preserve sufficient retrieved evidence for API, dependency, security,
+# configuration, and official-document comparisons.
 context_size = "high"
 
 
 # -----------------------------------------------------------------------------
 # Subprocess environment filtering
-#
-# Codex keeps the minimum useful core environment. Built-in exclusions for
-# KEY/SECRET/TOKEN remain active, followed by the explicit exclusions below.
 # -----------------------------------------------------------------------------
 
 [shell_environment_policy]
 
 inherit = "core"
+
+# Preserve Codex's built-in KEY / SECRET / TOKEN filtering.
 ignore_default_excludes = false
 
 exclude = [
@@ -163,16 +179,20 @@ exclude = [
 
 # -----------------------------------------------------------------------------
 # Multi-agent control
-#
-# A single subagent layer supports independent review and bounded parallelism.
-# Recursive agent trees remain blocked.
 # -----------------------------------------------------------------------------
 
 [agents]
 
+# Root session depth is zero. Permit only one subordinate layer.
 max_depth = 1
+
+# Bound parallelism to prevent uncontrolled agent fan-out.
 max_threads = 4
+
+# Maximum runtime for each worker.
 job_max_runtime_seconds = 1800
+
+# Preserve a model-visible interruption record.
 interrupt_message = true
 
 
@@ -182,51 +202,51 @@ interrupt_message = true
 
 [features]
 
-# Keep approved connector integrations available.
+# Approved connector integrations remain available.
 apps = true
 
-# Reduce streaming transport overhead when supported.
+# Reduce request transport overhead where supported.
 enable_request_compression = true
 
-# Expose Fast-tier selection but do not force it.
+# Make selectable faster service behavior available without forcing it.
 fast_mode = true
 
-# Permit persisted goals and bounded continuation for long-running work.
+# Allow persisted task goals and bounded long-running continuation.
 goals = true
 
-# Hooks require independent review before repository activation.
+# Hooks remain disabled pending an independent security and rollback review.
 hooks = false
 
-# Repository state, tests, decisions, and source registries are the durable
-# memory authority. Hidden cross-session model memory remains disabled.
+# Repository state, tests, evals, decision logs, and registries remain the
+# durable memory authority.
 memories = false
 
-# Subagents are available under the limits above.
+# Permit bounded subagent use under the [agents] limits.
 multi_agent = true
 
-# Experimental subprocess networking remains disabled.
+# Experimental subprocess-network proxying remains disabled.
 network_proxy = false
 
-# Keep personality controls available.
+# Enable personality support without locking the model.
 personality = true
 
-# Prevent unreviewed remote plugin catalog expansion.
+# Prevent automatic expansion from an unreviewed remote plugin catalog.
 remote_plugin = false
 
-# Reduce repeated command startup overhead.
+# Reduce repeated shell initialization overhead.
 shell_snapshot = true
 shell_tool = true
 
-# Skills may not install missing MCP dependencies automatically.
+# A Skill may not install missing MCP dependencies automatically.
 skill_mcp_dependency_install = false
 
 
 # -----------------------------------------------------------------------------
 # Apps and connectors
 #
-# Read operations may proceed efficiently.
-# Writes require human approval.
-# Destructive operations remain blocked.
+# Read operations remain efficient.
+# Writes require user review.
+# Destructive tools remain unavailable.
 # -----------------------------------------------------------------------------
 
 [apps._default]
@@ -234,19 +254,22 @@ skill_mcp_dependency_install = false
 enabled = true
 approvals_reviewer = "user"
 
+# Prompt for tools classified as writes.
 default_tools_approval_mode = "writes"
 
+# Block tools advertising destructive behavior.
 destructive_enabled = false
 
-# Non-destructive repository and connected-source reads remain available.
-# This does not authorize writes or destructive actions.
+# Allow open-world-capable connector tools where otherwise enabled.
+# This does not bypass write approval or enable destructive tools.
 open_world_enabled = true
 
 
 # -----------------------------------------------------------------------------
-# Reviewed repository skills
+# Reviewed repository Skills
 #
-# Skill enablement is not approval to execute scripts or perform external writes.
+# Skill enablement is not approval to run scripts, change external systems,
+# install dependencies, or perform destructive operations.
 # -----------------------------------------------------------------------------
 
 [[skills.config]]
