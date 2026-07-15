@@ -260,3 +260,17 @@ source = [
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
+precision = 2
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+]
+
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+
+[tool.coverage.xml]
+output = "coverage.xml"
