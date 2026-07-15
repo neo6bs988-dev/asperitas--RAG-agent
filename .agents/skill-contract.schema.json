@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asperitas.example/schemas/skill-contract-v2.json",
+  "title": "Asperitas Skill Contract v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "skill_id",
+    "owner",
+    "lifecycle",
+    "routing",
+    "modes",
+    "risk",
+    "permissions",
+    "contract",
+    "verification",
+    "rollback",
+    "relations",
+    "compatibility"
+  ],
+  "properties": {
+    "schema_version": {"const": "2.0"},
+    "skill_id": {"type": "string", "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"},
+    "owner": {"type": "string", "minLength": 1},
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "version",
+        "introduced_in",
+        "deprecated_since",
+        "compatibility_until",
+        "replaced_by"
+      ],
+      "properties": {
+        "status": {
+          "enum": ["active", "planned", "deprecated", "blocked", "unregistered_review_required"]
+        },
+        "version": {"type": "string", "minLength": 1},
+        "introduced_in": {"type": ["string", "null"]},
+        "deprecated_since": {"type": ["string", "null"]},
+        "compatibility_until": {"type": ["string", "null"]},
+        "replaced_by": {"type": ["string", "null"]},
+        "terminal_rationale": {"type": ["string", "null"]}
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implicit_activation",
+        "positive_triggers",
+        "negative_triggers",
+        "conflicts_with",
+        "precedence_rule"
+      ],
+      "properties": {
+        "implicit_activation": {"type": "boolean"},
+        "positive_triggers": {"$ref": "#/$defs/stringArray"},
+        "negative_triggers": {"$ref": "#/$defs/stringArray"},
+        "conflicts_with": {"$ref": "#/$defs/stringArray"},
+        "precedence_rule": {"type": "string"}
+      }
+    },
+    "modes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["READ", "DRAFT", "WRITE"]}
+    },
+    "risk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["risk_class", "human_gates"],
+      "properties": {
+        "risk_class": {"enum": ["low", "medium", "high"]},
+        "human_gates": {"$ref": "#/$defs/stringArray"}
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_required",
+        "external_call_allowed",
+        "network_allowed",
+        "execution_allowed",
+        "ingestion_allowed",
+        "write_allowed",
+        "destructive_allowed",
+        "allowed_actions",
+        "forbidden_actions"
+      ],
+      "properties": {
+        "approval_required": {"type": "boolean"},
+        "external_call_allowed": {"type": "boolean"},
+        "network_allowed": {"type": "boolean"},
+        "execution_allowed": {"type": "boolean"},
+        "ingestion_allowed": {"type": "boolean"},
+        "write_allowed": {"type": "boolean"},
+        "destructive_allowed": {"type": "boolean"},
+        "allowed_actions": {"$ref": "#/$defs/stringArray"},
+        "forbidden_actions": {"$ref": "#/$defs/stringArray"}
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_inputs", "output_contract", "error_behavior"],
+      "properties": {
+        "required_inputs": {"$ref": "#/$defs/stringArray"},
+        "output_contract": {"$ref": "#/$defs/stringArray"},
+        "error_behavior": {"enum": ["fail_closed", "fail_safe", "report_only"]}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "required_fixtures"],
+      "properties": {
+        "commands": {"$ref": "#/$defs/stringArray"},
+        "required_fixtures": {"$ref": "#/$defs/stringArray"}
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "verification"],
+      "properties": {
+        "strategy": {"type": "string", "minLength": 1},
+        "verification": {"type": "string", "minLength": 1}
+      }
+    },
+    "relations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["related_skills", "supersedes"],
+      "properties": {
+        "related_skills": {"$ref": "#/$defs/stringArray"},
+        "supersedes": {"$ref": "#/$defs/stringArray"}
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aliases"],
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "kind", "deprecated_since", "compatibility_until", "replaced_by"],
+            "properties": {
+              "value": {"type": "string", "minLength": 1},
+              "kind": {"type": "string", "minLength": 1},
+              "deprecated_since": {"type": ["string", "null"]},
+              "compatibility_until": {"type": ["string", "null"]},
+              "replaced_by": {"type": ["string", "null"]}
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stringArray": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
