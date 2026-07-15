@@ -122,20 +122,34 @@ jobs:
           if not isinstance(version, str) or not version.strip():
               raise SystemExit("asperitas_agent.__version__ is missing or invalid")
 
-          package_path = pathlib.Path(package.__file__).resolve()
           canonical_root = pathlib.Path("src/asperitas_agent").resolve()
+          package_search_paths = tuple(
+              pathlib.Path(path).resolve()
+              for path in getattr(package, "__path__", ())
+          )
+
+          if canonical_root not in package_search_paths:
+              raise SystemExit(
+                  "compatibility package does not route to the canonical src package: "
+                  f"canonical={canonical_root}, paths={package_search_paths}"
+              )
+
+          cli_module = importlib.import_module("asperitas_agent.cli")
+          cli_path = pathlib.Path(cli_module.__file__).resolve()
 
           try:
-              package_path.relative_to(canonical_root)
+              cli_path.relative_to(canonical_root)
           except ValueError as exc:
               raise SystemExit(
-                  f"canonical package import did not resolve under {canonical_root}: "
-                  f"{package_path}"
+                  f"canonical CLI implementation did not resolve under {canonical_root}: "
+                  f"{cli_path}"
               ) from exc
 
           print(f"python={sys.version}")
           print(f"package_version={version}")
-          print(f"package_path={package_path}")
+          print(f"package_file={pathlib.Path(package.__file__).resolve()}")
+          print(f"package_search_paths={package_search_paths}")
+          print(f"canonical_cli_path={cli_path}")
           PY
 
           python -m asperitas_agent.cli --help \
