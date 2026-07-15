@@ -65,11 +65,15 @@ parsers = [
   "python-docx>=1.1,<2",
 ]
 
-# Optional internal UI dependency.
+# Controlled internal Streamlit UI runtime.
+#
+# This exact pin provides a reviewable and reproducible deployment baseline.
+# Upgrade only through a dependency/security review with targeted UI smoke
+# validation. The Streamlit UI remains an optional capability and is not part
+# of the deterministic core installation.
 ui = [
-  "streamlit>=1.40,<2",
+  "streamlit==1.59.2",
 ]
-
 # Quality tools are deliberately separate from `dev` so normal CI installation
 # remains small and deterministic until these checks are explicitly enforced.
 quality = [
