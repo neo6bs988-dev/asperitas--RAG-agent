@@ -196,6 +196,7 @@
 # Exact-path exceptions
 # -----------------------------------------------------------------------------
 
-# This historical file is a DOCX/ZIP binary stored under a misleading .md name.
-# Mark it binary so checkout cannot rewrite bytes and dirty the worktree.
+# These historical files are DOCX/ZIP binaries stored under misleading .md names.
+# Mark them binary so checkout cannot rewrite bytes and dirty the worktree.
+00_ADMIN/decision_log.md binary
 04_AGENT_SYSTEM/guardrails/confidentiality_guardrail.md binary
