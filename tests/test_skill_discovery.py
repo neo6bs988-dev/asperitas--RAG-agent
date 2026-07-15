@@ -12,7 +12,6 @@ from asperitas_agent.skill_discovery import (
 )
 from asperitas_agent.skill_registry import SkillRegistry, require_skill
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "validate_skill_registry.py"
 EXPECTED_REMAINING_WARNINGS = [
