@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
+from pathlib import Path
 import subprocess
 import sys
-from copy import deepcopy
-from pathlib import Path
 
 from asperitas_agent.skill_contract import (
     validate_contract_file,
     validate_contract_files,
     validate_repository,
 )
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "validate_skill_contract.py"

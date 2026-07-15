@@ -1,13 +1,16 @@
 from __future__ import annotations
 
-import json
-import re
 from dataclasses import asdict, dataclass
+import json
 from pathlib import Path
+import re
 from typing import Any, Iterable, Mapping
 
-from .skill_discovery import SKILL_ALIASES, discover_skill_files, validate_skill_files_against_registry
-
+from .skill_discovery import (
+    SKILL_ALIASES,
+    discover_skill_files,
+    validate_skill_files_against_registry,
+)
 
 RESULT_STATES = ("PASS", "FAIL", "PARTIAL", "NOT_TESTABLE", "INVALID")
 LIFECYCLE_STATUSES = ("active", "planned", "deprecated", "blocked", "unregistered_review_required")
