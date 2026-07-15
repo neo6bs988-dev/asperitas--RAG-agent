@@ -1,43 +1,45 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
 # =============================================================================
-# Asperitas Project-Scoped Codex Configuration v2-FINAL
+# Asperitas Project-Scoped Codex Configuration
+# v2.1-PERFORMANCE-CANDIDATE
 # =============================================================================
+#
+# Candidate objective:
+# - improve complex-task correctness and review quality;
+# - preserve bounded cost, latency, permissions, and agent concurrency;
+# - improve official-document freshness without enabling unrestricted live web;
+# - avoid hidden memory contamination and unnecessary experimental features.
 #
 # Model routing:
-# - Default implementation: GPT-5.6 Terra / medium reasoning
-# - Planning: high reasoning
+# - Default implementation: GPT-5.6 Sol / medium
+# - Planning: high
 # - Code review: GPT-5.6 Sol
-# - Core RAG/eval/security/compliance work: manually select Sol / xhigh
-# - Simple deterministic work: manually select Luna / low
-# - GPT-5.5: compatibility, regression comparison, or explicitly justified
-#   Fast-mode work only
-#
-# Security boundary:
-# - workspace writes allowed;
-# - subprocess network denied;
-# - web search disabled unless explicitly enabled for the session;
-# - external writes require approval;
-# - destructive app tools blocked;
-# - secret-like environment values excluded;
-# - unknown skill dependency installation blocked;
-# - agent depth and concurrency bounded.
+# - Highest-risk/core work: manually escalate Sol to high or xhigh
+# - Bounded everyday work: manually select Terra / medium
+# - Deterministic repetitive work: manually select Luna / low
+# - GPT-5.5: regression comparison only
 #
 # Truth boundary:
-# This file configures Codex behavior only. It does not prove production
-# readiness, deployment, security certification, legal clearance, scientific
-# validation, wet-lab validation, or autonomous-laboratory authorization.
+# This candidate is expected to improve accuracy relative to v2-FINAL, but
+# improvement is not VERIFIED until it passes the same frozen evals and real-task
+# smoke checks as the incumbent.
 # =============================================================================
 
 
 # -----------------------------------------------------------------------------
-# Adaptive model baseline
+# Accuracy-first adaptive model baseline
 #
-# Terra is the default workhorse. CLI or UI model choices override this value.
-# Sol is reserved as the review model and for explicitly escalated core work.
+# Sol is the default because Asperitas work frequently involves repository-wide
+# reasoning, RAG/eval contracts, security, permissions, scientific evidence,
+# rights/compliance boundaries, and cross-file consistency.
+#
+# Medium remains the default reasoning effort to avoid applying high-cost
+# reasoning to every trivial task. High/xhigh is selected explicitly when the
+# task contract justifies it.
 # -----------------------------------------------------------------------------
 
-model = "gpt-5.6-terra"
+model = "gpt-5.6-sol"
 review_model = "gpt-5.6-sol"
 
 model_reasoning_effort = "medium"
@@ -48,53 +50,85 @@ model_verbosity = "medium"
 
 personality = "pragmatic"
 
-# Preserve the complete repository constitution without forcing every other
-# document into the prompt.
+
+# -----------------------------------------------------------------------------
+# Repository instruction fidelity
+#
+# Preserve the complete root AGENTS.md execution constitution. This is a maximum
+# read allowance, not an instruction to fill the context with unrelated files.
+# -----------------------------------------------------------------------------
+
 project_doc_max_bytes = 262144
 
-# Prevent exposure of private model reasoning.
+
+# -----------------------------------------------------------------------------
+# Reasoning and shell privacy
+# -----------------------------------------------------------------------------
+
 show_raw_agent_reasoning = false
 
-# Login shells can load aliases, credentials, and uncontrolled startup scripts.
+# Login shells may load aliases, credentials, user profiles, or uncontrolled
+# startup scripts. Use reproducible non-login shells.
 allow_login_shell = false
 
 
 # -----------------------------------------------------------------------------
-# Granular approval policy
+# Granular human approval
 #
-# `true` means the approval prompt may be shown to the human user.
-# It does not mean that the operation is automatically approved.
+# These values allow approval prompts to reach the human reviewer.
+# They do not automatically approve the requested operation.
 # -----------------------------------------------------------------------------
 
-approval_policy = { granular = { sandbox_approval = true, rules = true, mcp_elicitations = true, request_permissions = true, skill_approval = true } }
+approval_policy = { granular = {
+  sandbox_approval = true,
+  rules = true,
+  mcp_elicitations = true,
+  request_permissions = true,
+  skill_approval = true
+} }
 
 approvals_reviewer = "user"
 
 
 # -----------------------------------------------------------------------------
-# Filesystem and network sandbox
+# Filesystem and command-network sandbox
 # -----------------------------------------------------------------------------
 
 sandbox_mode = "workspace-write"
 
-# Web search is separate from shell networking. Keep it disabled by default;
-# enable it explicitly only for tasks requiring current external evidence.
-web_search = "disabled"
-
 
 [sandbox_workspace_write]
 
-# Shell commands, package managers, scripts, and skills cannot access the
-# network unless the session is explicitly reconfigured.
+# Package managers, scripts, skills, and arbitrary subprocesses remain offline.
 network_access = false
+
+
+# -----------------------------------------------------------------------------
+# Evidence freshness
+#
+# Cached search uses the OpenAI-maintained search index rather than unrestricted
+# live web access. It improves access to current technical documentation while
+# preserving a narrower exposure boundary than live retrieval.
+#
+# For a specifically authorized freshness-critical task, override this session
+# to `indexed` or `live`.
+# -----------------------------------------------------------------------------
+
+web_search = "cached"
+
+
+[tools.web_search]
+
+# Preserve enough retrieved context for API, configuration, dependency, and
+# security documentation comparisons.
+context_size = "high"
 
 
 # -----------------------------------------------------------------------------
 # Subprocess environment filtering
 #
-# Keep the usable core environment while excluding credentials. Avoid broad
-# patterns such as "*AUTH*" or "AWS_*", which can remove harmless build and
-# region configuration and create unnecessary execution failures.
+# Codex keeps the minimum useful core environment. Built-in exclusions for
+# KEY/SECRET/TOKEN remain active, followed by the explicit exclusions below.
 # -----------------------------------------------------------------------------
 
 [shell_environment_policy]
@@ -130,9 +164,8 @@ exclude = [
 # -----------------------------------------------------------------------------
 # Multi-agent control
 #
-# One subagent layer permits useful parallel review without recursive agent
-# trees. Four concurrent threads provide bounded parallelism without turning
-# ordinary implementation into an expensive multi-agent workflow.
+# A single subagent layer supports independent review and bounded parallelism.
+# Recursive agent trees remain blocked.
 # -----------------------------------------------------------------------------
 
 [agents]
@@ -149,53 +182,51 @@ interrupt_message = true
 
 [features]
 
-# Connector access remains available under the app approval controls below.
+# Keep approved connector integrations available.
 apps = true
 
-# Compress supported streaming request payloads.
+# Reduce streaming transport overhead when supported.
 enable_request_compression = true
 
-# Allow the user to select Fast mode when the active model supports it.
-# This does not enable the higher-cost service tier automatically.
+# Expose Fast-tier selection but do not force it.
 fast_mode = true
 
-# Support durable execution for explicitly bounded long-running work.
+# Permit persisted goals and bounded continuation for long-running work.
 goals = true
 
-# Repository hooks are disabled until individually reviewed and approved.
+# Hooks require independent review before repository activation.
 hooks = false
 
-# Disable hidden cross-session model memory for reproducibility and eval
-# integrity. Durable project knowledge belongs in repository artifacts.
+# Repository state, tests, decisions, and source registries are the durable
+# memory authority. Hidden cross-session model memory remains disabled.
 memories = false
 
-# Enable subagents, subject to the depth and thread limits above.
+# Subagents are available under the limits above.
 multi_agent = true
 
-# Keep experimental sandbox network proxying disabled.
+# Experimental subprocess networking remains disabled.
 network_proxy = false
 
+# Keep personality controls available.
 personality = true
 
-# Do not expose the remote plugin catalog by default. Installed and explicitly
-# authorized integrations can still be handled under applicable controls.
+# Prevent unreviewed remote plugin catalog expansion.
 remote_plugin = false
 
-# Reduce repeated shell startup overhead.
+# Reduce repeated command startup overhead.
 shell_snapshot = true
 shell_tool = true
 
-# Skills must not install missing MCP dependencies automatically.
+# Skills may not install missing MCP dependencies automatically.
 skill_mcp_dependency_install = false
 
 
 # -----------------------------------------------------------------------------
 # Apps and connectors
 #
-# Read-only connector operations may proceed without repeated prompts.
-# Write operations require approval. Destructive operations remain blocked.
-# Open-world reads are allowed because repository search and inspection may
-# require access to approved external systems.
+# Read operations may proceed efficiently.
+# Writes require human approval.
+# Destructive operations remain blocked.
 # -----------------------------------------------------------------------------
 
 [apps._default]
@@ -203,21 +234,19 @@ skill_mcp_dependency_install = false
 enabled = true
 approvals_reviewer = "user"
 
-# Read operations can proceed; writes require approval.
 default_tools_approval_mode = "writes"
 
-# Deletion and other destructive tools are blocked at the config layer.
 destructive_enabled = false
 
-# Permit non-destructive reads from approved apps/connectors.
+# Non-destructive repository and connected-source reads remain available.
+# This does not authorize writes or destructive actions.
 open_world_enabled = true
 
 
 # -----------------------------------------------------------------------------
 # Reviewed repository skills
 #
-# Enabling a skill does not authorize scripts or external writes.
-# Skill scripts remain subject to `skill_approval`.
+# Skill enablement is not approval to execute scripts or perform external writes.
 # -----------------------------------------------------------------------------
 
 [[skills.config]]
