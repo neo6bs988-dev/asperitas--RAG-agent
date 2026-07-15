@@ -1,1 +1,11 @@
-streamlit
+# Asperitas controlled Streamlit deployment dependency entrypoint.
+#
+# Installs the canonical src-layout Asperitas package together with the
+# reviewed UI dependency set declared in pyproject.toml.
+#
+# Dependency versions are authoritative in:
+#   pyproject.toml -> [project.optional-dependencies] -> ui
+#
+# This file must not independently duplicate Streamlit version constraints.
+
+.[ui]
