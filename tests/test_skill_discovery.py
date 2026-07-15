@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 
 from asperitas_agent.skill_discovery import (
     SKILL_ALIASES,
