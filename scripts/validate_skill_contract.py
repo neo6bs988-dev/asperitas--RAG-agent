@@ -18,7 +18,14 @@ def build_parser() -> argparse.ArgumentParser:
     target = parser.add_mutually_exclusive_group(required=True)
     target.add_argument("--root", type=Path, help="Repository root containing .agents/skills.")
     target.add_argument("--contract", type=Path, help="Strictly validate one fixture skill.contract.json.")
-    parser.add_argument("--transition", action="store_true", help="Audit an unmigrated repository without gating it.")
+    parser.add_argument(
+        "--transition",
+        action="store_true",
+        help=(
+            "Audit an unmigrated repository. Exit 0 means the audit completed, not that migration "
+            "passed; consumers must inspect state and ok."
+        ),
+    )
     parser.add_argument("--json", action="store_true", help="Emit deterministic structured JSON.")
     return parser
 

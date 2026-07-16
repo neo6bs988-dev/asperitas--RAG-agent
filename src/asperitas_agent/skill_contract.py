@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from datetime import date
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 from typing import Any, Iterable, Mapping
 
@@ -17,25 +18,37 @@ LIFECYCLE_STATUSES = ("active", "planned", "deprecated", "blocked", "unregistere
 MODES = ("READ", "DRAFT", "WRITE")
 RISK_CLASSES = ("low", "medium", "high")
 ERROR_BEHAVIORS = ("fail_closed", "fail_safe", "report_only")
+ALIAS_KINDS = ("deprecated_skill_id",)
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SKILL_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)*$")
 MVP_VERSION_PATTERN = re.compile(r"^mvp[-_ ]?\d", re.IGNORECASE)
-UNTRUSTED_SOURCE_BLOCKS = {
-    "treat_source_text_as_instruction",
-    "treat_untrusted_source_text_as_instruction",
-}
-BIOLOGY_MARKERS = (
-    "biosecurity",
-    "biosafety",
-    "biological",
-    "cites",
-    "genetic resource",
-    "lmo",
-    "nagoya",
-    "pathogen",
-    "wet-lab",
-    "wet lab",
+UNTRUSTED_SOURCE_BLOCKS = frozenset(
+    {
+        "treat_source_text_as_instruction",
+        "treat_untrusted_source_text_as_instruction",
+    }
 )
+SUPPORTED_SCHEMA_KEYWORDS = frozenset(
+    {
+        "$schema",
+        "$id",
+        "$ref",
+        "$defs",
+        "title",
+        "type",
+        "const",
+        "enum",
+        "pattern",
+        "minLength",
+        "required",
+        "properties",
+        "additionalProperties",
+        "items",
+        "minItems",
+        "uniqueItems",
+    }
+)
+SUPPORTED_SCHEMA_TYPES = frozenset({"object", "array", "string", "boolean", "null"})
 
 
 @dataclass(frozen=True, order=True)
@@ -94,11 +107,15 @@ def normalize_skill_id(frontmatter_name: str) -> str:
     return frontmatter_name.replace("-", "_")
 
 
-def validate_contract_file(path: str | Path) -> ContractValidationReport:
+def validate_contract_file(path: str | Path, *, schema_path: str | Path | None = None) -> ContractValidationReport:
     contract_path = Path(path)
+    schema, schema_findings = _load_schema(schema_path)
     record, findings = _load_contract_record(contract_path)
-    if record is not None:
+    findings = [*schema_findings, *findings]
+    if record is not None and schema is not None:
+        findings.extend(_validate_schema_instance(record.data, schema, str(record.path)))
         findings.extend(_validate_record(record))
+        findings.extend(_validate_contract_set([record]))
     return _build_report(
         state=_strict_state(findings),
         validation_level="fixture_contract_validation",
@@ -110,16 +127,20 @@ def validate_contract_file(path: str | Path) -> ContractValidationReport:
     )
 
 
-def validate_contract_files(paths: Iterable[str | Path]) -> ContractValidationReport:
+def validate_contract_files(
+    paths: Iterable[str | Path], *, schema_path: str | Path | None = None
+) -> ContractValidationReport:
     records: list[SkillContractRecord] = []
-    findings: list[ContractFinding] = []
+    schema, findings = _load_schema(schema_path)
     path_list = [Path(path) for path in paths]
     for path in path_list:
         record, load_findings = _load_contract_record(path)
         findings.extend(load_findings)
         if record is not None:
             records.append(record)
-            findings.extend(_validate_record(record))
+            if schema is not None:
+                findings.extend(_validate_schema_instance(record.data, schema, str(record.path)))
+                findings.extend(_validate_record(record))
     findings.extend(_validate_contract_set(records))
     return _build_report(
         state=_strict_state(findings),
@@ -132,7 +153,9 @@ def validate_contract_files(paths: Iterable[str | Path]) -> ContractValidationRe
     )
 
 
-def validate_repository(root: str | Path, *, transition: bool = False) -> ContractValidationReport:
+def validate_repository(
+    root: str | Path, *, transition: bool = False, schema_path: str | Path | None = None
+) -> ContractValidationReport:
     repo_root = Path(root).resolve()
     skills_root = repo_root / ".agents" / "skills"
     if not skills_root.is_dir():
@@ -156,14 +179,16 @@ def validate_repository(root: str | Path, *, transition: bool = False) -> Contra
     contract_paths = [path.parent / "skill.contract.json" for path in contract_paths]
     existing_contracts = [path for path in contract_paths if path.is_file()]
     records: list[SkillContractRecord] = []
-    findings: list[ContractFinding] = []
+    schema, findings = _load_schema(schema_path, repo_root=repo_root)
 
     for path in existing_contracts:
         record, load_findings = _load_contract_record(path)
         findings.extend(load_findings)
         if record is not None:
             records.append(record)
-            findings.extend(_validate_record(record))
+            if schema is not None:
+                findings.extend(_validate_schema_instance(record.data, schema, str(record.path)))
+                findings.extend(_validate_record(record))
     findings.extend(_validate_contract_set(records))
 
     missing_contracts = sorted(path for path in contract_paths if not path.is_file())
@@ -221,7 +246,11 @@ def validate_repository(root: str | Path, *, transition: bool = False) -> Contra
                     )
                 )
 
-    if transition:
+    schema_blocked = any(finding.code.startswith("SCHEMA_") for finding in findings)
+    if schema_blocked:
+        state = _strict_state(findings)
+        validation_level = "repository_transition_audit" if transition else "repository_contract_validation"
+    elif transition:
         state = "PARTIAL" if findings else "PASS"
         validation_level = "repository_transition_audit"
     else:
@@ -236,6 +265,235 @@ def validate_repository(root: str | Path, *, transition: bool = False) -> Contra
         canonical_skill_ids=tuple(record.skill_id for record in records if record.skill_id),
         findings=findings,
     )
+
+
+def _default_schema_path(repo_root: Path | None = None) -> Path:
+    root = repo_root if repo_root is not None else Path(__file__).resolve().parents[2]
+    return root / ".agents" / "skill-contract.schema.json"
+
+
+def _load_schema(
+    schema_path: str | Path | None, *, repo_root: Path | None = None
+) -> tuple[Mapping[str, Any] | None, list[ContractFinding]]:
+    path = Path(schema_path) if schema_path is not None else _default_schema_path(repo_root)
+    display_path = str(path)
+    if not path.is_file():
+        return None, [ContractFinding("SCHEMA_NOT_FOUND", display_path, "schema file is required")]
+    try:
+        schema = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        return None, [ContractFinding("SCHEMA_INVALID_JSON", display_path, str(exc))]
+    if not isinstance(schema, dict):
+        return None, [ContractFinding("SCHEMA_INVALID_ROOT", display_path, "schema root must be an object")]
+    findings = _validate_schema_definition(schema, schema, schema_path="#")
+    return (None if findings else schema), findings
+
+
+def _validate_schema_definition(node: Any, root: Mapping[str, Any], *, schema_path: str) -> list[ContractFinding]:
+    if not isinstance(node, dict):
+        return [ContractFinding("SCHEMA_INVALID_DEFINITION", schema_path, "schema definition must be an object")]
+    findings: list[ContractFinding] = []
+    for keyword in sorted(set(node) - SUPPORTED_SCHEMA_KEYWORDS):
+        findings.append(
+            ContractFinding(
+                "SCHEMA_UNSUPPORTED_KEYWORD",
+                f"{schema_path}/{_pointer_token(keyword)}",
+                f"unsupported schema keyword: {keyword}",
+            )
+        )
+    reference = node.get("$ref")
+    if reference is not None:
+        if not isinstance(reference, str) or not reference.startswith("#/$defs/"):
+            findings.append(
+                ContractFinding("SCHEMA_EXTERNAL_REF", schema_path, "only local #/$defs/... references are allowed")
+            )
+        elif _resolve_local_ref(root, reference) is None:
+            findings.append(ContractFinding("SCHEMA_REF_NOT_FOUND", schema_path, f"unresolved reference: {reference}"))
+    declared_type = node.get("type")
+    if declared_type is not None:
+        types = declared_type if isinstance(declared_type, list) else [declared_type]
+        if not types or any(not isinstance(item, str) or item not in SUPPORTED_SCHEMA_TYPES for item in types):
+            findings.append(ContractFinding("SCHEMA_UNSUPPORTED_TYPE", schema_path, "unsupported schema type"))
+        if len(types) != len(set(types)):
+            findings.append(ContractFinding("SCHEMA_DUPLICATE_TYPE", schema_path, "schema type union must be unique"))
+    properties = node.get("properties")
+    if properties is not None:
+        if not isinstance(properties, dict):
+            findings.append(ContractFinding("SCHEMA_INVALID_PROPERTIES", schema_path, "properties must be an object"))
+        else:
+            for name, child in sorted(properties.items()):
+                findings.extend(
+                    _validate_schema_definition(
+                        child,
+                        root,
+                        schema_path=f"{schema_path}/properties/{_pointer_token(str(name))}",
+                    )
+                )
+    definitions = node.get("$defs")
+    if definitions is not None:
+        if not isinstance(definitions, dict):
+            findings.append(ContractFinding("SCHEMA_INVALID_DEFS", schema_path, "$defs must be an object"))
+        else:
+            for name, child in sorted(definitions.items()):
+                findings.extend(
+                    _validate_schema_definition(
+                        child,
+                        root,
+                        schema_path=f"{schema_path}/$defs/{_pointer_token(str(name))}",
+                    )
+                )
+    if "items" in node:
+        findings.extend(_validate_schema_definition(node["items"], root, schema_path=f"{schema_path}/items"))
+    return findings
+
+
+def _validate_schema_instance(instance: Any, schema: Mapping[str, Any], display_path: str) -> list[ContractFinding]:
+    return _validate_schema_node(instance, schema, schema, display_path=display_path, pointer="")
+
+
+def _validate_schema_node(
+    instance: Any,
+    node: Mapping[str, Any],
+    root: Mapping[str, Any],
+    *,
+    display_path: str,
+    pointer: str,
+) -> list[ContractFinding]:
+    findings: list[ContractFinding] = []
+    reference = node.get("$ref")
+    if isinstance(reference, str):
+        resolved = _resolve_local_ref(root, reference)
+        if resolved is None:
+            return [_schema_finding("SCHEMA_REF_NOT_FOUND", display_path, pointer, reference)]
+        return _validate_schema_node(instance, resolved, root, display_path=display_path, pointer=pointer)
+
+    expected = node.get("type")
+    if expected is not None:
+        expected_types = expected if isinstance(expected, list) else [expected]
+        if not any(_matches_schema_type(instance, item) for item in expected_types):
+            return [
+                _schema_finding(
+                    "SCHEMA_TYPE",
+                    display_path,
+                    pointer,
+                    f"expected type {expected_types}, got {type(instance).__name__}",
+                )
+            ]
+    if "const" in node and instance != node["const"]:
+        findings.append(_schema_finding("SCHEMA_CONST", display_path, pointer, "value does not match const"))
+    if "enum" in node and instance not in node["enum"]:
+        findings.append(_schema_finding("SCHEMA_ENUM", display_path, pointer, "value is not in enum"))
+
+    if isinstance(instance, str):
+        minimum = node.get("minLength")
+        if isinstance(minimum, int) and len(instance) < minimum:
+            findings.append(_schema_finding("SCHEMA_MIN_LENGTH", display_path, pointer, "string is too short"))
+        pattern = node.get("pattern")
+        if isinstance(pattern, str) and re.fullmatch(pattern, instance) is None:
+            findings.append(_schema_finding("SCHEMA_PATTERN", display_path, pointer, "string does not match pattern"))
+
+    if isinstance(instance, dict):
+        required = node.get("required", [])
+        if isinstance(required, list):
+            for name in sorted(required):
+                if name not in instance:
+                    findings.append(
+                        _schema_finding(
+                            "SCHEMA_REQUIRED",
+                            display_path,
+                            _join_pointer(pointer, str(name)),
+                            f"required property is missing: {name}",
+                        )
+                    )
+        properties = node.get("properties", {})
+        if isinstance(properties, dict):
+            for name in sorted(instance):
+                child_pointer = _join_pointer(pointer, str(name))
+                if name in properties:
+                    findings.extend(
+                        _validate_schema_node(
+                            instance[name],
+                            properties[name],
+                            root,
+                            display_path=display_path,
+                            pointer=child_pointer,
+                        )
+                    )
+                elif node.get("additionalProperties") is False:
+                    findings.append(
+                        _schema_finding(
+                            "SCHEMA_ADDITIONAL_PROPERTY",
+                            display_path,
+                            child_pointer,
+                            f"unknown property: {name}",
+                        )
+                    )
+
+    if isinstance(instance, list):
+        minimum = node.get("minItems")
+        if isinstance(minimum, int) and len(instance) < minimum:
+            findings.append(_schema_finding("SCHEMA_MIN_ITEMS", display_path, pointer, "array is too short"))
+        if node.get("uniqueItems") is True:
+            keys = [_json_identity(item) for item in instance]
+            if len(keys) != len(set(keys)):
+                findings.append(
+                    _schema_finding("SCHEMA_UNIQUE_ITEMS", display_path, pointer, "array items must be unique")
+                )
+        items = node.get("items")
+        if isinstance(items, dict):
+            for index, item in enumerate(instance):
+                findings.extend(
+                    _validate_schema_node(
+                        item,
+                        items,
+                        root,
+                        display_path=display_path,
+                        pointer=_join_pointer(pointer, str(index)),
+                    )
+                )
+    return findings
+
+
+def _resolve_local_ref(root: Mapping[str, Any], reference: str) -> Mapping[str, Any] | None:
+    if not reference.startswith("#/$defs/"):
+        return None
+    current: Any = root
+    for token in reference[2:].split("/"):
+        token = token.replace("~1", "/").replace("~0", "~")
+        if not isinstance(current, dict) or token not in current:
+            return None
+        current = current[token]
+    return current if isinstance(current, dict) else None
+
+
+def _matches_schema_type(value: Any, expected: str) -> bool:
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    if expected == "null":
+        return value is None
+    return False
+
+
+def _schema_finding(code: str, display_path: str, pointer: str, message: str) -> ContractFinding:
+    return ContractFinding(code, f"{display_path}#{pointer or '/'}", message)
+
+
+def _join_pointer(pointer: str, token: str) -> str:
+    return f"{pointer}/{_pointer_token(token)}"
+
+
+def _pointer_token(token: str) -> str:
+    return token.replace("~", "~0").replace("/", "~1")
+
+
+def _json_identity(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
 
 
 def _load_contract_record(path: Path) -> tuple[SkillContractRecord | None, list[ContractFinding]]:
@@ -371,7 +629,7 @@ def _validate_record(record: SkillContractRecord) -> list[ContractFinding]:
     version = lifecycle.get("version")
     if not _non_empty_string(version):
         findings.append(ContractFinding("LIFECYCLE_VERSION_REQUIRED", display_path, "lifecycle.version is required"))
-    elif MVP_VERSION_PATTERN.match(version):
+    elif isinstance(version, str) and MVP_VERSION_PATTERN.match(version):
         findings.append(
             ContractFinding(
                 "STALE_MVP_CANONICAL_VERSION",
@@ -389,6 +647,75 @@ def _validate_record(record: SkillContractRecord) -> list[ContractFinding]:
                 "deprecated lifecycle requires replaced_by or terminal_rationale",
             )
         )
+    deprecated_since = _optional_full_date(
+        lifecycle.get("deprecated_since"), "lifecycle.deprecated_since", findings, display_path
+    )
+    compatibility_until = _optional_full_date(
+        lifecycle.get("compatibility_until"), "lifecycle.compatibility_until", findings, display_path
+    )
+    replaced_by = lifecycle.get("replaced_by")
+    terminal_rationale = lifecycle.get("terminal_rationale")
+    if status == "deprecated":
+        if deprecated_since is None:
+            findings.append(
+                ContractFinding("DEPRECATED_SINCE_REQUIRED", display_path, "deprecated lifecycle requires a date")
+            )
+        if compatibility_until is None:
+            findings.append(
+                ContractFinding(
+                    "DEPRECATED_COMPATIBILITY_UNTIL_REQUIRED",
+                    display_path,
+                    "deprecated lifecycle requires a compatibility expiry",
+                )
+            )
+        if deprecated_since is not None and compatibility_until is not None and compatibility_until < deprecated_since:
+            findings.append(
+                ContractFinding(
+                    "INVALID_LIFECYCLE_DATE_ORDER",
+                    display_path,
+                    "compatibility_until must be on or after deprecated_since",
+                )
+            )
+        dispositions = sum((_non_empty_string(replaced_by), _non_empty_string(terminal_rationale)))
+        if dispositions != 1:
+            findings.append(
+                ContractFinding(
+                    "DEPRECATED_DISPOSITION_EXCLUSIVE",
+                    display_path,
+                    "deprecated lifecycle requires exactly one of replaced_by or terminal_rationale",
+                )
+            )
+        if replaced_by is not None and (
+            not isinstance(replaced_by, str) or not SKILL_ID_PATTERN.fullmatch(replaced_by)
+        ):
+            findings.append(
+                ContractFinding("INVALID_REPLACED_BY", display_path, "replaced_by must be a canonical skill_id")
+            )
+        if replaced_by == skill_id:
+            findings.append(ContractFinding("SELF_REPLACEMENT", display_path, "deprecated skill cannot replace itself"))
+    else:
+        non_null_fields = {
+            "deprecated_since": lifecycle.get("deprecated_since"),
+            "compatibility_until": lifecycle.get("compatibility_until"),
+            "replaced_by": replaced_by,
+        }
+        for field, value in non_null_fields.items():
+            if value is not None:
+                findings.append(
+                    ContractFinding(
+                        "NON_DEPRECATED_LIFECYCLE_METADATA",
+                        display_path,
+                        f"{field} must be null unless lifecycle is deprecated",
+                    )
+                )
+        if terminal_rationale not in (None, ""):
+            findings.append(
+                ContractFinding(
+                    "NON_DEPRECATED_TERMINAL_RATIONALE",
+                    display_path,
+                    "terminal_rationale must be absent, null, or empty unless deprecated",
+                )
+            )
 
     routing = _object(data, "routing", findings, display_path)
     implicit_activation = routing.get("implicit_activation")
@@ -473,17 +800,15 @@ def _validate_record(record: SkillContractRecord) -> list[ContractFinding]:
                 "high-risk contract requires approval and non-empty forbidden_actions",
             )
         )
-    biology_context = " ".join(_all_strings(data)).casefold()
     risky_capability = permissions.get("execution_allowed") is True or permissions.get("write_allowed") is True
-    if risk_class == "high" and risky_capability and any(marker in biology_context for marker in BIOLOGY_MARKERS):
-        if not human_gates:
-            findings.append(
-                ContractFinding(
-                    "HIGH_RISK_BIOLOGY_REQUIRES_HUMAN_GATE",
-                    display_path,
-                    "high-risk biological execution or writing requires a human gate",
-                )
+    if risk_class == "high" and risky_capability and not human_gates:
+        findings.append(
+            ContractFinding(
+                "HIGH_RISK_EXECUTION_REQUIRES_HUMAN_GATE",
+                display_path,
+                "high-risk execution or writing requires a human gate",
             )
+        )
     if not UNTRUSTED_SOURCE_BLOCKS.intersection(forbidden_actions):
         findings.append(
             ContractFinding(
@@ -543,10 +868,27 @@ def _validate_record(record: SkillContractRecord) -> list[ContractFinding]:
                     findings.append(ContractFinding("MISSING_ALIAS_FIELD", alias_path, f"missing alias field: {field}"))
             if not _non_empty_string(alias.get("value")):
                 findings.append(ContractFinding("INVALID_ALIAS_VALUE", alias_path, "alias value is required"))
-            is_deprecated_alias = (
-                alias.get("deprecated_since") is not None or alias.get("kind") == "deprecated_skill_id"
+            elif not SKILL_ID_PATTERN.fullmatch(str(alias["value"])):
+                findings.append(
+                    ContractFinding("INVALID_ALIAS_VALUE", alias_path, "alias must match canonical skill_id grammar")
+                )
+            if alias.get("kind") not in ALIAS_KINDS:
+                findings.append(ContractFinding("INVALID_ALIAS_KIND", alias_path, "unsupported alias kind"))
+            alias_deprecated_since = _optional_full_date(
+                alias.get("deprecated_since"), "deprecated_since", findings, alias_path
             )
-            if is_deprecated_alias and not _non_empty_string(alias.get("compatibility_until")):
+            alias_compatibility_until = _optional_full_date(
+                alias.get("compatibility_until"), "compatibility_until", findings, alias_path
+            )
+            if alias_deprecated_since is None:
+                findings.append(
+                    ContractFinding(
+                        "DEPRECATED_ALIAS_REQUIRES_START",
+                        alias_path,
+                        "deprecated alias requires deprecated_since",
+                    )
+                )
+            if alias_compatibility_until is None:
                 findings.append(
                     ContractFinding(
                         "DEPRECATED_ALIAS_REQUIRES_EXPIRY",
@@ -554,12 +896,33 @@ def _validate_record(record: SkillContractRecord) -> list[ContractFinding]:
                         "deprecated alias requires compatibility_until",
                     )
                 )
-            if alias.get("kind") == "deprecated_skill_id" and not _non_empty_string(alias.get("deprecated_since")):
+            if (
+                alias_deprecated_since is not None
+                and alias_compatibility_until is not None
+                and alias_compatibility_until < alias_deprecated_since
+            ):
                 findings.append(
                     ContractFinding(
-                        "DEPRECATED_ALIAS_REQUIRES_START",
+                        "INVALID_ALIAS_DATE_ORDER",
                         alias_path,
-                        "deprecated alias requires deprecated_since",
+                        "compatibility_until must be on or after deprecated_since",
+                    )
+                )
+            alias_replaced_by = alias.get("replaced_by")
+            if not isinstance(alias_replaced_by, str) or not SKILL_ID_PATTERN.fullmatch(alias_replaced_by):
+                findings.append(
+                    ContractFinding(
+                        "INVALID_ALIAS_REPLACED_BY",
+                        alias_path,
+                        "alias replaced_by must be a canonical skill_id",
+                    )
+                )
+            elif alias_replaced_by == str(alias.get("value", "")).replace("-", "_"):
+                findings.append(
+                    ContractFinding(
+                        "ALIAS_SELF_REFERENCE",
+                        alias_path,
+                        "deprecated alias cannot replace itself",
                     )
                 )
 
@@ -629,22 +992,114 @@ def _validate_contract_set(records: list[SkillContractRecord]) -> list[ContractF
             if _non_empty_string(replaced_by):
                 alias_edges[normalized_id] = str(replaced_by).replace("-", "_")
 
+    successor_edges: dict[str, str] = {}
+    for record in records:
+        lifecycle = record.data.get("lifecycle")
+        if not isinstance(lifecycle, dict):
+            continue
+        successor = lifecycle.get("replaced_by")
+        if not _non_empty_string(successor):
+            continue
+        successor_id = str(successor)
+        successor_record = ids.get(successor_id)
+        if successor_record is None:
+            findings.append(
+                ContractFinding(
+                    "SUCCESSOR_NOT_FOUND",
+                    str(record.path),
+                    f"lifecycle successor does not resolve: {successor_id}",
+                )
+            )
+            continue
+        successor_lifecycle = successor_record.data.get("lifecycle")
+        successor_status = successor_lifecycle.get("status") if isinstance(successor_lifecycle, dict) else None
+        if successor_status not in {"active", "planned"}:
+            findings.append(
+                ContractFinding(
+                    "INVALID_SUCCESSOR_STATUS",
+                    str(record.path),
+                    f"successor must be active or planned: {successor_id}",
+                )
+            )
+        if record.skill_id:
+            successor_edges[record.skill_id] = successor_id
+
+    for record in records:
+        compatibility = record.data.get("compatibility")
+        if not isinstance(compatibility, dict) or not isinstance(compatibility.get("aliases"), list):
+            continue
+        for index, alias in enumerate(compatibility["aliases"]):
+            if not isinstance(alias, dict) or not _non_empty_string(alias.get("replaced_by")):
+                continue
+            successor_id = str(alias["replaced_by"])
+            successor_record = ids.get(successor_id)
+            alias_path = f"{record.path}#compatibility.aliases[{index}]"
+            if successor_record is None:
+                findings.append(
+                    ContractFinding(
+                        "ALIAS_SUCCESSOR_NOT_FOUND",
+                        alias_path,
+                        f"alias successor does not resolve: {successor_id}",
+                    )
+                )
+                continue
+            successor_lifecycle = successor_record.data.get("lifecycle")
+            successor_status = successor_lifecycle.get("status") if isinstance(successor_lifecycle, dict) else None
+            if successor_status not in {"active", "planned"}:
+                findings.append(
+                    ContractFinding(
+                        "INVALID_ALIAS_SUCCESSOR_STATUS",
+                        alias_path,
+                        f"alias successor must be active or planned: {successor_id}",
+                    )
+                )
+
+    findings.extend(_find_directed_cycles(successor_edges, "SUCCESSOR_CYCLE", records))
+
     for start in sorted(alias_edges):
         seen: set[str] = set()
         current = start
         while current in alias_edges:
             if current in seen:
-                record = aliases.get(start, (records[0], {}))[0] if records else None
+                cycle_record = aliases.get(start, (records[0], {}))[0] if records else None
                 findings.append(
                     ContractFinding(
                         "ALIAS_CYCLE",
-                        str(record.path) if record else "<contracts>",
+                        str(cycle_record.path) if cycle_record else "<contracts>",
                         f"alias cycle detected from {start}",
                     )
                 )
                 break
             seen.add(current)
             current = alias_edges[current]
+    return findings
+
+
+def _find_directed_cycles(
+    edges: Mapping[str, str], code: str, records: list[SkillContractRecord]
+) -> list[ContractFinding]:
+    findings: list[ContractFinding] = []
+    record_by_id = {record.skill_id: record for record in records}
+    reported: set[str] = set()
+    for start in sorted(edges):
+        seen: set[str] = set()
+        current = start
+        while current in edges:
+            if current in seen:
+                cycle_key = min(seen)
+                if cycle_key not in reported:
+                    record = record_by_id.get(start)
+                    findings.append(
+                        ContractFinding(
+                            code,
+                            str(record.path) if record else "<contracts>",
+                            f"successor cycle detected from {start}",
+                        )
+                    )
+                    reported.add(cycle_key)
+                break
+            seen.add(current)
+            current = edges[current]
     return findings
 
 
@@ -658,9 +1113,7 @@ def _object(
     return value
 
 
-def _string_list(
-    data: Mapping[str, Any], field: str, findings: list[ContractFinding], display_path: str
-) -> list[str]:
+def _string_list(data: Mapping[str, Any], field: str, findings: list[ContractFinding], display_path: str) -> list[str]:
     value = data.get(field)
     if not isinstance(value, list) or any(not _non_empty_string(item) for item in value):
         findings.append(
@@ -674,32 +1127,46 @@ def _non_empty_string(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+def _optional_full_date(value: Any, field: str, findings: list[ContractFinding], display_path: str) -> date | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        findings.append(ContractFinding("INVALID_FULL_DATE", display_path, f"{field} must be YYYY-MM-DD or null"))
+        return None
+    try:
+        parsed = date.fromisoformat(value)
+    except ValueError:
+        findings.append(ContractFinding("INVALID_FULL_DATE", display_path, f"{field} must be YYYY-MM-DD"))
+        return None
+    if parsed.isoformat() != value:
+        findings.append(ContractFinding("INVALID_FULL_DATE", display_path, f"{field} must be normalized YYYY-MM-DD"))
+        return None
+    return parsed
+
+
 def _is_safe_relative_path(value: str, skill_directory: Path) -> bool:
-    path = Path(value)
-    if path.is_absolute():
+    if not value or "\x00" in value:
         return False
+    posix_path = PurePosixPath(value)
+    windows_path = PureWindowsPath(value)
+    if posix_path.is_absolute() or windows_path.is_absolute() or windows_path.drive:
+        return False
+    normalized_parts = [part for part in re.split(r"[\\/]", value) if part not in {"", "."}]
+    depth = 0
+    for part in normalized_parts:
+        if part == "..":
+            depth -= 1
+            if depth < 0:
+                return False
+        else:
+            depth += 1
+    path = Path(*normalized_parts)
     try:
         candidate = (skill_directory / path).resolve()
         candidate.relative_to(skill_directory.resolve())
     except (OSError, ValueError):
         return False
     return True
-
-
-def _all_strings(value: Any) -> list[str]:
-    if isinstance(value, str):
-        return [value]
-    if isinstance(value, dict):
-        result: list[str] = []
-        for key, item in value.items():
-            result.extend((str(key), *_all_strings(item)))
-        return result
-    if isinstance(value, list):
-        result = []
-        for item in value:
-            result.extend(_all_strings(item))
-        return result
-    return []
 
 
 def _relative_display(path: Path, root: Path) -> str:
@@ -711,7 +1178,7 @@ def _relative_display(path: Path, root: Path) -> str:
 
 def _strict_state(findings: Iterable[ContractFinding]) -> str:
     findings_tuple = tuple(findings)
-    if any(finding.code.startswith("INVALID_CONTRACT_JSON") for finding in findings_tuple):
+    if any(finding.code in {"INVALID_CONTRACT_JSON", "SCHEMA_INVALID_JSON"} for finding in findings_tuple):
         return "INVALID"
     if any(finding.severity == "error" for finding in findings_tuple):
         return "FAIL"
