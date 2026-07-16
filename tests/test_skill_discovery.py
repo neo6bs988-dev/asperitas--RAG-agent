@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 
 from asperitas_agent.skill_discovery import (
     SKILL_ALIASES,
@@ -11,7 +11,6 @@ from asperitas_agent.skill_discovery import (
     validate_skill_files_against_registry,
 )
 from asperitas_agent.skill_registry import SkillRegistry, require_skill
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "validate_skill_registry.py"

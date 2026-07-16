@@ -12,7 +12,7 @@ Security and behavior boundaries:
 - only the repository-local ``src`` directory may be added;
 - symlink escape outside the repository is rejected;
 - the expected project and package markers must exist;
-- existing equivalent ``sys.path`` entries are not duplicated;
+- existing equivalent ``sys.path`` entries are moved to the front and deduplicated;
 - no project module is imported;
 - no files, environment variables, network resources, or external systems are
   modified;
@@ -25,10 +25,9 @@ Editable installation remains the preferred development configuration.
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
+import sys
 from typing import Final
-
 
 _DISABLE_ENV: Final[str] = "ASPERITAS_DISABLE_REPO_BOOTSTRAP"
 _TRUE_VALUES: Final[frozenset[str]] = frozenset(
@@ -100,18 +99,32 @@ def _path_is_registered(target: Path) -> bool:
 
 
 def _bootstrap_src_layout() -> None:
-    """Prepend the validated repository ``src`` path when required."""
+    """Move the validated repository ``src`` path to the front exactly once."""
 
     if _bootstrap_disabled():
         return
 
     src_directory = _validated_src_directory()
-    if src_directory is None or _path_is_registered(src_directory):
+    if src_directory is None:
         return
 
+    target_key = _path_key(src_directory)
+    retained_entries: list[object] = []
+
+    for entry in sys.path:
+        try:
+            if _path_key(entry) == target_key:
+                continue
+        except (OSError, TypeError, ValueError):
+            # Preserve malformed or non-filesystem entries owned by other tools.
+            pass
+
+        retained_entries.append(entry)
+
     # ``src`` must precede repository-root compatibility shims so imports use
-    # the canonical package implementation.
-    sys.path.insert(0, str(src_directory))
+    # the canonical package implementation. Slice assignment preserves the
+    # existing list object for callers that hold a reference to ``sys.path``.
+    sys.path[:] = [str(src_directory), *retained_entries]
 
 
 try:

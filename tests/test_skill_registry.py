@@ -16,7 +16,6 @@ from asperitas_agent.skill_registry import (
     validate_registry,
 )
 
-
 STAGE_APPROPRIATE_MVP016D_SKILLS = (
     "asperitas_audit_trace",
     "asperitas_compliance_audit",
