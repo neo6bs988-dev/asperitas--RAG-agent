@@ -856,19 +856,23 @@ def test_boolean_true_additional_properties_explicitly_allows_unknown_fields(tmp
     assert report.ok is True
 
 
-def test_malformed_pattern_is_a_stable_finding_not_an_exception(tmp_path):
+@pytest.mark.parametrize(
+    "pattern",
+    ("[", "a{999999999999999999999999999999999999}"),
+)
+def test_malformed_pattern_is_a_stable_finding_not_an_exception(tmp_path, pattern):
     contract_path = write_fixture(tmp_path, "pattern-probe")
     schema_path = write_schema(
         tmp_path,
-        lambda schema: schema["properties"]["owner"].update({"pattern": "["}),
+        lambda schema: schema["properties"]["skill_id"].update({"pattern": pattern}),
     )
 
-    first = validate_contract_file(contract_path, schema_path=schema_path)
-    second = validate_contract_file(contract_path, schema_path=schema_path)
+    reports = [validate_contract_file(contract_path, schema_path=schema_path) for _ in range(3)]
 
-    assert_schema_rejected(first)
-    assert "SCHEMA_INVALID_PATTERN" in finding_codes(first)
-    assert first.to_dict() == second.to_dict()
+    assert_schema_rejected(reports[0])
+    assert "SCHEMA_INVALID_PATTERN" in finding_codes(reports[0])
+    assert any(finding.path == "#/properties/skill_id/pattern" for finding in reports[0].findings)
+    assert reports[0].to_dict() == reports[1].to_dict() == reports[2].to_dict()
 
 
 def test_multiple_malformed_schema_values_have_deterministic_sorted_findings(tmp_path):

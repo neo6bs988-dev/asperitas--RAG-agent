@@ -291,7 +291,7 @@ def _load_schema(
         findings = _validate_schema_definition(schema, schema, schema_path="#")
         if not findings:
             findings.extend(_validate_schema_reference_cycles(schema))
-    except (KeyError, RecursionError, TypeError, ValueError, re.error):
+    except (KeyError, OverflowError, RecursionError, TypeError, ValueError, re.error):
         findings = [
             ContractFinding(
                 "SCHEMA_INVALID_DEFINITION",
@@ -441,7 +441,7 @@ def _validate_schema_definition(node: Any, root: Mapping[str, Any], *, schema_pa
         else:
             try:
                 re.compile(pattern)
-            except re.error:
+            except (re.error, OverflowError):
                 findings.append(
                     ContractFinding(
                         "SCHEMA_INVALID_PATTERN",
