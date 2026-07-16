@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import date
 import json
+import math
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 from typing import Any, Iterable, Mapping
@@ -49,6 +50,7 @@ SUPPORTED_SCHEMA_KEYWORDS = frozenset(
     }
 )
 SUPPORTED_SCHEMA_TYPES = frozenset({"object", "array", "string", "boolean", "null"})
+SUPPORTED_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
 
 
 @dataclass(frozen=True, order=True)
@@ -281,15 +283,34 @@ def _load_schema(
         return None, [ContractFinding("SCHEMA_NOT_FOUND", display_path, "schema file is required")]
     try:
         schema = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeError, json.JSONDecodeError, RecursionError) as exc:
         return None, [ContractFinding("SCHEMA_INVALID_JSON", display_path, str(exc))]
     if not isinstance(schema, dict):
         return None, [ContractFinding("SCHEMA_INVALID_ROOT", display_path, "schema root must be an object")]
-    findings = _validate_schema_definition(schema, schema, schema_path="#")
+    try:
+        findings = _validate_schema_definition(schema, schema, schema_path="#")
+        if not findings:
+            findings.extend(_validate_schema_reference_cycles(schema))
+    except (KeyError, RecursionError, TypeError, ValueError, re.error):
+        findings = [
+            ContractFinding(
+                "SCHEMA_INVALID_DEFINITION",
+                "#",
+                "schema definition exceeds or violates the supported deterministic boundary",
+            )
+        ]
     return (None if findings else schema), findings
 
 
 def _validate_schema_definition(node: Any, root: Mapping[str, Any], *, schema_path: str) -> list[ContractFinding]:
+    if isinstance(node, bool):
+        return [
+            ContractFinding(
+                "SCHEMA_UNSUPPORTED_BOOLEAN_SCHEMA",
+                schema_path,
+                "Boolean schema nodes are not supported",
+            )
+        ]
     if not isinstance(node, dict):
         return [ContractFinding("SCHEMA_INVALID_DEFINITION", schema_path, "schema definition must be an object")]
     findings: list[ContractFinding] = []
@@ -301,25 +322,176 @@ def _validate_schema_definition(node: Any, root: Mapping[str, Any], *, schema_pa
                 f"unsupported schema keyword: {keyword}",
             )
         )
-    reference = node.get("$ref")
-    if reference is not None:
-        if not isinstance(reference, str) or not reference.startswith("#/$defs/"):
+
+    dialect = node.get("$schema")
+    if "$schema" in node and (not isinstance(dialect, str) or dialect != SUPPORTED_SCHEMA_DIALECT):
+        findings.append(
+            _schema_definition_finding(
+                "SCHEMA_INVALID_DIALECT",
+                schema_path,
+                "$schema",
+                f"$schema must equal {SUPPORTED_SCHEMA_DIALECT}",
+            )
+        )
+    for keyword in ("$id", "title"):
+        if keyword in node and not _non_empty_string(node[keyword]):
             findings.append(
-                ContractFinding("SCHEMA_EXTERNAL_REF", schema_path, "only local #/$defs/... references are allowed")
+                _schema_definition_finding(
+                    "SCHEMA_INVALID_KEYWORD_VALUE",
+                    schema_path,
+                    keyword,
+                    f"{keyword} must be a non-empty string",
+                )
+            )
+
+    reference = node.get("$ref")
+    if "$ref" in node:
+        reference_path = _schema_keyword_path(schema_path, "$ref")
+        if not isinstance(reference, str) or not reference:
+            findings.append(ContractFinding("SCHEMA_INVALID_REF", reference_path, "$ref must be a non-empty string"))
+        elif not reference.startswith("#"):
+            findings.append(
+                ContractFinding(
+                    "SCHEMA_EXTERNAL_REF",
+                    reference_path,
+                    "only local #/$defs/<token> references are allowed",
+                )
+            )
+        elif not _is_supported_local_ref(reference):
+            findings.append(
+                ContractFinding(
+                    "SCHEMA_INVALID_REF",
+                    reference_path,
+                    "$ref must use the supported #/$defs/<token> JSON Pointer form",
+                )
             )
         elif _resolve_local_ref(root, reference) is None:
-            findings.append(ContractFinding("SCHEMA_REF_NOT_FOUND", schema_path, f"unresolved reference: {reference}"))
-    declared_type = node.get("type")
-    if declared_type is not None:
-        types = declared_type if isinstance(declared_type, list) else [declared_type]
-        if not types or any(not isinstance(item, str) or item not in SUPPORTED_SCHEMA_TYPES for item in types):
-            findings.append(ContractFinding("SCHEMA_UNSUPPORTED_TYPE", schema_path, "unsupported schema type"))
-        if len(types) != len(set(types)):
-            findings.append(ContractFinding("SCHEMA_DUPLICATE_TYPE", schema_path, "schema type union must be unique"))
+            findings.append(
+                ContractFinding("SCHEMA_REF_NOT_FOUND", reference_path, f"unresolved local reference: {reference}")
+            )
+        if len(node) != 1:
+            findings.append(
+                ContractFinding(
+                    "SCHEMA_UNSUPPORTED_REF_SIBLING",
+                    schema_path,
+                    "$ref schema nodes cannot contain sibling keywords in the bounded validator",
+                )
+            )
+
+    if "type" in node:
+        declared_type = node["type"]
+        type_path = _schema_keyword_path(schema_path, "type")
+        if isinstance(declared_type, str):
+            if declared_type not in SUPPORTED_SCHEMA_TYPES:
+                findings.append(ContractFinding("SCHEMA_UNSUPPORTED_TYPE", type_path, "unsupported schema type"))
+        elif isinstance(declared_type, list):
+            if not declared_type:
+                findings.append(ContractFinding("SCHEMA_INVALID_TYPE", type_path, "type array must not be empty"))
+            elif any(not isinstance(item, str) for item in declared_type):
+                findings.append(ContractFinding("SCHEMA_INVALID_TYPE", type_path, "type array members must be strings"))
+            else:
+                if any(item not in SUPPORTED_SCHEMA_TYPES for item in declared_type):
+                    findings.append(ContractFinding("SCHEMA_UNSUPPORTED_TYPE", type_path, "unsupported schema type"))
+                if len(declared_type) != len(set(declared_type)):
+                    findings.append(
+                        ContractFinding("SCHEMA_DUPLICATE_TYPE", type_path, "schema type union must be unique")
+                    )
+        else:
+            findings.append(
+                ContractFinding("SCHEMA_INVALID_TYPE", type_path, "type must be a string or non-empty string array")
+            )
+
+    if "const" in node and not _is_json_value(node["const"]):
+        findings.append(
+            _schema_definition_finding(
+                "SCHEMA_INVALID_CONST",
+                schema_path,
+                "const",
+                "const must contain a finite JSON-compatible value",
+            )
+        )
+
+    if "enum" in node:
+        enum_values = node["enum"]
+        enum_path = _schema_keyword_path(schema_path, "enum")
+        if not isinstance(enum_values, list) or not enum_values:
+            findings.append(ContractFinding("SCHEMA_INVALID_ENUM", enum_path, "enum must be a non-empty array"))
+        elif any(not _is_json_value(value) for value in enum_values):
+            findings.append(
+                ContractFinding(
+                    "SCHEMA_INVALID_ENUM",
+                    enum_path,
+                    "enum members must be finite JSON-compatible values",
+                )
+            )
+        elif _has_json_duplicates(enum_values):
+            findings.append(
+                ContractFinding(
+                    "SCHEMA_INVALID_ENUM",
+                    enum_path,
+                    "enum values must be unique using JSON type-aware equality",
+                )
+            )
+
+    if "pattern" in node:
+        pattern = node["pattern"]
+        pattern_path = _schema_keyword_path(schema_path, "pattern")
+        if not isinstance(pattern, str):
+            findings.append(ContractFinding("SCHEMA_INVALID_PATTERN", pattern_path, "pattern must be a string"))
+        else:
+            try:
+                re.compile(pattern)
+            except re.error:
+                findings.append(
+                    ContractFinding(
+                        "SCHEMA_INVALID_PATTERN",
+                        pattern_path,
+                        "pattern must compile under the supported Python regular-expression subset",
+                    )
+                )
+
+    for keyword in ("minLength", "minItems"):
+        if keyword in node:
+            value = node[keyword]
+            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                findings.append(
+                    _schema_definition_finding(
+                        "SCHEMA_INVALID_NON_NEGATIVE_INTEGER",
+                        schema_path,
+                        keyword,
+                        f"{keyword} must be a non-negative integer and not Boolean",
+                    )
+                )
+
+    if "required" in node:
+        required = node["required"]
+        required_path = _schema_keyword_path(schema_path, "required")
+        if not isinstance(required, list):
+            findings.append(ContractFinding("SCHEMA_INVALID_REQUIRED", required_path, "required must be an array"))
+        elif any(not _non_empty_string(item) for item in required):
+            findings.append(
+                ContractFinding(
+                    "SCHEMA_INVALID_REQUIRED",
+                    required_path,
+                    "required members must be non-empty strings",
+                )
+            )
+        elif len(required) != len(set(required)):
+            findings.append(
+                ContractFinding("SCHEMA_INVALID_REQUIRED", required_path, "required members must be unique")
+            )
+
     properties = node.get("properties")
-    if properties is not None:
+    if "properties" in node:
         if not isinstance(properties, dict):
-            findings.append(ContractFinding("SCHEMA_INVALID_PROPERTIES", schema_path, "properties must be an object"))
+            findings.append(
+                _schema_definition_finding(
+                    "SCHEMA_INVALID_PROPERTIES",
+                    schema_path,
+                    "properties",
+                    "properties must be an object",
+                )
+            )
         else:
             for name, child in sorted(properties.items()):
                 findings.extend(
@@ -329,21 +501,138 @@ def _validate_schema_definition(node: Any, root: Mapping[str, Any], *, schema_pa
                         schema_path=f"{schema_path}/properties/{_pointer_token(str(name))}",
                     )
                 )
+
+    if "additionalProperties" in node and not isinstance(node["additionalProperties"], bool):
+        findings.append(
+            _schema_definition_finding(
+                "SCHEMA_INVALID_ADDITIONAL_PROPERTIES",
+                schema_path,
+                "additionalProperties",
+                "additionalProperties must be Boolean",
+            )
+        )
+
     definitions = node.get("$defs")
-    if definitions is not None:
+    if "$defs" in node:
         if not isinstance(definitions, dict):
-            findings.append(ContractFinding("SCHEMA_INVALID_DEFS", schema_path, "$defs must be an object"))
+            findings.append(
+                _schema_definition_finding(
+                    "SCHEMA_INVALID_DEFS",
+                    schema_path,
+                    "$defs",
+                    "$defs must be an object",
+                )
+            )
         else:
             for name, child in sorted(definitions.items()):
+                definition_path = f"{schema_path}/$defs/{_pointer_token(str(name))}"
+                if not _non_empty_string(name):
+                    findings.append(
+                        ContractFinding("SCHEMA_INVALID_DEFS", definition_path, "$defs keys must be non-empty strings")
+                    )
                 findings.extend(
                     _validate_schema_definition(
                         child,
                         root,
-                        schema_path=f"{schema_path}/$defs/{_pointer_token(str(name))}",
+                        schema_path=definition_path,
                     )
                 )
+
     if "items" in node:
-        findings.extend(_validate_schema_definition(node["items"], root, schema_path=f"{schema_path}/items"))
+        items = node["items"]
+        items_path = _schema_keyword_path(schema_path, "items")
+        if not isinstance(items, dict):
+            if isinstance(items, bool):
+                findings.append(
+                    ContractFinding(
+                        "SCHEMA_UNSUPPORTED_BOOLEAN_SCHEMA",
+                        items_path,
+                        "Boolean schema nodes are not supported",
+                    )
+                )
+            else:
+                findings.append(ContractFinding("SCHEMA_INVALID_ITEMS", items_path, "items must be a schema object"))
+        else:
+            findings.extend(_validate_schema_definition(items, root, schema_path=items_path))
+
+    if "uniqueItems" in node and not isinstance(node["uniqueItems"], bool):
+        findings.append(
+            _schema_definition_finding(
+                "SCHEMA_INVALID_UNIQUE_ITEMS",
+                schema_path,
+                "uniqueItems",
+                "uniqueItems must be Boolean",
+            )
+        )
+    return findings
+
+
+def _schema_definition_finding(code: str, schema_path: str, keyword: str, message: str) -> ContractFinding:
+    return ContractFinding(code, _schema_keyword_path(schema_path, keyword), message)
+
+
+def _schema_keyword_path(schema_path: str, keyword: str) -> str:
+    return f"{schema_path}/{_pointer_token(keyword)}"
+
+
+def _is_supported_local_ref(reference: str) -> bool:
+    if not reference.startswith("#/$defs/"):
+        return False
+    token = reference.removeprefix("#/$defs/")
+    if not token:
+        return False
+    index = 0
+    while index < len(token):
+        if token[index] == "/":
+            return False
+        if token[index] == "~":
+            if index + 1 >= len(token) or token[index + 1] not in {"0", "1"}:
+                return False
+            index += 2
+        else:
+            index += 1
+    return True
+
+
+def _validate_schema_reference_cycles(root: Mapping[str, Any]) -> list[ContractFinding]:
+    findings: list[ContractFinding] = []
+    references: list[tuple[str, str]] = []
+
+    def collect(node: Any, path: str) -> None:
+        if not isinstance(node, dict):
+            return
+        reference = node.get("$ref")
+        if isinstance(reference, str):
+            references.append((path, reference))
+        properties = node.get("properties")
+        if isinstance(properties, dict):
+            for name, child in sorted(properties.items()):
+                collect(child, f"{path}/properties/{_pointer_token(str(name))}")
+        definitions = node.get("$defs")
+        if isinstance(definitions, dict):
+            for name, child in sorted(definitions.items()):
+                collect(child, f"{path}/$defs/{_pointer_token(str(name))}")
+        items = node.get("items")
+        if isinstance(items, dict):
+            collect(items, f"{path}/items")
+
+    collect(root, "#")
+    for path, reference in references:
+        visited: set[int] = set()
+        current = _resolve_local_ref(root, reference)
+        while isinstance(current, dict) and isinstance(current.get("$ref"), str):
+            identity = id(current)
+            if identity in visited:
+                findings.append(
+                    ContractFinding(
+                        "SCHEMA_REF_CYCLE",
+                        _schema_keyword_path(path, "$ref"),
+                        "local reference cycle is not supported",
+                    )
+                )
+                break
+            visited.add(identity)
+            current = _resolve_local_ref(root, current["$ref"])
     return findings
 
 
@@ -379,9 +668,9 @@ def _validate_schema_node(
                     f"expected type {expected_types}, got {type(instance).__name__}",
                 )
             ]
-    if "const" in node and instance != node["const"]:
+    if "const" in node and not _json_equal(instance, node["const"]):
         findings.append(_schema_finding("SCHEMA_CONST", display_path, pointer, "value does not match const"))
-    if "enum" in node and instance not in node["enum"]:
+    if "enum" in node and not any(_json_equal(instance, value) for value in node["enum"]):
         findings.append(_schema_finding("SCHEMA_ENUM", display_path, pointer, "value is not in enum"))
 
     if isinstance(instance, str):
@@ -434,8 +723,7 @@ def _validate_schema_node(
         if isinstance(minimum, int) and len(instance) < minimum:
             findings.append(_schema_finding("SCHEMA_MIN_ITEMS", display_path, pointer, "array is too short"))
         if node.get("uniqueItems") is True:
-            keys = [_json_identity(item) for item in instance]
-            if len(keys) != len(set(keys)):
+            if _has_json_duplicates(instance):
                 findings.append(
                     _schema_finding("SCHEMA_UNIQUE_ITEMS", display_path, pointer, "array items must be unique")
                 )
@@ -492,8 +780,34 @@ def _pointer_token(token: str) -> str:
     return token.replace("~", "~0").replace("/", "~1")
 
 
-def _json_identity(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+def _json_equal(left: Any, right: Any) -> bool:
+    if isinstance(left, bool) or isinstance(right, bool):
+        return isinstance(left, bool) and isinstance(right, bool) and left == right
+    if isinstance(left, (int, float)) or isinstance(right, (int, float)):
+        return isinstance(left, (int, float)) and isinstance(right, (int, float)) and left == right
+    if left is None or right is None:
+        return left is None and right is None
+    if isinstance(left, str) or isinstance(right, str):
+        return isinstance(left, str) and isinstance(right, str) and left == right
+    if isinstance(left, list) or isinstance(right, list):
+        return (
+            isinstance(left, list)
+            and isinstance(right, list)
+            and len(left) == len(right)
+            and all(_json_equal(left_item, right_item) for left_item, right_item in zip(left, right, strict=True))
+        )
+    if isinstance(left, dict) or isinstance(right, dict):
+        return (
+            isinstance(left, dict)
+            and isinstance(right, dict)
+            and set(left) == set(right)
+            and all(_json_equal(left[key], right[key]) for key in left)
+        )
+    return False
+
+
+def _has_json_duplicates(values: list[Any]) -> bool:
+    return any(_json_equal(value, previous) for index, value in enumerate(values) for previous in values[:index])
 
 
 def _load_contract_record(path: Path) -> tuple[SkillContractRecord | None, list[ContractFinding]]:
@@ -529,6 +843,18 @@ def _load_contract_record(path: Path) -> tuple[SkillContractRecord | None, list[
         data=raw_data,
     )
     return record, findings
+
+
+def _is_json_value(value: Any) -> bool:
+    if value is None or isinstance(value, (bool, str, int)):
+        return True
+    if isinstance(value, float):
+        return math.isfinite(value)
+    if isinstance(value, list):
+        return all(_is_json_value(item) for item in value)
+    if isinstance(value, dict):
+        return all(isinstance(key, str) and _is_json_value(item) for key, item in value.items())
+    return False
 
 
 def _read_skill_frontmatter(path: Path) -> tuple[dict[str, str], list[ContractFinding]]:

@@ -776,6 +776,164 @@ def write_schema(tmp_path: Path, mutation) -> Path:
     return path
 
 
+MALFORMED_SCHEMA_CASES = (
+    ("additionalProperties-string", ("additionalProperties",), "false"),
+    ("additionalProperties-integer", ("additionalProperties",), 0),
+    ("additionalProperties-object", ("additionalProperties",), {}),
+    ("required-string", ("required",), "owner"),
+    ("required-non-string-member", ("required",), [1]),
+    ("required-duplicate", ("required",), ["owner", "owner"]),
+    ("properties-array", ("properties",), []),
+    ("property-scalar-schema", ("properties", "owner"), "schema"),
+    ("defs-array", ("$defs",), []),
+    ("defs-boolean-schema", ("$defs", "x"), True),
+    ("items-array", ("items",), []),
+    ("items-string", ("items",), "schema"),
+    ("pattern-integer", ("properties", "owner", "pattern"), 1),
+    ("pattern-invalid", ("properties", "owner", "pattern"), "["),
+    ("minLength-boolean", ("properties", "owner", "minLength"), True),
+    ("minLength-negative", ("properties", "owner", "minLength"), -1),
+    ("minLength-float", ("properties", "owner", "minLength"), 1.5),
+    ("minLength-string", ("properties", "owner", "minLength"), "1"),
+    ("minItems-boolean", ("properties", "modes", "minItems"), True),
+    ("minItems-negative", ("properties", "modes", "minItems"), -1),
+    ("uniqueItems-string", ("properties", "modes", "uniqueItems"), "true"),
+    ("uniqueItems-integer", ("properties", "modes", "uniqueItems"), 1),
+    ("enum-string", ("properties", "modes", "items", "enum"), "value"),
+    ("enum-empty", ("properties", "modes", "items", "enum"), []),
+    ("enum-duplicate", ("properties", "modes", "items", "enum"), ["READ", "READ"]),
+    ("type-boolean", ("properties", "owner", "type"), True),
+    ("type-empty", ("properties", "owner", "type"), []),
+    ("type-duplicate", ("properties", "owner", "type"), ["string", "string"]),
+    ("type-unsupported", ("properties", "owner", "type"), "integer"),
+    ("dialect-integer", ("$schema",), 1),
+    ("dialect-null", ("$schema",), None),
+    ("dialect-unsupported", ("$schema",), "https://example.invalid/schema"),
+    ("id-boolean", ("$id",), False),
+    ("id-empty", ("$id",), ""),
+    ("title-array", ("title",), []),
+    ("title-whitespace", ("title",), "   "),
+    ("ref-integer", ("properties", "owner", "$ref"), 1),
+    ("ref-external", ("properties", "owner"), {"$ref": "https://example.invalid/schema"}),
+    ("ref-unresolved", ("properties", "owner"), {"$ref": "#/$defs/missing"}),
+    ("ref-malformed-pointer", ("properties", "owner"), {"$ref": "#/$defs/a/b"}),
+    ("scalar-schema-node", ("properties", "owner"), 7),
+    ("boolean-schema-node", ("properties", "owner"), True),
+)
+
+
+@pytest.mark.parametrize(("case_name", "field_path", "value"), MALFORMED_SCHEMA_CASES)
+def test_malformed_supported_schema_keyword_values_fail_closed(tmp_path, case_name, field_path, value):
+    contract_path = write_fixture(tmp_path, f"schema-{case_name}")
+    schema_path = write_schema(tmp_path, lambda schema: set_nested(schema, field_path, value))
+
+    report = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert_schema_rejected(report)
+
+
+def test_malformed_additional_properties_cannot_disable_unknown_field_rejection(tmp_path):
+    contract = valid_contract("additional_properties_probe")
+    contract["unexpected_top_level"] = True
+    contract_path = write_fixture(tmp_path, "additional-properties-probe", contract)
+    schema_path = write_schema(tmp_path, lambda schema: schema.update({"additionalProperties": "false"}))
+
+    report = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert_schema_rejected(report)
+    assert "SCHEMA_INVALID_ADDITIONAL_PROPERTIES" in finding_codes(report)
+
+
+def test_boolean_true_additional_properties_explicitly_allows_unknown_fields(tmp_path):
+    contract = valid_contract("allowed_additional_properties")
+    contract["unexpected_top_level"] = True
+    contract_path = write_fixture(tmp_path, "allowed-additional-properties", contract)
+    schema_path = write_schema(tmp_path, lambda schema: schema.update({"additionalProperties": True}))
+
+    report = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert report.state == "PASS"
+    assert report.ok is True
+
+
+def test_malformed_pattern_is_a_stable_finding_not_an_exception(tmp_path):
+    contract_path = write_fixture(tmp_path, "pattern-probe")
+    schema_path = write_schema(
+        tmp_path,
+        lambda schema: schema["properties"]["owner"].update({"pattern": "["}),
+    )
+
+    first = validate_contract_file(contract_path, schema_path=schema_path)
+    second = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert_schema_rejected(first)
+    assert "SCHEMA_INVALID_PATTERN" in finding_codes(first)
+    assert first.to_dict() == second.to_dict()
+
+
+def test_multiple_malformed_schema_values_have_deterministic_sorted_findings(tmp_path):
+    contract_path = write_fixture(tmp_path, "multi-schema-probe")
+
+    def mutate(schema):
+        schema["additionalProperties"] = "false"
+        schema["required"] = ["owner", "owner"]
+        schema["properties"]["owner"]["pattern"] = "["
+
+    schema_path = write_schema(tmp_path, mutate)
+    first = validate_contract_file(contract_path, schema_path=schema_path)
+    second = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert_schema_rejected(first)
+    assert first.to_dict() == second.to_dict()
+    assert list(first.findings) == sorted(first.findings)
+    assert {
+        "SCHEMA_INVALID_ADDITIONAL_PROPERTIES",
+        "SCHEMA_INVALID_PATTERN",
+        "SCHEMA_INVALID_REQUIRED",
+    }.issubset(finding_codes(first))
+
+
+def test_json_type_aware_enum_values_do_not_treat_true_as_one(tmp_path):
+    contract_path = write_fixture(tmp_path, "json-enum-probe")
+    schema_path = write_schema(
+        tmp_path,
+        lambda schema: schema["properties"]["owner"].update({"enum": [True, 1]}),
+    )
+
+    report = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert "SCHEMA_INVALID_ENUM" not in finding_codes(report)
+    assert "SCHEMA_ENUM" in finding_codes(report)
+
+
+def test_json_numeric_equivalents_are_duplicate_enum_values(tmp_path):
+    contract_path = write_fixture(tmp_path, "numeric-enum-probe")
+    schema_path = write_schema(
+        tmp_path,
+        lambda schema: schema["properties"]["owner"].update({"enum": [1, 1.0]}),
+    )
+
+    report = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert_schema_rejected(report)
+    assert "SCHEMA_INVALID_ENUM" in finding_codes(report)
+
+
+def test_local_reference_cycles_fail_closed(tmp_path):
+    contract_path = write_fixture(tmp_path, "ref-cycle-probe")
+
+    def mutate(schema):
+        schema["$defs"]["cycleA"] = {"$ref": "#/$defs/cycleB"}
+        schema["$defs"]["cycleB"] = {"$ref": "#/$defs/cycleA"}
+        schema["properties"]["owner"] = {"$ref": "#/$defs/cycleA"}
+
+    schema_path = write_schema(tmp_path, mutate)
+    report = validate_contract_file(contract_path, schema_path=schema_path)
+
+    assert_schema_rejected(report)
+    assert "SCHEMA_REF_CYCLE" in finding_codes(report)
+
+
 def test_schema_engine_fails_closed_on_unsupported_keyword_and_external_ref(tmp_path):
     contract_path = write_fixture(tmp_path, "schema-guard")
     unsupported = write_schema(tmp_path, lambda schema: schema.update({"oneOf": []}))

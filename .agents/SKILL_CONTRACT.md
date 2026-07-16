@@ -36,6 +36,12 @@ malformed, uses an external reference, or introduces an unsupported keyword or t
 repository-set semantic checks are additive; they do not replace structural validation. This is deliberately not
 a general JSON Schema Draft 2020-12 implementation.
 
+Schema-definition validation precedes instance and semantic validation. Both supported keyword names and their
+value shapes fail closed with deterministic `SCHEMA_*` findings. Patterns must compile under the bounded Python
+regular-expression subset; complete ECMA-262 compatibility is not claimed. Boolean schema nodes, schema-valued
+`additionalProperties`, `$ref` siblings, and reference cycles are not supported. No external schema is loaded,
+and malformed regular expressions never escape through the public validation APIs.
+
 ## Canonical identity
 
 Each canonical skill has exactly one directory, one `SKILL.md` frontmatter name, one `skill.contract.json`, and one
