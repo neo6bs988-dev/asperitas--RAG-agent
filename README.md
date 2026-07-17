@@ -173,6 +173,22 @@ Any complexity increase must document:
 
 ## Repository Evidence Map
 
+### Current capability truth status
+
+Snapshot baseline: `ec9250387f0cfa4fa209d661fbd01ae0755ec8be`. This SHA records the last verified main state for this documentation sync; live code, validators, and exact-head evidence override it when the repository changes.
+
+| Capability | Status | Evidence | Next gate |
+|---|---|---|---|
+| Skill Contract v2 foundation | `IMPLEMENTED`, merged and main-verified | `.agents/skill-contract.schema.json`, `src/asperitas_agent/skill_contract.py`, `scripts/validate_skill_contract.py`, focused tests, PR #219 merge | Preserve exact-head contract validation |
+| Live Skill manifests | `NOT IMPLEMENTED` — 0 manifests for 30 `SKILL.md` definitions | `python scripts/validate_skill_contract.py --root . --transition --json` reports `PARTIAL`, `ok=false`, `contracts_checked=0` | Separately authorized P1B-2 manifest migration |
+| Skill routing migration | `NOT IMPLEMENTED` | Current Python discovery/registry remains incumbent; contract declarations do not change routing | Freeze incumbent baseline, then routing tests and canary |
+| Retrieval pipeline | `IMPLEMENTED` development components; production status `UNVERIFIED` | `src/asperitas_agent/`, retrieval tests, development eval artifacts | Clean before/after quality, metadata, latency, context, and cost evidence for each promotion |
+| Evaluation suite | `IMPLEMENTED` public development tests/evals; coverage is not complete and no protected holdout is established | `tests/`, `eval/`, `scripts/`, `eval_results/` | Contamination-controlled expansion with fixed datasets and thresholds |
+| CI and security checks | `IMPLEMENTED`; exact-head status is revision-specific | `.github/workflows/`, repository ruleset, `SECURITY.md` | Required checks on the exact proposed head; scanner success is not proof of vulnerability absence |
+| Production deployment | `NOT IMPLEMENTED` / `UNVERIFIED` | No approved deployment and operational evidence established by this repository snapshot | Separate release, security, operations, ownership, rollback, and deployment approval |
+| Legal and rights clearance | `NOT ESTABLISHED`; human-gated | Source metadata and policies are not legal clearance | Named counsel/rights review for the specific source, use, jurisdiction, and transfer |
+| Wet-lab validation | `NOT ESTABLISHED`; human-gated | Computational, literature, fixture, and repository evidence are not wet-lab results | Approved protocol, biosafety review, controlled execution, and scientific validation |
+
 | Capability area | Repository evidence | Evidence boundary |
 |---|---|---|
 | Source registry | `02_SOURCE_REGISTRY/`, `src/asperitas_agent/registry.py`, `src/asperitas_agent/source_registry_contract.py` | Does not prove complete licensed production ingestion |

@@ -1,6 +1,6 @@
 # Asperitas Skill Contract v2
 
-Status: P1B-1 foundation hardening; transition audit only; P1B-2 blocked pending exact-head recertification
+Status: P1B-1 foundation merged and main-verified; transition `PARTIAL`; P1B-2 not started
 
 ## Purpose
 
@@ -93,11 +93,36 @@ report `state=PARTIAL` and `ok=false`, with missing manifests visible. Strict `F
 ## Migration stages
 
 1. **P1B-1 foundation:** add the schema, deterministic validator, strict fixture tests, and a transition audit.
-   Existing skills remain unchanged and the repository reports `PARTIAL` because manifests are absent.
-2. **P1B-2 manifests:** remains blocked until P1B-1F exact-head recertification and independent reaudit; then add
-   reviewed contracts to existing skills without renaming or changing routing.
+   This foundation is merged on main. Existing skills remain unchanged and the repository reports `PARTIAL`
+   because all 30 manifests are absent.
+2. **P1B-2 manifests:** not started. Under a separate approved contract, add reviewed manifests to existing
+   skills without renaming, deleting, merging, canonicalizing, or changing routing.
 3. **Later migration:** freeze routing evaluations before changing aliases, descriptions, identities, or lifecycle.
 4. **Enforcement:** replace the incumbent gate only after exact-head tests, routing evaluations, and human review.
+
+The P1B-2 migration inputs include the incumbent aliases
+`benchmark_workflow_preflight -> mvp-implementation`,
+`compliance_review -> compliance-biosafety-review`, and
+`retrieval_eval -> retrieval-eval-quality-gate`. They also include the repository Skills
+`embeddings-vector-db-mvp005`, `github-pr-review`, and `open-source-adoption-review`, which currently lack an
+incumbent Python `SkillSpec`. These inputs do not establish successor approval, canonical cutover, or runtime
+authority.
+
+Current verification:
+
+```bash
+python -m py_compile src/asperitas_agent/skill_contract.py scripts/validate_skill_contract.py
+python -m pytest -q tests/test_skill_contract.py tests/test_skill_discovery.py tests/test_skill_registry.py tests/test_sitecustomize.py
+python scripts/validate_skill_contract.py --root . --transition --json
+```
+
+At the verified foundation snapshot, the transition command reports `state=PARTIAL`, `ok=false`,
+`skills_discovered=30`, and `contracts_checked=0`. A successful transition-command process exit means the audit
+ran; it does not promote `PARTIAL` to `PASS`.
+
+Before merge, rollback is to withdraw or supersede the branch or Draft PR. After an authorized merge, revert the
+documentation merge in a separately authorized action, then rerun contract, discovery, registry, instruction,
+artifact, and exact-head verification.
 
 ## Non-claims
 

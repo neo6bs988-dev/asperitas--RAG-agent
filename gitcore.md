@@ -1,4 +1,6 @@
-# GITCORE.md — Asperitas Repository Execution Constitution
+# gitcore.md — Asperitas Repository Execution Constitution
+
+> **Canonical path:** `gitcore.md` (lowercase). Preserve this exact casing in links and commands because case-sensitive filesystems treat `GITCORE.md` as a different, nonexistent path.
 
 > **Status:** ACTIVE GOVERNANCE BASELINE  
 > **Version:** 1.0  
@@ -115,7 +117,7 @@ Skipping a stage requires a named approver, written rationale, residual risk, an
 Apply the following order:
 
 1. applicable law, safety restrictions, contractual obligations, and explicit action-level human approval;
-2. this `GITCORE.md`;
+2. this `gitcore.md`;
 3. the stricter requirement in `SECURITY.md`;
 4. the nearest applicable `AGENTS.md`;
 5. approved repository policies, schemas, decision records, and workflow documents;
@@ -143,7 +145,7 @@ A stale SHA, phase label, date, or “next step” in a document never overrides
 
 ### 2.3 Durable-document rule
 
-`GITCORE.md`, `AGENTS.md`, `SECURITY.md`, and `ROADMAP.md` must contain durable rules.
+`gitcore.md`, `AGENTS.md`, `SECURITY.md`, and `ROADMAP.md` must contain durable rules.
 
 Do not use them as manually synchronized status dashboards. Mutable state must be resolved during task preflight from GitHub evidence.
 
@@ -209,7 +211,7 @@ STOP_CONDITIONS:
 Minimum inspection:
 
 1. repository root and applicable `AGENTS.md`;
-2. `GITCORE.md`, `README.md`, and `SECURITY.md`;
+2. `gitcore.md`, `README.md`, and `SECURITY.md`;
 3. current branch, HEAD, and working-tree status;
 4. relevant source, tests, workflows, schemas, and decision records;
 5. open or recently merged work touching the same surface;
@@ -320,7 +322,7 @@ Recommended sensitive ownership paths:
 ```text
 /.github/**
 /SECURITY.md
-/GITCORE.md
+/gitcore.md
 /AGENTS.md
 /pyproject.toml
 /02_SOURCE_REGISTRY/**
@@ -860,7 +862,7 @@ Repeated failures must become a durable asset: a test, eval case, schema rule, c
 
 | Artifact | Responsibility |
 |---|---|
-| `GITCORE.md` | Durable repository-wide execution constitution |
+| `gitcore.md` | Durable repository-wide execution constitution |
 | `AGENTS.md` | Agent-specific operating instructions and scoped execution behavior |
 | `README.md` | Public, evidence-grounded product and contributor interface |
 | `SECURITY.md` | Vulnerability reporting, trust boundaries, secure development, and incident handling |
