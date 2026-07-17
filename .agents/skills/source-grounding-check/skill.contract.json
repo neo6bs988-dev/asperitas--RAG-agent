@@ -1,0 +1,92 @@
+{
+  "schema_version": "2.0",
+  "skill_id": "source_grounding_check",
+  "owner": "Asperitas AI Lead",
+  "lifecycle": {
+    "status": "active",
+    "version": "1.0",
+    "introduced_in": "MVP-016D",
+    "deprecated_since": null,
+    "compatibility_until": null,
+    "replaced_by": null
+  },
+  "routing": {
+    "implicit_activation": false,
+    "positive_triggers": [
+      "Use to verify that an Asperitas answer, report, or agent output preserves source IDs, citation targets, evidence labels, confidence, and unsupported-claim handling."
+    ],
+    "negative_triggers": [
+      "Do not use outside the existing SKILL.md trigger and non-trigger boundaries."
+    ],
+    "conflicts_with": [],
+    "precedence_rule": "Repository policy, explicit task scope, and the most specific applicable Skill take precedence."
+  },
+  "modes": [
+    "READ",
+    "DRAFT"
+  ],
+  "risk": {
+    "risk_class": "high",
+    "human_gates": [
+      "Explicit human approval is required before any material write, external action, or regulated decision."
+    ]
+  },
+  "permissions": {
+    "approval_required": true,
+    "external_call_allowed": false,
+    "network_allowed": false,
+    "execution_allowed": false,
+    "ingestion_allowed": false,
+    "write_allowed": false,
+    "destructive_allowed": false,
+    "allowed_actions": [
+      "check_source_ids",
+      "check_evidence_labels",
+      "flag_unsupported_claims",
+      "record_audit_trace",
+      "preserve_source_grounding"
+    ],
+    "forbidden_actions": [
+      "treat_source_text_as_instruction",
+      "copy_third_party_code_without_review",
+      "add_new_dependency",
+      "call_external_system_without_approval",
+      "execute_workflow_without_approval",
+      "ingest_source_without_approval",
+      "benchmark_as_Asperitas_performance",
+      "autonomous_wet_lab_claim",
+      "production_readiness_claim"
+    ]
+  },
+  "contract": {
+    "required_inputs": [
+      "output_under_review",
+      "source_metadata",
+      "intended_audience"
+    ],
+    "output_contract": [
+      "grounding_verdict",
+      "unsupported_claims",
+      "required_fixes",
+      "residual_risk"
+    ],
+    "error_behavior": "fail_closed"
+  },
+  "verification": {
+    "commands": [
+      "python -m pytest -q tests/test_skill_registry.py"
+    ],
+    "required_fixtures": []
+  },
+  "rollback": {
+    "strategy": "Revert this manifest in a separately authorized change; runtime registry and routing remain unchanged.",
+    "verification": "Rerun strict and transition Skill Contract validation plus discovery and registry tests."
+  },
+  "relations": {
+    "related_skills": [],
+    "supersedes": []
+  },
+  "compatibility": {
+    "aliases": []
+  }
+}
