@@ -85,7 +85,6 @@ def decide_release(
         "promotion_allowed": False,
         "reasons": [
             "public-safe synthetic prompt-harness controls passed",
-            "repository regression, exact-head CI, protected holdout, and "
-            "independent review remain required",
+            "repository regression, exact-head CI, protected holdout, and independent review remain required",
         ],
     }
