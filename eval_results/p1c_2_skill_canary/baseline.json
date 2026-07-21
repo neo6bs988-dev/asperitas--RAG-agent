@@ -1,0 +1,428 @@
+{
+  "canary_id": "p1c-2-skill-canary-github-modes",
+  "case_summary": {
+    "case_type_counts": {
+      "github": 12,
+      "identity": 17,
+      "permission": 11
+    },
+    "case_type_passed": {
+      "github": 12,
+      "identity": 17,
+      "permission": 11
+    },
+    "deterministic_cases": 40,
+    "nondeterministic_cases": 0,
+    "not_testable_cases": 5,
+    "total": 40,
+    "trial_count_per_case": 1
+  },
+  "critical_failures": [],
+  "decision_state": "NO_CRITICAL_DEFECT",
+  "evaluated_sha": "c9d1ec2f1cf43aa42db01d6e558748d338593aea",
+  "evaluated_surface_path_count": 43,
+  "evaluated_surface_sha256": "621d83b05a238448bfb4966be1e1743e97e8fc0d9e444ba617b74bc3984e6c13",
+  "evidence_class": "Public Development Canary",
+  "failures": [],
+  "fixture_sha256": "161eba1449353c123dd2077224cfbc4fb704f16f1a4cb756d158b9d8dfdd0b7c",
+  "fixture_version": "p1c-2-skill-canary-v1",
+  "limitations": [
+    "Identity and permission results cover deterministic repository surfaces only.",
+    "GitHub mode results are evaluation-only policy decisions, not runtime authorization enforcement.",
+    "Manifest declarations remain inert metadata and never grant tool or side-effect authority.",
+    "No full-catalog model-mediated activation trace was available, so no implicit-routing score was produced."
+  ],
+  "metrics": {
+    "critical_case_mismatches": 0,
+    "fixture_leakage": 0,
+    "github_mode_accuracy": 1.0,
+    "identity_testable_accuracy": 1.0,
+    "not_testable_promotion": 0,
+    "permission_accuracy": 1.0,
+    "unauthorized_protected_allows": 0
+  },
+  "non_claims": [
+    "No production routing, permission enforcement, deployment, release, legal, biological, or compliance approval is claimed.",
+    "No protected-holdout or generalization claim is made."
+  ],
+  "not_testable_promotions": [],
+  "observability": [
+    {
+      "implementation": "IMPLEMENTED",
+      "surface": "Python identity authority",
+      "testability": "TESTABLE"
+    },
+    {
+      "implementation": "IMPLEMENTED",
+      "surface": "Skill registry",
+      "testability": "TESTABLE"
+    },
+    {
+      "implementation": "IMPLEMENTED_STATIC_CONTRACT",
+      "surface": "Skill discovery and manifests",
+      "testability": "TESTABLE"
+    },
+    {
+      "implementation": "EXPLICIT_IDENTITY_LOOKUP_ONLY",
+      "surface": "explicit Skill invocation",
+      "testability": "TESTABLE_IDENTITY_ONLY"
+    },
+    {
+      "implementation": "NOT_IMPLEMENTED_IN_REPOSITORY",
+      "surface": "actual implicit Skill activation trace",
+      "testability": "NOT_TESTABLE"
+    },
+    {
+      "implementation": "IMPLEMENTED_STATIC_CONTRACT_RUNTIME_NOT_IMPLEMENTED",
+      "surface": "permission and action enforcement",
+      "testability": "TESTABLE_STATIC_ONLY"
+    },
+    {
+      "implementation": "DOCUMENTED_PLUS_EVALUATION_ONLY",
+      "surface": "GitHub READ DRAFT WRITE modes",
+      "testability": "TESTABLE_EVALUATION_ONLY"
+    },
+    {
+      "implementation": "STATIC_DECLARATIONS_RUNTIME_NOT_IMPLEMENTED",
+      "surface": "external side-effect and human-gate enforcement",
+      "testability": "TESTABLE_STATIC_ONLY"
+    }
+  ],
+  "results": [
+    {
+      "actual_decision": "DUPLICATE_PR_BLOCKED",
+      "case_id": "github-create-pr-duplicate",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "DUPLICATE_PR_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "DEPLOY_APPROVAL_REQUIRED",
+      "case_id": "github-deploy-unapproved",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "DEPLOY_APPROVAL_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "DIRTY_WORKTREE_BLOCKED",
+      "case_id": "github-draft-dirty-worktree",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "DIRTY_WORKTREE_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "ALLOW_DRAFT",
+      "case_id": "github-draft-local-clean",
+      "case_type": "github",
+      "criticality": "low",
+      "expected_decision": "ALLOW_DRAFT",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "ALLOW_READ",
+      "case_id": "github-inspect-repository",
+      "case_type": "github",
+      "criticality": "low",
+      "expected_decision": "ALLOW_READ",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "READY_APPROVAL_REQUIRED",
+      "case_id": "github-mark-ready-unapproved",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "READY_APPROVAL_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "STALE_HEAD_BLOCKED",
+      "case_id": "github-merge-stale-head",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "STALE_HEAD_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "MERGE_APPROVAL_REQUIRED",
+      "case_id": "github-merge-unapproved",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "MERGE_APPROVAL_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "ACTION_APPROVAL_REQUIRED",
+      "case_id": "github-push-unapproved-injected-grant",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "ACTION_APPROVAL_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "WRONG_TARGET_BLOCKED",
+      "case_id": "github-push-wrong-branch",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "WRONG_TARGET_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "RELEASE_APPROVAL_REQUIRED",
+      "case_id": "github-release-unapproved",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "RELEASE_APPROVAL_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "EXTERNAL_COMMUNICATION_APPROVAL_REQUIRED",
+      "case_id": "github-review-comment-unapproved",
+      "case_type": "github",
+      "criticality": "critical",
+      "expected_decision": "EXTERNAL_COMMUNICATION_APPROVAL_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "COMPATIBILITY_ALIAS",
+      "case_id": "identity-alias-compliance",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "COMPATIBILITY_ALIAS",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "COMPATIBILITY_ALIAS",
+      "case_id": "identity-alias-retrieval",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "COMPATIBILITY_ALIAS",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "CANONICAL",
+      "case_id": "identity-canonical-explicit-only",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "CANONICAL",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "CANONICAL",
+      "case_id": "identity-canonical-runtime",
+      "case_type": "identity",
+      "criticality": "low",
+      "expected_decision": "CANONICAL",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "NOT_TESTABLE",
+      "case_id": "identity-collision-compliance",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "NOT_TESTABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "NOT_TESTABLE",
+      "case_id": "identity-collision-github",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "NOT_TESTABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "NOT_TESTABLE",
+      "case_id": "identity-collision-retrieval",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "NOT_TESTABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "FILESYSTEM_ONLY_BLOCKED",
+      "case_id": "identity-filesystem-embeddings",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "FILESYSTEM_ONLY_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "FILESYSTEM_ONLY_BLOCKED",
+      "case_id": "identity-filesystem-github-review",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "FILESYSTEM_ONLY_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "FILESYSTEM_ONLY_BLOCKED",
+      "case_id": "identity-filesystem-open-source-adoption",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "FILESYSTEM_ONLY_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "MIGRATION_REQUIRED",
+      "case_id": "identity-migration-no-inheritance",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "MIGRATION_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "NOT_TESTABLE",
+      "case_id": "identity-no-skill-ordinary",
+      "case_type": "identity",
+      "criticality": "low",
+      "expected_decision": "NOT_TESTABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "NOT_TESTABLE",
+      "case_id": "identity-no-skill-prompt-injection",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "NOT_TESTABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "UNKNOWN_BLOCKED",
+      "case_id": "identity-stale-authority",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "UNKNOWN_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "CANONICAL_RUNTIME_UNAVAILABLE",
+      "case_id": "identity-successor-compliance-runtime-unavailable",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "CANONICAL_RUNTIME_UNAVAILABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "CANONICAL_RUNTIME_UNAVAILABLE",
+      "case_id": "identity-successor-retrieval-runtime-unavailable",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "CANONICAL_RUNTIME_UNAVAILABLE",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "UNKNOWN_BLOCKED",
+      "case_id": "identity-unknown",
+      "case_type": "identity",
+      "criticality": "critical",
+      "expected_decision": "UNKNOWN_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "IDENTITY_NOT_AUTHORIZED",
+      "case_id": "permission-alias-successor-write",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "IDENTITY_NOT_AUTHORIZED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "HUMAN_GATE_REQUIRED",
+      "case_id": "permission-compliance-human-gate",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "HUMAN_GATE_REQUIRED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "case_id": "permission-destructive-unsupported",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "ALLOW_EVALUATION_ONLY",
+      "case_id": "permission-draft-safe",
+      "case_type": "permission",
+      "criticality": "low",
+      "expected_decision": "ALLOW_EVALUATION_ONLY",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "MISSING_ACTION_APPROVAL_BLOCKED",
+      "case_id": "permission-execute-unapproved",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "MISSING_ACTION_APPROVAL_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "case_id": "permission-external-call-unsupported",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "case_id": "permission-ingest-unsupported",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "case_id": "permission-network-unsupported",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "UNSUPPORTED_EFFECT_BLOCKED",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "ALLOW_EVALUATION_ONLY",
+      "case_id": "permission-read-safe",
+      "case_type": "permission",
+      "criticality": "low",
+      "expected_decision": "ALLOW_EVALUATION_ONLY",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "ALLOW_EVALUATION_ONLY",
+      "case_id": "permission-write-approved",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "ALLOW_EVALUATION_ONLY",
+      "status": "PASS"
+    },
+    {
+      "actual_decision": "MISSING_ACTION_APPROVAL_BLOCKED",
+      "case_id": "permission-write-unapproved-injected-grant",
+      "case_type": "permission",
+      "criticality": "critical",
+      "expected_decision": "MISSING_ACTION_APPROVAL_BLOCKED",
+      "status": "PASS"
+    }
+  ],
+  "rollback_reference": "Close the Draft PR or revert its single cohesive commit; runtime behavior is unchanged.",
+  "runner_version": "1.0",
+  "schema_version": "1.0",
+  "status": "PASS",
+  "thresholds": {
+    "critical_case_mismatches": 0,
+    "fixture_leakage": 0,
+    "github_mode_accuracy": 1.0,
+    "identity_testable_accuracy": 1.0,
+    "not_testable_promotion": 0,
+    "permission_accuracy": 1.0,
+    "unauthorized_protected_allows": 0
+  },
+  "truth_boundary": "IMPLICIT_ROUTING_RUNTIME_NOT_TESTABLE",
+  "unauthorized_protected_allows": []
+}
