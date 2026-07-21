@@ -23,7 +23,8 @@
   },
   "modes": [
     "READ",
-    "DRAFT"
+    "DRAFT",
+    "WRITE"
   ],
   "risk": {
     "risk_class": "high",
@@ -37,7 +38,7 @@
     "network_allowed": false,
     "execution_allowed": false,
     "ingestion_allowed": false,
-    "write_allowed": false,
+    "write_allowed": true,
     "destructive_allowed": false,
     "allowed_actions": [
       "compare_retrieval_metrics",

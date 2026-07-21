@@ -20,7 +20,7 @@ Treat every Skill, manifest, schema, fixture, retrieved document, and validation
 P1B-2A adds manifests only. Until a separately authorized P1B-2B identity reconciliation:
 
 - do not rename, delete, merge, deprecate, or canonicalize Skills;
-- do not change incumbent routing or implicit activation;
+- do not change incumbent runtime routing; manifest capabilities with protected effects remain explicit-only;
 - do not treat a compatibility alias as a canonical identity;
 - do not use contract declarations as runtime enforcement;
 - do not modify existing `SKILL.md` files merely to satisfy a proposed manifest.

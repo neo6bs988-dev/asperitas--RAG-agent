@@ -11,7 +11,7 @@
     "replaced_by": null
   },
   "routing": {
-    "implicit_activation": true,
+    "implicit_activation": false,
     "positive_triggers": [
       "Use when recording or reviewing decision logs, metric provenance, release decisions, or task closeout evidence."
     ],
@@ -23,19 +23,22 @@
   },
   "modes": [
     "READ",
-    "DRAFT"
+    "DRAFT",
+    "WRITE"
   ],
   "risk": {
-    "risk_class": "medium",
-    "human_gates": []
+    "risk_class": "high",
+    "human_gates": [
+      "Explicit action-specific human approval is required before a tracked decision log is appended or updated."
+    ]
   },
   "permissions": {
-    "approval_required": false,
+    "approval_required": true,
     "external_call_allowed": false,
     "network_allowed": false,
     "execution_allowed": false,
     "ingestion_allowed": false,
-    "write_allowed": false,
+    "write_allowed": true,
     "destructive_allowed": false,
     "allowed_actions": [
       "record_decision_log",

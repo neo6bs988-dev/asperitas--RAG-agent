@@ -75,6 +75,12 @@ Supported modes are `READ`, `DRAFT`, and `WRITE`. `WRITE` requires both `write_a
 by default. Every high-risk contract declaring execution or writing requires at least one non-empty explicit human
 gate, regardless of descriptions, triggers, aliases, domain wording, or approval flags.
 
+The P1B-2A inventory test maps every current allowed action ID to an explicit effect class and fails closed on an
+unknown action. Repository `WRITE` and local command `EXECUTE` are declared only for explicit,
+approval-required, human-gated Skills. Network, external-call, ingestion, and destructive permissions remain false
+unless an allowed action explicitly requires the matching effect. These declarations remain inert capability
+metadata and do not grant runtime authority.
+
 A contract declaration does not grant shell, network, connector, write, ingestion, destructive, or biological
 execution authority. Runtime authorization must be enforced separately. Legal, regulatory, rights, biosafety,
 biosecurity, scientific, release, and external-communication approvals remain human gates.

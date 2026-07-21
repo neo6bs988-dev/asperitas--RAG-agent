@@ -35,7 +35,7 @@
     "approval_required": true,
     "external_call_allowed": false,
     "network_allowed": false,
-    "execution_allowed": false,
+    "execution_allowed": true,
     "ingestion_allowed": false,
     "write_allowed": false,
     "destructive_allowed": false,
