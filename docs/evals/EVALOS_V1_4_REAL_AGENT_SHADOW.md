@@ -8,6 +8,14 @@ This subsystem is evaluation infrastructure. It does not establish deployment,
 production monitoring, protected-holdout generalization, legal or scientific
 clearance, or production readiness.
 
+## Stack and review boundary
+
+The v1.4 implementation commit is stacked on EvalOS v0.9 from Draft PR #222.
+PR #224 targets `main` only so repository workflows configured for pull requests
+to `main` can evaluate the combined exact head. After #222 is merged or otherwise
+resolved, the v1.4 review diff must be rechecked against the new merge base before
+any merge decision.
+
 ## Goal
 
 Connect the incumbent deterministic `ask_agent()` runtime to a repeated,
