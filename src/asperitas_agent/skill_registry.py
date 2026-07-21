@@ -363,6 +363,14 @@ class SkillRegistry:
 
     def lookup_decision(self, skill_id: str) -> dict[str, Any]:
         identity = self.identity_authority.resolve(skill_id) if self.identity_authority is not None else None
+        if identity is not None and identity.decision == "blocked":
+            return {
+                "skill_id": skill_id,
+                "supported": False,
+                "decision": "blocked",
+                "reason": identity.reason,
+                "identity": identity.to_dict(),
+            }
         skill = self.get_skill(skill_id)
         if skill is None:
             result = {
@@ -396,6 +404,8 @@ class SkillRegistry:
 
     def validate(self) -> tuple[str, ...]:
         errors: list[str] = []
+        if self.identity_authority is not None:
+            errors.extend(f"identity_authority: {error}" for error in self.identity_authority.validate())
         skill_ids = self.list_skill_ids()
         if len(skill_ids) != len(set(skill_ids)):
             errors.append("duplicate skill_id")
@@ -404,7 +414,7 @@ class SkillRegistry:
             errors.append(f"missing required skills: {', '.join(missing)}")
         for skill in self.skills:
             errors.extend(f"{skill.skill_id}: {error}" for error in skill.validate())
-        return tuple(errors)
+        return tuple(sorted(errors))
 
     def to_dict(self) -> dict[str, Any]:
         return {
