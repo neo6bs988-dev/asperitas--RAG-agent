@@ -440,24 +440,30 @@ def test_retrieval_compatibility_id_does_not_replace_canonical_identity(tmp_path
     assert "retrieval_eval" not in report.canonical_skill_ids
 
 
-def test_repository_transition_audit_is_partial_and_reports_current_drift():
+def test_repository_transition_audit_is_partial_only_for_incumbent_alias_authority():
     report = validate_repository(REPO_ROOT, transition=True)
     codes = finding_codes(report)
 
     assert report.state == "PARTIAL"
     assert report.ok is False
     assert report.skills_discovered == 30
-    assert report.contracts_checked == 0
-    assert "MISSING_SKILL_CONTRACT" in codes
-    assert "UNREGISTERED_REPOSITORY_SKILL" in codes
-    assert "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL" in codes
+    assert report.contracts_checked == 30
+    assert codes == {
+        "LEGACY_ALIAS_EQUALS_CANONICAL_SKILL",
+        "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL",
+    }
 
 
-def test_repository_strict_validation_fails_before_manifests_exist():
+def test_repository_strict_validation_fails_for_incumbent_alias_authority():
     report = validate_repository(REPO_ROOT)
 
     assert report.state == "FAIL"
     assert report.ok is False
+    assert report.contracts_checked == 30
+    assert finding_codes(report) == {
+        "LEGACY_ALIAS_EQUALS_CANONICAL_SKILL",
+        "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL",
+    }
 
 
 def test_missing_skills_root_is_not_testable(tmp_path):

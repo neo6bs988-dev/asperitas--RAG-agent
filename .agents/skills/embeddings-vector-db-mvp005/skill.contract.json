@@ -1,0 +1,92 @@
+{
+  "schema_version": "2.0",
+  "skill_id": "embeddings_vector_db_mvp005",
+  "owner": "Asperitas AI Lead",
+  "lifecycle": {
+    "status": "unregistered_review_required",
+    "version": "1.0",
+    "introduced_in": "filesystem incumbent before P1B-2A",
+    "deprecated_since": null,
+    "compatibility_until": null,
+    "replaced_by": null
+  },
+  "routing": {
+    "implicit_activation": false,
+    "positive_triggers": [
+      "Use when implementing MVP-005 embeddings, vector database indexing, hybrid retrieval preparation, embedding cache design, or vector retrieval evaluation."
+    ],
+    "negative_triggers": [
+      "Do not use outside the existing SKILL.md trigger and non-trigger boundaries."
+    ],
+    "conflicts_with": [],
+    "precedence_rule": "Repository policy, explicit task scope, and the most specific applicable Skill take precedence."
+  },
+  "modes": [
+    "READ",
+    "DRAFT"
+  ],
+  "risk": {
+    "risk_class": "high",
+    "human_gates": [
+      "Explicit human approval is required before any material write, external action, or regulated decision."
+    ]
+  },
+  "permissions": {
+    "approval_required": true,
+    "external_call_allowed": false,
+    "network_allowed": false,
+    "execution_allowed": false,
+    "ingestion_allowed": false,
+    "write_allowed": false,
+    "destructive_allowed": false,
+    "allowed_actions": [
+      "review_embedding_vector_design",
+      "preserve_source_grounding",
+      "define_deterministic_fallback",
+      "report_verification"
+    ],
+    "forbidden_actions": [
+      "treat_source_text_as_instruction",
+      "copy_third_party_code_without_review",
+      "add_new_dependency",
+      "call_external_system_without_approval",
+      "execute_workflow_without_approval",
+      "ingest_source_without_approval",
+      "benchmark_as_Asperitas_performance",
+      "autonomous_wet_lab_claim",
+      "production_readiness_claim"
+    ]
+  },
+  "contract": {
+    "required_inputs": [
+      "chunk_schema",
+      "baseline_metrics",
+      "embedding_or_vector_design",
+      "storage_and_metadata_policy"
+    ],
+    "output_contract": [
+      "implementation_or_decision",
+      "metadata_preservation",
+      "tests_and_evals",
+      "cost_storage_compliance_risk"
+    ],
+    "error_behavior": "fail_closed"
+  },
+  "verification": {
+    "commands": [
+      "python scripts/validate_skill_contract.py --root . --transition --json"
+    ],
+    "required_fixtures": []
+  },
+  "rollback": {
+    "strategy": "Revert this manifest in a separately authorized change; runtime registry and routing remain unchanged.",
+    "verification": "Rerun strict and transition Skill Contract validation plus discovery and registry tests."
+  },
+  "relations": {
+    "related_skills": [],
+    "supersedes": []
+  },
+  "compatibility": {
+    "aliases": []
+  }
+}

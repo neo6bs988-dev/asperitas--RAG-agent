@@ -1,6 +1,6 @@
 # Asperitas Skill Contract v2
 
-Status: P1B-1 foundation merged and main-verified; transition `PARTIAL`; P1B-2 not started
+Status: P1B-2A candidate has 30 reviewed manifests; transition `PARTIAL` because incumbent alias authority remains unresolved
 
 ## Purpose
 
@@ -75,6 +75,12 @@ Supported modes are `READ`, `DRAFT`, and `WRITE`. `WRITE` requires both `write_a
 by default. Every high-risk contract declaring execution or writing requires at least one non-empty explicit human
 gate, regardless of descriptions, triggers, aliases, domain wording, or approval flags.
 
+The P1B-2A inventory test maps every current allowed action ID to an explicit effect class and fails closed on an
+unknown action. Repository `WRITE` and local command `EXECUTE` are declared only for explicit,
+approval-required, human-gated Skills. Network, external-call, ingestion, and destructive permissions remain false
+unless an allowed action explicitly requires the matching effect. These declarations remain inert capability
+metadata and do not grant runtime authority.
+
 A contract declaration does not grant shell, network, connector, write, ingestion, destructive, or biological
 execution authority. Runtime authorization must be enforced separately. Legal, regulatory, rights, biosafety,
 biosecurity, scientific, release, and external-communication approvals remain human gates.
@@ -95,9 +101,11 @@ report `state=PARTIAL` and `ok=false`, with missing manifests visible. Strict `F
 1. **P1B-1 foundation:** add the schema, deterministic validator, strict fixture tests, and a transition audit.
    This foundation is merged on main. Existing skills remain unchanged and the repository reports `PARTIAL`
    because all 30 manifests are absent.
-2. **P1B-2 manifests:** not started. Under a separate approved contract, add reviewed manifests to existing
-   skills without renaming, deleting, merging, canonicalizing, or changing routing.
-3. **Later migration:** freeze routing evaluations before changing aliases, descriptions, identities, or lifecycle.
+2. **P1B-2A manifests:** this candidate tree has one reviewed manifest for each of 30 discovered Skills without
+   renaming, deleting, merging, canonicalizing, registering, or changing routing. The three filesystem-only Skills
+   are explicit-only and `unregistered_review_required`.
+3. **P1B-2B identity reconciliation:** resolve the three incumbent registry/alias authority collisions before
+   freezing routing evaluations or changing aliases, descriptions, identities, or lifecycle.
 4. **Enforcement:** replace the incumbent gate only after exact-head tests, routing evaluations, and human review.
 
 The P1B-2 migration inputs include the incumbent aliases
@@ -116,9 +124,11 @@ python -m pytest -q tests/test_skill_contract.py tests/test_skill_discovery.py t
 python scripts/validate_skill_contract.py --root . --transition --json
 ```
 
-At the verified foundation snapshot, the transition command reports `state=PARTIAL`, `ok=false`,
-`skills_discovered=30`, and `contracts_checked=0`. A successful transition-command process exit means the audit
-ran; it does not promote `PARTIAL` to `PASS`.
+In this candidate tree, the transition command reports `state=PARTIAL`, `ok=false`,
+`skills_discovered=30`, and `contracts_checked=30`. There are no missing or schema-invalid manifests. The only
+findings are the three pre-existing registry/alias authority collisions; strict validation therefore remains
+`FAIL`. A successful transition-command process exit means the audit ran; it does not promote `PARTIAL` to
+`PASS`.
 
 Before merge, rollback is to withdraw or supersede the branch or Draft PR. After an authorized merge, revert the
 documentation merge in a separately authorized action, then rerun contract, discovery, registry, instruction,
