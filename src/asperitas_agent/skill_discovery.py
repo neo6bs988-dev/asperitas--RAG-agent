@@ -4,14 +4,12 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from .skill_registry import DEFAULT_SKILL_REGISTRY, SkillRegistry
-
-
-SKILL_ALIASES = {
-    "benchmark_workflow_preflight": ("benchmark-workflow-preflight", "mvp-implementation"),
-    "compliance_review": ("compliance-review", "compliance-biosafety-review"),
-    "retrieval_eval": ("retrieval-eval", "retrieval-eval-quality-gate"),
-}
+from .skill_registry import (
+    DEFAULT_SKILL_REGISTRY,
+    SKILL_IDENTITY_ALIASES,
+    SkillRegistry,
+    build_skill_identity_authority,
+)
 
 
 @dataclass(frozen=True)
@@ -87,7 +85,17 @@ def validate_skill_files_against_registry(
     discovered = discover_skill_files(root)
     discovered_by_key = _discovered_lookup(discovered)
     registered_ids = active_registry.list_skill_ids()
-    registry_keys = {_normalize_skill_name(skill_id) for skill_id in registered_ids}
+    legacy_ids = {alias.legacy_id for alias in SKILL_IDENTITY_ALIASES}
+    successor_ids = {
+        alias.canonical_id for alias in SKILL_IDENTITY_ALIASES if alias.legacy_id in registered_ids
+    }
+    canonical_ids = tuple(
+        sorted(
+            {skill_id for skill_id in registered_ids if skill_id not in legacy_ids}
+            | successor_ids
+        )
+    )
+    identity_authority = build_skill_identity_authority(canonical_ids)
 
     invalid_frontmatter = tuple(
         {
@@ -102,12 +110,15 @@ def validate_skill_files_against_registry(
     duplicate_names = _duplicate_skill_names(discovered)
 
     missing_skill_files = tuple(
-        skill_id for skill_id in registered_ids if not _skill_has_discovered_file(skill_id, discovered_by_key)
+        skill_id
+        for skill_id in canonical_ids
+        if _normalize_skill_name(skill_id) not in discovered_by_key
     )
     missing_registry_specs = tuple(
         skill.normalized_name
         for skill in discovered
-        if not skill.frontmatter_errors and not _discovered_skill_is_registered(skill, registry_keys)
+        if not skill.frontmatter_errors
+        and identity_authority.resolve(skill.normalized_name.replace("-", "_")).identity_kind != "canonical"
     )
     warnings = tuple(f"unknown well-formed skill file: {skill_id}" for skill_id in missing_registry_specs)
     errors = tuple(
@@ -172,12 +183,6 @@ def _normalize_skill_name(value: str) -> str:
     return value.strip().casefold().replace("_", "-").replace(" ", "-")
 
 
-def _candidate_keys(skill_id: str) -> tuple[str, ...]:
-    base = _normalize_skill_name(skill_id)
-    aliases = tuple(_normalize_skill_name(alias) for alias in SKILL_ALIASES.get(skill_id, ()))
-    return tuple(dict.fromkeys((base, *aliases)))
-
-
 def _discovered_lookup(discovered: list[DiscoveredSkill]) -> set[str]:
     keys: set[str] = set()
     for skill in discovered:
@@ -185,16 +190,6 @@ def _discovered_lookup(discovered: list[DiscoveredSkill]) -> set[str]:
         if skill.name:
             keys.add(skill.normalized_name)
     return keys
-
-
-def _skill_has_discovered_file(skill_id: str, discovered_by_key: set[str]) -> bool:
-    return any(key in discovered_by_key for key in _candidate_keys(skill_id))
-
-
-def _discovered_skill_is_registered(skill: DiscoveredSkill, registry_keys: set[str]) -> bool:
-    keys = {_normalize_skill_name(skill.directory_name), skill.normalized_name}
-    alias_keys = {_normalize_skill_name(alias) for aliases in SKILL_ALIASES.values() for alias in aliases}
-    return bool(keys & registry_keys) or bool(keys & alias_keys)
 
 
 def _duplicate_skill_names(discovered: list[DiscoveredSkill]) -> tuple[str, ...]:

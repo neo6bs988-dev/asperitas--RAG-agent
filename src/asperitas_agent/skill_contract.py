@@ -8,11 +8,8 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 from typing import Any, Iterable, Mapping
 
-from .skill_discovery import (
-    SKILL_ALIASES,
-    discover_skill_files,
-    validate_skill_files_against_registry,
-)
+from .skill_discovery import discover_skill_files, validate_skill_files_against_registry
+from .skill_registry import build_skill_identity_authority
 
 RESULT_STATES = ("PASS", "FAIL", "PARTIAL", "NOT_TESTABLE", "INVALID")
 LIFECYCLE_STATUSES = ("active", "planned", "deprecated", "blocked", "unregistered_review_required")
@@ -227,26 +224,36 @@ def validate_repository(
             )
         )
 
-    discovered_names = {skill.normalized_name for skill in skills}
-    canonical_registry_ids = {skill_id.replace("_", "-") for skill_id in incumbent_report.registered_skills}
-    for registry_id, aliases in sorted(SKILL_ALIASES.items()):
-        canonical_name = registry_id.replace("_", "-")
-        for alias in aliases:
-            normalized_alias = alias.replace("_", "-")
-            if normalized_alias in discovered_names and normalized_alias != canonical_name:
-                code = (
-                    "LEGACY_ALIAS_EQUALS_CANONICAL_SKILL"
-                    if normalized_alias in canonical_registry_ids
-                    else "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL"
+    authority = build_skill_identity_authority(tuple(record.skill_id for record in records if record.skill_id))
+    for error in authority.validate():
+        findings.append(
+            ContractFinding(
+                code="INVALID_IDENTITY_AUTHORITY",
+                path="src/asperitas_agent/skill_registry.py",
+                message=error,
+                severity="candidate" if transition else "error",
+            )
+        )
+    declared_aliases = {
+        str(alias.get("value")): (record.skill_id, str(alias.get("replaced_by")))
+        for record in records
+        for alias in (
+            record.data.get("compatibility", {}).get("aliases", [])
+            if isinstance(record.data.get("compatibility"), dict)
+            else []
+        )
+        if isinstance(alias, dict) and _non_empty_string(alias.get("value"))
+    }
+    for alias in authority.aliases:
+        if declared_aliases.get(alias.legacy_id) != (alias.canonical_id, alias.canonical_id):
+            findings.append(
+                ContractFinding(
+                    code="IDENTITY_AUTHORITY_MANIFEST_MISMATCH",
+                    path=".agents/skills",
+                    message=f"identity authority and manifest disagree for {alias.legacy_id}",
+                    severity="candidate" if transition else "error",
                 )
-                findings.append(
-                    ContractFinding(
-                        code=code,
-                        path="src/asperitas_agent/skill_discovery.py",
-                        message=f"{registry_id} alias {alias} points to a different live skill identity",
-                        severity="candidate" if transition else "error",
-                    )
-                )
+            )
 
     schema_blocked = any(finding.code.startswith("SCHEMA_") for finding in findings)
     if schema_blocked:

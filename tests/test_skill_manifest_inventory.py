@@ -8,8 +8,8 @@ from typing import Callable
 import pytest
 
 from asperitas_agent.skill_contract import validate_repository
-from asperitas_agent.skill_discovery import SKILL_ALIASES, discover_skill_files
-from asperitas_agent.skill_registry import DEFAULT_SKILL_REGISTRY
+from asperitas_agent.skill_discovery import discover_skill_files
+from asperitas_agent.skill_registry import DEFAULT_SKILL_REGISTRY, SKILL_IDENTITY_ALIASES
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -23,10 +23,6 @@ COMPATIBILITY_TARGETS = {
     "benchmark_workflow_preflight": "mvp-implementation",
     "compliance_review": "compliance-biosafety-review",
     "retrieval_eval": "retrieval-eval-quality-gate",
-}
-EXPECTED_RESIDUAL_FINDINGS = {
-    "LEGACY_ALIAS_EQUALS_CANONICAL_SKILL",
-    "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL",
 }
 PROTECTED_EFFECTS = {
     "WRITE": "write_allowed",
@@ -255,11 +251,9 @@ def test_registry_relationships_remain_explicit_without_runtime_registration() -
     registered_before = DEFAULT_SKILL_REGISTRY.list_skill_ids()
     registered_ids = set(registered_before)
 
-    assert SKILL_ALIASES == {
-        "benchmark_workflow_preflight": ("benchmark-workflow-preflight", "mvp-implementation"),
-        "compliance_review": ("compliance-review", "compliance-biosafety-review"),
-        "retrieval_eval": ("retrieval-eval", "retrieval-eval-quality-gate"),
-    }
+    assert {alias.legacy_id: alias.canonical_id.replace("_", "-") for alias in SKILL_IDENTITY_ALIASES} == (
+        COMPATIBILITY_TARGETS
+    )
     assert FILESYSTEM_ONLY_SKILLS.isdisjoint(
         {skill_id.replace("_", "-") for skill_id in registered_ids}
     )
@@ -275,21 +269,17 @@ def test_registry_relationships_remain_explicit_without_runtime_registration() -
     assert DEFAULT_SKILL_REGISTRY.list_skill_ids() == registered_before
 
 
-def test_repository_validation_has_only_incumbent_alias_authority_findings() -> None:
+def test_repository_validation_passes_with_reconciled_identity_authority() -> None:
     transition = validate_repository(REPO_ROOT, transition=True)
     strict = validate_repository(REPO_ROOT)
 
-    assert transition.state == "PARTIAL"
+    assert transition.state == "PASS"
     assert transition.contracts_checked == EXPECTED_SKILL_COUNT
     assert transition.skills_discovered == EXPECTED_SKILL_COUNT
-    assert {finding.code for finding in transition.findings} == EXPECTED_RESIDUAL_FINDINGS
-    assert strict.state == "FAIL"
+    assert transition.findings == ()
+    assert strict.state == "PASS"
     assert strict.contracts_checked == EXPECTED_SKILL_COUNT
-    assert {finding.code for finding in strict.findings} == EXPECTED_RESIDUAL_FINDINGS
-    assert all(
-        finding.path == "src/asperitas_agent/skill_discovery.py"
-        for finding in (*transition.findings, *strict.findings)
-    )
+    assert strict.findings == ()
 
 
 def test_action_taxonomy_covers_all_live_manifests_and_capabilities_are_consistent() -> None:

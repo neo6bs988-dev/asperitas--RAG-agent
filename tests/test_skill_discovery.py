@@ -6,11 +6,10 @@ import subprocess
 import sys
 
 from asperitas_agent.skill_discovery import (
-    SKILL_ALIASES,
     discover_skill_files,
     validate_skill_files_against_registry,
 )
-from asperitas_agent.skill_registry import SkillRegistry, require_skill
+from asperitas_agent.skill_registry import SKILL_IDENTITY_ALIASES, SkillRegistry, require_skill
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "validate_skill_registry.py"
@@ -72,12 +71,12 @@ def test_no_missing_skill_files_for_registered_default_skills():
     assert report["missing_skill_files"] == []
 
 
-def test_skill_aliases_are_documented_and_stable():
-    assert SKILL_ALIASES == {
-        "benchmark_workflow_preflight": ("benchmark-workflow-preflight", "mvp-implementation"),
-        "compliance_review": ("compliance-review", "compliance-biosafety-review"),
-        "retrieval_eval": ("retrieval-eval", "retrieval-eval-quality-gate"),
-    }
+def test_skill_identity_aliases_are_typed_and_stable():
+    assert [(alias.legacy_id, alias.canonical_id, alias.classification) for alias in SKILL_IDENTITY_ALIASES] == [
+        ("benchmark_workflow_preflight", "mvp_implementation", "deprecated_migration_alias"),
+        ("compliance_review", "compliance_biosafety_review", "true_compatibility_alias"),
+        ("retrieval_eval", "retrieval_eval_quality_gate", "true_compatibility_alias"),
+    ]
 
 
 def test_underscore_hyphen_matching_works(tmp_path):
