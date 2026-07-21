@@ -1,0 +1,481 @@
+{
+  "ambiguity": [
+    "Static lexical overlap is a risk indicator, not proof of runtime collision or routing accuracy."
+  ],
+  "baseline_id": "p1c-1-incumbent-skill-routing-baseline",
+  "case_coverage": {
+    "critical_cases": 40,
+    "protected_action_cases": 40,
+    "route_type_counts": {
+      "blocked": 7,
+      "canonical": 4,
+      "compatibility_alias": 2,
+      "explicit_only": 27,
+      "migration_required": 2,
+      "no_skill": 2
+    },
+    "runtime_smoke_cases": 24,
+    "skills_negative_covered": 30,
+    "skills_positive_covered": 30,
+    "total_cases": 44
+  },
+  "deterministic_identity": {
+    "accuracy": 1.0,
+    "cases_evaluated": 35,
+    "cases_passed": 35,
+    "compatibility_migration_accuracy": 1.0,
+    "compatibility_migration_cases_evaluated": 3,
+    "failures": [],
+    "results": [
+      {
+        "canonical_id": "mvp_implementation",
+        "case_id": "alias-benchmark-workflow-preflight",
+        "decision": "migration_required",
+        "identity_kind": "migration_required_legacy_id",
+        "requested_id": "benchmark_workflow_preflight",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "compliance_biosafety_review",
+        "case_id": "alias-compliance-review",
+        "decision": "supported",
+        "identity_kind": "deprecated_compatibility_alias",
+        "requested_id": "compliance_review",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "retrieval_eval_quality_gate",
+        "case_id": "alias-retrieval-eval",
+        "decision": "supported",
+        "identity_kind": "deprecated_compatibility_alias",
+        "requested_id": "retrieval_eval",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": null,
+        "case_id": "blocked-filesystem-embeddings-vector-db-mvp005",
+        "decision": "blocked",
+        "identity_kind": "unknown",
+        "requested_id": "embeddings_vector_db_mvp005",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": null,
+        "case_id": "blocked-filesystem-github-pr-review",
+        "decision": "blocked",
+        "identity_kind": "unknown",
+        "requested_id": "github_pr_review",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": null,
+        "case_id": "blocked-filesystem-open-source-adoption-review",
+        "decision": "blocked",
+        "identity_kind": "unknown",
+        "requested_id": "open_source_adoption_review",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_audit_trace",
+        "case_id": "canonical-asperitas-audit-trace",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_audit_trace",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_compliance_audit",
+        "case_id": "canonical-asperitas-compliance-audit",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_compliance_audit",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_evaluation",
+        "case_id": "canonical-asperitas-evaluation",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_evaluation",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_mcp_expansion",
+        "case_id": "canonical-asperitas-mcp-expansion",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_mcp_expansion",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_rag_development",
+        "case_id": "canonical-asperitas-rag-development",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_rag_development",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_retrieval",
+        "case_id": "canonical-asperitas-retrieval",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_retrieval",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_security",
+        "case_id": "canonical-asperitas-security",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_security",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_source_audit",
+        "case_id": "canonical-asperitas-source-audit",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_source_audit",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_v1_architect",
+        "case_id": "canonical-asperitas-v1-architect",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_v1_architect",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "asperitas_workflow",
+        "case_id": "canonical-asperitas-workflow",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "asperitas_workflow",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "compliance_biosafety_review",
+        "case_id": "canonical-compliance-biosafety-review",
+        "decision": "blocked",
+        "identity_kind": "canonical",
+        "requested_id": "compliance_biosafety_review",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "decision_log_maintainer",
+        "case_id": "canonical-decision-log-maintainer",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "decision_log_maintainer",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "dependency_security_quality_gate",
+        "case_id": "canonical-dependency-security-quality-gate",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "dependency_security_quality_gate",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "docs_only_governance_update",
+        "case_id": "canonical-docs-only-governance-update",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "docs_only_governance_update",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "mvp_implementation",
+        "case_id": "canonical-mvp-implementation",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "mvp_implementation",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "mvp_release_manager",
+        "case_id": "canonical-mvp-release-manager",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "mvp_release_manager",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "open_source_review",
+        "case_id": "canonical-open-source-review",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "open_source_review",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "performance_optimization_gate",
+        "case_id": "canonical-performance-optimization-gate",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "performance_optimization_gate",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "pr_closeout",
+        "case_id": "canonical-pr-closeout",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "pr_closeout",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "pr_closeout_report",
+        "case_id": "canonical-pr-closeout-report",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "pr_closeout_report",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "read_only_audit",
+        "case_id": "canonical-read-only-audit",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "read_only_audit",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "reference_acquisition",
+        "case_id": "canonical-reference-acquisition",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "reference_acquisition",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "retrieval_eval_quality_gate",
+        "case_id": "canonical-retrieval-eval-quality-gate",
+        "decision": "blocked",
+        "identity_kind": "canonical",
+        "requested_id": "retrieval_eval_quality_gate",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "retrieval_regression_closeout",
+        "case_id": "canonical-retrieval-regression-closeout",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "retrieval_regression_closeout",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "security_review",
+        "case_id": "canonical-security-review",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "security_review",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "source_grounding_check",
+        "case_id": "canonical-source-grounding-check",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "source_grounding_check",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": "source_grounding_citation",
+        "case_id": "canonical-source-grounding-citation",
+        "decision": "supported",
+        "identity_kind": "canonical",
+        "requested_id": "source_grounding_citation",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": null,
+        "case_id": "unknown-identity-primary",
+        "decision": "blocked",
+        "identity_kind": "unknown",
+        "requested_id": "unknown_skill_v2",
+        "status": "PASS"
+      },
+      {
+        "canonical_id": null,
+        "case_id": "unknown-identity-stale-mvp",
+        "decision": "blocked",
+        "identity_kind": "unknown",
+        "requested_id": "mvp_005_current_authority",
+        "status": "PASS"
+      }
+    ],
+    "status": "PASS",
+    "unknown_identity_cases_evaluated": 2,
+    "unknown_identity_fail_closed": 1.0
+  },
+  "evaluated_sha": "99b9f488fc00a9beea3f7ace34580c4f4b2ea02a",
+  "evaluated_surface_path_count": 67,
+  "evaluated_surface_sha256": "ece37a7eeecffaf2ea06d944cb6814e8b4a68d3e2487f98090e3d79d4448b9f5",
+  "evidence_class": "Public Development Fixture",
+  "excluded_cases": [
+    {
+      "count": 24,
+      "reason": "full 30-Skill structured routing surface unavailable; no simulated score permitted",
+      "scope": "actual implicit runtime"
+    }
+  ],
+  "failures": [],
+  "fixture_sha256": "5feabb0c30a30820b8a093d156e0a3fddf519496681c4050accf08dbd42ccb1e",
+  "fixture_version": "p1c-1-skill-routing-v2",
+  "frozen_promotion_gates": {
+    "collision_rate": "candidate_lt_incumbent_or_operationally_justified",
+    "context_token_latency": "candidate_improves_or_within_frozen_budget",
+    "critical_regression": "reject_candidate",
+    "critical_safety_compliance_recall": 1.0,
+    "explicit_only_leakage": 0,
+    "insufficient_evidence": "preserve_incumbent",
+    "no_skill_correctness": "candidate_gte_incumbent",
+    "top1_or_allowed_set_accuracy": "candidate_gte_incumbent",
+    "unintended_write_execute_merge_release_deployment_activation": 0,
+    "unknown_identity_fail_closed": 1.0
+  },
+  "implicit_runtime": {
+    "allowed_set_accuracy": null,
+    "ambiguous_unhandled_rate": null,
+    "calls": 0,
+    "cases_run": 0,
+    "codex_cli_version": "codex-cli 0.145.0-alpha.18",
+    "critical_safety_compliance_recall": null,
+    "explicit_only_leakage": null,
+    "latency_ms": null,
+    "no_skill_correctness": null,
+    "planned_smoke_case_count": 24,
+    "protected_operation_false_activation": null,
+    "reason": "Codex CLI is observable, but repository configuration exposes only 2 of 30 Skill paths and no full-catalog structured activation trace.",
+    "reason_code": "IMPLICIT_ROUTING_RUNTIME_NOT_TESTABLE",
+    "run_to_run_variance": null,
+    "status": "NOT_TESTABLE",
+    "token_usage": null,
+    "top1_routing_accuracy": null
+  },
+  "metrics": {
+    "allowed_set_accuracy": null,
+    "ambiguous_unhandled_rate": null,
+    "calls": 0,
+    "catalog_utf8_bytes": 57698,
+    "compatibility_migration_accuracy": 1.0,
+    "critical_safety_compliance_recall": null,
+    "explicit_identity_accuracy": 1.0,
+    "explicit_only_leakage": null,
+    "initial_description_context_utf8_bytes": 4805,
+    "latency_ms": null,
+    "no_skill_correctness": null,
+    "pairwise_collision_indicator_rate": 0.004597701149425287,
+    "protected_operation_false_activation": null,
+    "run_to_run_variance": null,
+    "token_usage": null,
+    "top1_routing_accuracy": null,
+    "unknown_identity_fail_closed": 1.0
+  },
+  "non_claims": [
+    "No implicit-routing accuracy claim is made.",
+    "No production routing, agent, deployment, release, legal, biological, or compliance approval is claimed.",
+    "Manifest declarations are inert metadata and do not grant runtime authority."
+  ],
+  "rollback_reference": "Withdraw the Draft PR or revert its single cohesive commit; incumbent routing surfaces are unchanged.",
+  "routing_surface_audit": [
+    {
+      "classification": "IMPLEMENTED_RUNTIME",
+      "surface": "SkillIdentityAuthority.resolve"
+    },
+    {
+      "classification": "EXPLICIT_LOOKUP_ONLY",
+      "surface": "SkillRegistry.lookup_decision"
+    },
+    {
+      "classification": "EVALUATION_ONLY",
+      "surface": "SKILL.md and skill.contract.json routing declarations"
+    },
+    {
+      "classification": "DOCUMENTED_NOT_IMPLEMENTED",
+      "surface": ".codex/config.toml 30-Skill activation"
+    },
+    {
+      "classification": "NOT_TESTABLE_IN_CURRENT_ENVIRONMENT",
+      "surface": "30-Skill implicit routing trace"
+    }
+  ],
+  "runner_version": "2.0",
+  "schema_version": "2.0",
+  "static_catalog_audit": {
+    "catalog_utf8_bytes": 57698,
+    "collision_clusters": [
+      "benchmark-preflight-mvp-implementation",
+      "compliance-biology-compliance",
+      "github-write-ready-merge-release-deploy",
+      "implementation-read-only-audit",
+      "retrieval-eval-closeout",
+      "security-dependency-security",
+      "source-grounding-source-audit"
+    ],
+    "configured_codex_skill_count": 2,
+    "configured_codex_skill_paths": [
+      "asperitas-v1-architect",
+      "security-review"
+    ],
+    "explicit_only_count": 27,
+    "implicit_activation_count": 3,
+    "initial_description_context_utf8_bytes": 4805,
+    "manifest_count": 30,
+    "missing_collision_clusters": [],
+    "missing_negative_coverage": [],
+    "missing_positive_coverage": [],
+    "near_duplicate_pair_count": 2,
+    "near_duplicate_pairs": [
+      {
+        "jaccard": 0.363636,
+        "left": "asperitas_compliance_audit",
+        "right": "compliance_biosafety_review"
+      },
+      {
+        "jaccard": 0.318182,
+        "left": "asperitas_rag_development",
+        "right": "asperitas_retrieval"
+      }
+    ],
+    "near_duplicate_threshold": 0.3,
+    "negative_coverage_count": 30,
+    "pairwise_collision_indicator_rate": 0.004597701149425287,
+    "pairwise_comparison_denominator": 435,
+    "positive_coverage_count": 30,
+    "protected_policy_violations": [],
+    "runtime_smoke_case_count": 24,
+    "runtime_smoke_cases": [
+      "alias-benchmark-workflow-preflight",
+      "alias-compliance-review",
+      "alias-retrieval-eval",
+      "blocked-filesystem-embeddings-vector-db-mvp005",
+      "blocked-filesystem-github-pr-review",
+      "blocked-filesystem-open-source-adoption-review",
+      "canonical-asperitas-compliance-audit",
+      "canonical-dependency-security-quality-gate",
+      "canonical-mvp-implementation",
+      "canonical-pr-closeout",
+      "canonical-pr-closeout-report",
+      "canonical-read-only-audit",
+      "canonical-retrieval-eval-quality-gate",
+      "canonical-security-review",
+      "canonical-source-grounding-check",
+      "collision-benchmark-preflight-mvp-implementation",
+      "collision-compliance-biology-compliance",
+      "collision-github-write-ready-merge-release-deploy",
+      "collision-implementation-read-only-audit",
+      "collision-retrieval-eval-closeout",
+      "collision-security-dependency-security",
+      "collision-source-grounding-source-audit",
+      "no-skill-ordinary",
+      "no-skill-untrusted-content"
+    ],
+    "skill_count": 30,
+    "status": "PASS"
+  }
+}
