@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from datetime import date
 from typing import Any
 
 
@@ -24,6 +25,7 @@ OVERCLAIM_BLOCKS = (
     "autonomous_wet_lab_claim",
     "production_readiness_claim",
 )
+IDENTITY_CLASSIFICATIONS = ("true_compatibility_alias", "deprecated_migration_alias")
 REQUIRED_SKILL_IDS = (
     "mvp_implementation",
     "source_grounding_check",
@@ -185,11 +187,173 @@ class SkillSpec:
         return {key: list(value) if isinstance(value, tuple) else value for key, value in data.items()}
 
 
+@dataclass(frozen=True, order=True)
+class SkillIdentityAlias:
+    legacy_id: str
+    canonical_id: str
+    classification: str
+    deprecated_since: str
+    compatibility_until: str
+
+
+@dataclass(frozen=True)
+class SkillIdentityResolution:
+    requested_id: str
+    identity_kind: str
+    canonical_id: str | None
+    decision: str
+    deprecated: bool
+    migration_required: bool
+    compatibility_until: str | None
+    reason: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class SkillIdentityAuthority:
+    canonical_ids: tuple[str, ...]
+    aliases: tuple[SkillIdentityAlias, ...]
+
+    def validate(self) -> tuple[str, ...]:
+        errors: list[str] = []
+        canonical_ids = set(self.canonical_ids)
+        if len(canonical_ids) != len(self.canonical_ids):
+            errors.append("duplicate canonical skill_id")
+        alias_ids = [alias.legacy_id for alias in self.aliases]
+        if len(alias_ids) != len(set(alias_ids)):
+            errors.append("duplicate legacy alias")
+        edges: dict[str, str] = {}
+        for alias in self.aliases:
+            if alias.classification not in IDENTITY_CLASSIFICATIONS:
+                errors.append(f"invalid alias classification: {alias.legacy_id}")
+            if alias.legacy_id in canonical_ids:
+                errors.append(f"alias collides with canonical skill_id: {alias.legacy_id}")
+            if alias.legacy_id == alias.canonical_id:
+                errors.append(f"self alias: {alias.legacy_id}")
+            if alias.canonical_id not in canonical_ids:
+                errors.append(f"missing alias successor: {alias.legacy_id} -> {alias.canonical_id}")
+            deprecated = _identity_date(alias.deprecated_since)
+            compatibility_until = _identity_date(alias.compatibility_until)
+            if deprecated is None:
+                errors.append(f"invalid deprecated_since: {alias.legacy_id}")
+            if compatibility_until is None:
+                errors.append(f"invalid compatibility_until: {alias.legacy_id}")
+            if deprecated is not None and compatibility_until is not None and compatibility_until < deprecated:
+                errors.append(f"invalid compatibility window: {alias.legacy_id}")
+            edges[alias.legacy_id] = alias.canonical_id
+        for start in sorted(edges):
+            seen: set[str] = set()
+            current = start
+            while current in edges:
+                if current in seen:
+                    errors.append(f"alias cycle: {start}")
+                    break
+                seen.add(current)
+                current = edges[current]
+        return tuple(sorted(set(errors)))
+
+    def resolve(self, requested_id: str, *, as_of: date | None = None) -> SkillIdentityResolution:
+        if self.validate():
+            return SkillIdentityResolution(
+                requested_id=requested_id,
+                identity_kind="unknown",
+                canonical_id=None,
+                decision="blocked",
+                deprecated=False,
+                migration_required=False,
+                compatibility_until=None,
+                reason="identity authority is invalid and blocked fail-closed",
+            )
+        if requested_id in self.canonical_ids:
+            return SkillIdentityResolution(
+                requested_id=requested_id,
+                identity_kind="canonical",
+                canonical_id=requested_id,
+                decision="canonical",
+                deprecated=False,
+                migration_required=False,
+                compatibility_until=None,
+                reason="requested identity is canonical",
+            )
+        alias = next((item for item in self.aliases if item.legacy_id == requested_id), None)
+        if alias is None:
+            return SkillIdentityResolution(
+                requested_id=requested_id,
+                identity_kind="unknown",
+                canonical_id=None,
+                decision="blocked",
+                deprecated=False,
+                migration_required=False,
+                compatibility_until=None,
+                reason="unknown skill identity is unsupported and blocked fail-closed",
+            )
+        expired = (as_of or date.today()) > date.fromisoformat(alias.compatibility_until)
+        migration_required = alias.classification == "deprecated_migration_alias" or expired
+        return SkillIdentityResolution(
+            requested_id=requested_id,
+            identity_kind=(
+                "migration_required_legacy_id" if migration_required else "deprecated_compatibility_alias"
+            ),
+            canonical_id=alias.canonical_id,
+            decision="migration_required" if migration_required else "compatibility_alias",
+            deprecated=True,
+            migration_required=migration_required,
+            compatibility_until=alias.compatibility_until,
+            reason=(
+                "legacy identity requires explicit migration and grants no successor capabilities"
+                if migration_required
+                else "deprecated compatibility alias resolves to one canonical identity without capability expansion"
+            ),
+        )
+
+
+def _identity_date(value: str) -> date | None:
+    try:
+        parsed = date.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+    return parsed if parsed.isoformat() == value else None
+
+
+SKILL_IDENTITY_ALIASES = (
+    SkillIdentityAlias(
+        legacy_id="benchmark_workflow_preflight",
+        canonical_id="mvp_implementation",
+        classification="deprecated_migration_alias",
+        deprecated_since="2026-06-23",
+        compatibility_until="2026-12-31",
+    ),
+    SkillIdentityAlias(
+        legacy_id="compliance_review",
+        canonical_id="compliance_biosafety_review",
+        classification="true_compatibility_alias",
+        deprecated_since="2026-06-23",
+        compatibility_until="2026-12-31",
+    ),
+    SkillIdentityAlias(
+        legacy_id="retrieval_eval",
+        canonical_id="retrieval_eval_quality_gate",
+        classification="true_compatibility_alias",
+        deprecated_since="2026-06-23",
+        compatibility_until="2026-12-31",
+    ),
+)
+
+
+def build_skill_identity_authority(canonical_ids: tuple[str, ...]) -> SkillIdentityAuthority:
+    normalized = tuple(sorted(canonical_ids))
+    aliases = tuple(alias for alias in SKILL_IDENTITY_ALIASES if alias.canonical_id in normalized)
+    return SkillIdentityAuthority(normalized, aliases)
+
+
 @dataclass(frozen=True)
 class SkillRegistry:
     skills: tuple[SkillSpec, ...]
     registry_id: str = "asperitas_v1_skill_registry"
     version: str = DEFAULT_VERSION
+    identity_authority: SkillIdentityAuthority | None = None
 
     def list_skill_ids(self) -> tuple[str, ...]:
         return tuple(skill.skill_id for skill in self.skills)
@@ -198,25 +362,50 @@ class SkillRegistry:
         return {skill.skill_id: skill for skill in self.skills}.get(skill_id)
 
     def lookup_decision(self, skill_id: str) -> dict[str, Any]:
+        identity = self.identity_authority.resolve(skill_id) if self.identity_authority is not None else None
+        if identity is not None and identity.decision == "blocked":
+            return {
+                "skill_id": skill_id,
+                "supported": False,
+                "decision": "blocked",
+                "reason": identity.reason,
+                "identity": identity.to_dict(),
+            }
         skill = self.get_skill(skill_id)
         if skill is None:
-            return {
+            result = {
                 "skill_id": skill_id,
                 "supported": False,
                 "decision": "blocked",
                 "reason": "unknown skill is unsupported and blocked fail-closed",
             }
+            if identity is not None:
+                result["identity"] = identity.to_dict()
+                if identity.identity_kind == "canonical":
+                    result["reason"] = "canonical repository identity has no incumbent runtime SkillSpec"
+            return result
         errors = skill.validate()
-        return {
+        result = {
             "skill_id": skill_id,
             "supported": not errors,
             "decision": "supported" if not errors else "blocked",
             "reason": "skill is registered and valid" if not errors else "registered skill failed validation",
             "validation_errors": list(errors),
         }
+        if identity is not None:
+            result["identity"] = identity.to_dict()
+            if identity.migration_required:
+                result.update(
+                    supported=False,
+                    decision="migration_required",
+                    reason=identity.reason,
+                )
+        return result
 
     def validate(self) -> tuple[str, ...]:
         errors: list[str] = []
+        if self.identity_authority is not None:
+            errors.extend(f"identity_authority: {error}" for error in self.identity_authority.validate())
         skill_ids = self.list_skill_ids()
         if len(skill_ids) != len(set(skill_ids)):
             errors.append("duplicate skill_id")
@@ -225,7 +414,7 @@ class SkillRegistry:
             errors.append(f"missing required skills: {', '.join(missing)}")
         for skill in self.skills:
             errors.extend(f"{skill.skill_id}: {error}" for error in skill.validate())
-        return tuple(errors)
+        return tuple(sorted(errors))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -551,7 +740,15 @@ DEFAULT_SKILLS = (
     ),
 )
 
-DEFAULT_SKILL_REGISTRY = SkillRegistry(DEFAULT_SKILLS)
+_LEGACY_SKILL_IDS = frozenset(alias.legacy_id for alias in SKILL_IDENTITY_ALIASES)
+_DEFAULT_CANONICAL_IDS = tuple(
+    sorted(
+        {skill.skill_id for skill in DEFAULT_SKILLS if skill.skill_id not in _LEGACY_SKILL_IDS}
+        | {alias.canonical_id for alias in SKILL_IDENTITY_ALIASES}
+    )
+)
+DEFAULT_SKILL_IDENTITY_AUTHORITY = build_skill_identity_authority(_DEFAULT_CANONICAL_IDS)
+DEFAULT_SKILL_REGISTRY = SkillRegistry(DEFAULT_SKILLS, identity_authority=DEFAULT_SKILL_IDENTITY_AUTHORITY)
 
 
 def list_skill_ids() -> tuple[str, ...]:

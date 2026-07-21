@@ -1,6 +1,6 @@
 # Asperitas Skill Contract v2
 
-Status: P1B-2A candidate has 30 reviewed manifests; transition `PARTIAL` because incumbent alias authority remains unresolved
+Status: 30 reviewed manifests use a reconciled typed identity authority; verify current strict and transition state at the inspected SHA
 
 ## Purpose
 
@@ -57,10 +57,18 @@ skill requires both dates in order and exactly one non-empty disposition: a cano
 and cannot form a cycle. For every non-deprecated state, the two dates and `replaced_by` are null;
 `terminal_rationale` is absent, null, or empty.
 
-Contract v2 foundation supports only the `deprecated_skill_id` alias kind. Each alias requires valid ordered dates
-and a canonical replacement resolving to an active or planned contract. Aliases are globally unique, cannot equal
-a canonical ID or frontmatter name, self-reference, or form cycles. An unregistered skill is review-only and must
-set `routing.implicit_activation` to `false`.
+Contract v2 manifests support the `deprecated_skill_id` compatibility record. The shared Python identity authority
+additionally classifies each legacy ID as either a deprecated compatibility alias or a migration-required legacy
+ID. Each relationship requires valid ordered dates and a canonical replacement resolving to an active or planned
+contract. Aliases are globally unique, cannot equal a canonical ID or frontmatter name, self-reference, or form
+cycles. Expired aliases and unknown IDs fail closed. An unregistered skill is review-only and must set
+`routing.implicit_activation` to `false`.
+
+`compliance_review` and `retrieval_eval` are deprecated compatibility aliases. Their lookup metadata names the
+canonical successor without registering a new runtime `SkillSpec` or broadening incumbent permissions.
+`benchmark_workflow_preflight` is migration-required because its read-only preflight contract is not equivalent to
+the approval-gated write-capable `mvp_implementation` contract. It never auto-routes or inherits successor
+capabilities.
 
 ## Routing and explicit-only policy
 
@@ -104,8 +112,8 @@ report `state=PARTIAL` and `ok=false`, with missing manifests visible. Strict `F
 2. **P1B-2A manifests:** this candidate tree has one reviewed manifest for each of 30 discovered Skills without
    renaming, deleting, merging, canonicalizing, registering, or changing routing. The three filesystem-only Skills
    are explicit-only and `unregistered_review_required`.
-3. **P1B-2B identity reconciliation:** resolve the three incumbent registry/alias authority collisions before
-   freezing routing evaluations or changing aliases, descriptions, identities, or lifecycle.
+3. **P1B-2B identity reconciliation:** use one typed authority for discovery, contract validation, and explicit
+   lookup metadata while preserving incumbent runtime `SkillSpec` routing and protected capabilities.
 4. **Enforcement:** replace the incumbent gate only after exact-head tests, routing evaluations, and human review.
 
 The P1B-2 migration inputs include the incumbent aliases
@@ -124,11 +132,9 @@ python -m pytest -q tests/test_skill_contract.py tests/test_skill_discovery.py t
 python scripts/validate_skill_contract.py --root . --transition --json
 ```
 
-In this candidate tree, the transition command reports `state=PARTIAL`, `ok=false`,
-`skills_discovered=30`, and `contracts_checked=30`. There are no missing or schema-invalid manifests. The only
-findings are the three pre-existing registry/alias authority collisions; strict validation therefore remains
-`FAIL`. A successful transition-command process exit means the audit ran; it does not promote `PARTIAL` to
-`PASS`.
+For a reconciled candidate, strict and transition validation are expected to report `state=PASS`, `ok=true`,
+`skills_discovered=30`, `contracts_checked=30`, and no findings. A successful transition-command process exit
+alone is insufficient; consumers must inspect the complete payload, and a changed head requires fresh validation.
 
 Before merge, rollback is to withdraw or supersede the branch or Draft PR. After an authorized merge, revert the
 documentation merge in a separately authorized action, then rerun contract, discovery, registry, instruction,

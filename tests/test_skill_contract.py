@@ -440,30 +440,24 @@ def test_retrieval_compatibility_id_does_not_replace_canonical_identity(tmp_path
     assert "retrieval_eval" not in report.canonical_skill_ids
 
 
-def test_repository_transition_audit_is_partial_only_for_incumbent_alias_authority():
+def test_repository_transition_audit_passes_with_reconciled_identity_authority():
     report = validate_repository(REPO_ROOT, transition=True)
     codes = finding_codes(report)
 
-    assert report.state == "PARTIAL"
-    assert report.ok is False
+    assert report.state == "PASS"
+    assert report.ok is True
     assert report.skills_discovered == 30
     assert report.contracts_checked == 30
-    assert codes == {
-        "LEGACY_ALIAS_EQUALS_CANONICAL_SKILL",
-        "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL",
-    }
+    assert codes == set()
 
 
-def test_repository_strict_validation_fails_for_incumbent_alias_authority():
+def test_repository_strict_validation_passes_with_reconciled_identity_authority():
     report = validate_repository(REPO_ROOT)
 
-    assert report.state == "FAIL"
-    assert report.ok is False
+    assert report.state == "PASS"
+    assert report.ok is True
     assert report.contracts_checked == 30
-    assert finding_codes(report) == {
-        "LEGACY_ALIAS_EQUALS_CANONICAL_SKILL",
-        "LEGACY_ALIAS_SATISFIES_DIFFERENT_SKILL",
-    }
+    assert finding_codes(report) == set()
 
 
 def test_missing_skills_root_is_not_testable(tmp_path):
@@ -474,7 +468,7 @@ def test_missing_skills_root_is_not_testable(tmp_path):
     assert finding_codes(report) == {"SKILLS_ROOT_NOT_FOUND"}
 
 
-def test_cli_transition_returns_zero_but_never_reports_pass():
+def test_cli_transition_returns_zero_and_reports_pass():
     result = subprocess.run(
         [sys.executable, str(SCRIPT), "--root", str(REPO_ROOT), "--transition", "--json"],
         cwd=REPO_ROOT,
@@ -486,8 +480,8 @@ def test_cli_transition_returns_zero_but_never_reports_pass():
     payload = json.loads(result.stdout)
 
     assert result.returncode == 0, result.stderr
-    assert payload["state"] == "PARTIAL"
-    assert payload["ok"] is False
+    assert payload["state"] == "PASS"
+    assert payload["ok"] is True
 
 
 def test_cli_invalid_json_returns_one(tmp_path):
