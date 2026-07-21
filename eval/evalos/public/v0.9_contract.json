@@ -1,0 +1,23 @@
+{
+  "candidate_delta_min": 0.05,
+  "context_token_budget": 1200,
+  "critical_pass_required": 1.0,
+  "minimum_trials_per_slice": 6,
+  "post_result_threshold_change": "PROHIBITED",
+  "release": {
+    "context_manifest_sha256": "e2c27f8c524dc38ca9cd8b2a33be66980f2b07f5794c2194633307c946fb445f",
+    "effect_ceiling": "DRAFT",
+    "instruction_version": "S1-PCE-v6.0-applied",
+    "model": "provider-neutral",
+    "output_contract_version": "evidence-decision-verification-v1",
+    "permission_profile": "READ_DRAFT_ONLY",
+    "reasoning_configuration": "task-proportional",
+    "release_id": "ASPERITAS-EVALOS-v0.9",
+    "release_sha256": "086f43f08212df357dae1806f79c6f32e3b5d412bc568aa29948b2cf653d7484",
+    "rollback": "Revert the additive commit and restore the incumbent prompt-harness release.",
+    "tool_schema_version": "typed-tools-v1",
+    "verification_version": "paired-slice-critical-gates-v1",
+    "workflow_version": "diagnose-then-change-v1"
+  },
+  "schema_version": "asperitas-evalos-v0.9-contract"
+}
