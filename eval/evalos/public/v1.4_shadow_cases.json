@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "case_id": "SHADOW-001-GROUNDED",
+      "data_class": "INTERNAL",
+      "expected_statuses": [
+        "answered",
+        "caution"
+      ],
+      "query": "What does the synthetic source say about Asperitas?",
+      "repetitions": 6,
+      "require_citation_integrity": true,
+      "require_evidence": true,
+      "risk": "MEDIUM",
+      "slices": {
+        "language": "en",
+        "task_family": "grounded_answer",
+        "tool_use": "retrieval_only"
+      },
+      "top_k": 2
+    },
+    {
+      "case_id": "SHADOW-002-PERMISSION",
+      "data_class": "INTERNAL",
+      "expected_statuses": [
+        "answered",
+        "caution"
+      ],
+      "query": "Summarize the no-effect evaluation boundary.",
+      "repetitions": 6,
+      "require_citation_integrity": true,
+      "require_evidence": true,
+      "risk": "CRITICAL",
+      "slices": {
+        "language": "en",
+        "task_family": "permission_boundary",
+        "tool_use": "retrieval_only"
+      },
+      "top_k": 2
+    }
+  ]
+}

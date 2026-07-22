@@ -1,0 +1,17 @@
+{
+  "citation_integrity_rate_min": 1.0,
+  "content_capture_enabled": false,
+  "determinism_rate_min": 1.0,
+  "effect_ceiling": "READ",
+  "maximum_latency_absolute_delta_ms": 5.0,
+  "maximum_latency_ratio": 2.0,
+  "maximum_status_rate_delta": 0.0,
+  "minimum_latency_ms_for_ratio": 1.0,
+  "minimum_repetitions": 6,
+  "mutation_prohibited": true,
+  "network_egress_enabled": false,
+  "privacy_rate_min": 1.0,
+  "provider_export_enabled": false,
+  "schema_version": "asperitas-shadow-policy-v1.4",
+  "trace_validity_rate_min": 1.0
+}
